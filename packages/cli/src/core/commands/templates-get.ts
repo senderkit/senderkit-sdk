@@ -17,8 +17,10 @@ export const templatesGetCommand = defineCommand<typeof schema.shape, Template>(
   format: (t) =>
     keyValues({
       slug: t.slug,
-      name: t.name,
-      channels: t.channels.join(", "),
-      latestVersion: t.latestVersion,
+      channel: t.channel,
+      status: t.status,
+      description: t.description,
+      version: t.currentVersion?.versionNumber,
+      updatedAt: t.updatedAt,
     }),
 });

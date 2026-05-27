@@ -14,12 +14,12 @@ export const templatesListCommand = defineCommand<typeof schema.shape, Template[
   format: (templates) => {
     if (templates.length === 0) return "No templates found.";
     return table(
-      ["SLUG", "NAME", "CHANNELS", "VERSION"],
+      ["SLUG", "CHANNEL", "STATUS", "UPDATED"],
       templates.map((t) => [
         t.slug,
-        t.name,
-        t.channels.join(", "),
-        t.latestVersion === undefined ? "—" : String(t.latestVersion),
+        t.channel ?? "—",
+        t.status ?? "—",
+        t.updatedAt ? String(t.updatedAt) : "—",
       ]),
     );
   },

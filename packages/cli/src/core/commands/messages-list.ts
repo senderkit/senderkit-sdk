@@ -34,12 +34,12 @@ export const messagesListCommand = defineCommand<
     const rows = table(
       ["ID", "STATUS", "CHANNEL", "TEMPLATE", "TO", "CREATED"],
       res.data.map((m) => [
-        m.id,
+        m.publicId ?? m.id,
         m.status,
         m.channel,
-        m.template,
-        m.to,
-        m.createdAt,
+        m.templateSlug ?? "—",
+        m.recipient,
+        String(m.createdAt),
       ]),
     );
     return res.nextCursor

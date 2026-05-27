@@ -23,11 +23,29 @@ export function stubClient(): { client: SenderKit; calls: StubCalls } {
     },
     templates: {
       list: async () => [
-        { slug: "welcome", name: "Welcome", channels: ["email"], latestVersion: 2 },
+        {
+          slug: "welcome",
+          channel: "email",
+          description: "Welcome email",
+          status: "published",
+          updatedAt: "2026-01-01T00:00:00Z",
+        },
       ],
       get: async (slug: string) => {
         calls.getSlug = slug;
-        return { slug, name: "Welcome", channels: ["email"], latestVersion: 2 };
+        return {
+          slug,
+          channel: "email",
+          description: "Welcome email",
+          status: "published",
+          updatedAt: "2026-01-01T00:00:00Z",
+          currentVersion: {
+            versionNumber: 2,
+            content: {},
+            variables: [],
+            publishedAt: "2026-01-01T00:00:00Z",
+          },
+        };
       },
     },
     messages: {

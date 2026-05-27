@@ -26,5 +26,6 @@ export type {
   SendResponse,
   SenderKitOptions,
   Template,
+  TemplateVersion,
 } from "./types.js";
 export { VERSION } from "./version.js";

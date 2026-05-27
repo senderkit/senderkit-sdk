@@ -106,20 +106,33 @@ export type BatchSendResult =
   | { ok: true; index: number; id: string; status: "queued"; livemode: boolean }
   | { ok: false; index: number; error: SenderKitError };
 
+export interface TemplateVersion {
+  versionNumber: number;
+  content: unknown;
+  variables: unknown;
+  publishedAt: string | null;
+}
+
 export interface Template {
   slug: string;
-  name: string;
-  channels: Channel[];
-  latestVersion?: number;
+  channel: Channel;
+  description: string | null;
+  status: string;
+  updatedAt: string;
+  /** Included by `templates.get`; absent on `templates.list`. */
+  currentVersion?: TemplateVersion | null;
   [key: string]: unknown;
 }
 
 export interface Message {
+  /** Internal id. */
   id: string;
+  /** Public-facing id (e.g. `msg_…`). */
+  publicId: string;
   status: string;
   channel: Channel;
-  template: string;
-  to: string;
+  templateSlug: string | null;
+  recipient: string;
   createdAt: string;
   [key: string]: unknown;
 }

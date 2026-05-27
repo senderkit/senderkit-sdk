@@ -6,7 +6,7 @@ export function table(headers: string[], rows: string[][]): string {
     Math.max(h.length, ...rows.map((r) => (r[i] ?? "").length)),
   );
   const pad = (cells: string[]) =>
-    cells.map((c, i) => c.padEnd(widths[i] ?? 0)).join("  ");
+    cells.map((c, i) => String(c ?? "").padEnd(widths[i] ?? 0)).join("  ");
   const lines = [pc.dim(pad(headers)), ...rows.map((r) => pad(r))];
   return lines.join("\n");
 }
