@@ -1,0 +1,56 @@
+{
+  "name": "@senderkit/cli",
+  "version": "0.1.0",
+  "description": "SenderKit command-line interface and MCP server — send notifications and inspect templates/messages from your terminal or AI assistant.",
+  "license": "MIT",
+  "homepage": "https://github.com/senderkit/senderkit-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/senderkit/senderkit-sdk.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/senderkit/senderkit-sdk/issues"
+  },
+  "keywords": [
+    "senderkit",
+    "cli",
+    "mcp",
+    "notifications",
+    "transactional"
+  ],
+  "type": "module",
+  "bin": {
+    "senderkit": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@senderkit/sdk": "workspace:*",
+    "commander": "^14.0.3",
+    "jsonc-parser": "^3.3.1",
+    "picocolors": "^1.1.1",
+    "smol-toml": "^1.6.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

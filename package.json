@@ -10,8 +10,8 @@
   },
   "packageManager": "pnpm@10.13.1",
   "scripts": {
-    "build": "pnpm --filter @senderkit/sdk build",
-    "test": "pnpm --filter @senderkit/sdk test",
+    "build": "pnpm --filter @senderkit/sdk --filter @senderkit/cli build",
+    "test": "pnpm --filter @senderkit/sdk --filter @senderkit/cli test",
     "typecheck": "pnpm -r typecheck"
   }
 }

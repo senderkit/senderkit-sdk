@@ -7,6 +7,7 @@ Official TypeScript SDK for [SenderKit](https://senderkit.com) — notification 
 | Package | Description |
 | --- | --- |
 | [`@senderkit/sdk`](./packages/sdk) | Core TypeScript SDK. Node.js 18+, ESM-first, zero runtime dependencies. |
+| [`@senderkit/cli`](./packages/cli) | Command-line interface and MCP server. Send notifications and inspect templates/messages from your terminal or AI assistant. |
 | [`@senderkit/react-email`](./packages/react-email) | Bridge React Email templates to SenderKit — metadata, preview data, payload typing, manifest generation. |
 
 ## Examples
