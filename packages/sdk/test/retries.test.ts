@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SenderKit, SenderKitNetworkError, SenderKitValidationError } from "../src/index.js";
-import { createMockFetch } from "./helpers/mock-fetch.js";
+import { SenderKit, SenderKitNetworkError, SenderKitValidationError } from "../src/index";
+import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("retries", () => {
   it("retries on 500 and succeeds on second attempt", async () => {

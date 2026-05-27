@@ -1,7 +1,7 @@
 import { Command as Commander } from "commander";
 import pc from "picocolors";
-import { startMcpServer } from "../mcp/server.js";
-import { startHttpServer } from "../mcp/http.js";
+import { startMcpServer } from "../mcp/server";
+import { startHttpServer } from "../mcp/http";
 import {
   CLIENT_IDS,
   type ClientId,
@@ -10,10 +10,10 @@ import {
   printSnippet,
   remoteSpec,
   serverBlock,
-} from "../mcp/install.js";
-import { tryResolveApiKey } from "../core/context.js";
-import { success } from "./format.js";
-import { handleError } from "./errors.js";
+} from "../mcp/install";
+import { tryResolveApiKey } from "../core/context";
+import { success } from "./format";
+import { handleError } from "./errors";
 
 const CLIENT_CHOICES = ["all", ...CLIENT_IDS];
 

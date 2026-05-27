@@ -3,7 +3,7 @@ import { createServer, type Server } from "node:http";
 import { AddressInfo } from "node:net";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { handleHttpRequest } from "../src/mcp/http.js";
+import { handleHttpRequest } from "../src/mcp/http";
 
 function listen(server: Server): Promise<number> {
   return new Promise((resolve) => {

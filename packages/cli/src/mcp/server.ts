@@ -1,11 +1,11 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio";
 import type { SenderKit } from "@senderkit/sdk";
 import type { z } from "zod";
-import { registry } from "../core/registry.js";
-import { buildClient } from "../core/context.js";
-import { describeError } from "../cli/errors.js";
-import { VERSION } from "../version.js";
+import { registry } from "../core/registry";
+import { buildClient } from "../core/context";
+import { describeError } from "../cli/errors";
+import { VERSION } from "../version";
 
 const SEND_TOOLS = new Set(["senderkit_send", "senderkit_send_raw"]);
 

@@ -1,7 +1,7 @@
-import { SenderKitError } from "./errors.js";
-import { HttpClient } from "./http.js";
-import { MessagesResource } from "./resources/messages.js";
-import { TemplatesResource } from "./resources/templates.js";
+import { SenderKitError } from "./errors";
+import { HttpClient } from "./http";
+import { MessagesResource } from "./resources/messages";
+import { TemplatesResource } from "./resources/templates";
 import type {
   BatchSendOptions,
   BatchSendResult,
@@ -9,7 +9,7 @@ import type {
   SendRequest,
   SendResponse,
   SenderKitOptions,
-} from "./types.js";
+} from "./types";
 
 const DEFAULT_BASE_URL = "https://api.senderkit.com";
 const DEFAULT_TIMEOUT = 30_000;

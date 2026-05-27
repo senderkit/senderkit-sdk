@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { buildClient } from "../core/context.js";
-import { buildMcpServer } from "./server.js";
+import { buildClient } from "../core/context";
+import { buildMcpServer } from "./server";
 
 export interface HttpServerOptions {
   port: number;

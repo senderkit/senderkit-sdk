@@ -4,7 +4,7 @@ import {
   renderTemplate,
   TemplateRenderError,
   TemplateValidationError,
-} from "../src/index.js";
+} from "../src/index";
 
 interface WelcomeProps {
   name: string;
@@ -138,8 +138,8 @@ describe("renderTemplate", () => {
       throw new Error("Cannot find module '@react-email/render'");
     });
 
-    const freshRender = await import("../src/render.js");
-    const freshErrors = await import("../src/errors.js");
+    const freshRender = await import("../src/render");
+    const freshErrors = await import("../src/errors");
 
     await expect(freshRender.renderTemplate(welcomeTemplate)).rejects.toBeInstanceOf(
       freshErrors.TemplateRenderError,

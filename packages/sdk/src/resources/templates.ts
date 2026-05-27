@@ -1,5 +1,5 @@
-import type { HttpClient } from "../http.js";
-import type { Template } from "../types.js";
+import type { HttpClient } from "../http";
+import type { Template } from "../types";
 
 export class TemplatesResource {
   constructor(private readonly http: HttpClient) {}

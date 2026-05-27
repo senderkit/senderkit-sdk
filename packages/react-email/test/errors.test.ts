@@ -3,7 +3,7 @@ import {
   SenderKitReactEmailError,
   TemplateRenderError,
   TemplateValidationError,
-} from "../src/index.js";
+} from "../src/index";
 
 describe("errors", () => {
   it("base error carries templateId and cause", () => {

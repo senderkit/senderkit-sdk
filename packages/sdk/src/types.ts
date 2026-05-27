@@ -1,4 +1,4 @@
-import type { SenderKitError } from "./errors.js";
+import type { SenderKitError } from "./errors";
 
 export type Channel = "email" | "sms" | "push";
 

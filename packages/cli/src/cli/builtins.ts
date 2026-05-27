@@ -9,10 +9,10 @@ import {
   maskKey,
   readConfig,
   setConfigValue,
-} from "../core/config.js";
-import { resolveBaseUrl } from "../core/context.js";
-import { success } from "./format.js";
-import { handleError } from "./errors.js";
+} from "../core/config";
+import { resolveBaseUrl } from "../core/context";
+import { success } from "./format";
+import { handleError } from "./errors";
 
 function assertConfigKey(key: string): asserts key is ConfigKey {
   if (!(CONFIG_KEYS as readonly string[]).includes(key)) {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SenderKit } from "../src/index.js";
-import { createMockFetch } from "./helpers/mock-fetch.js";
+import { SenderKit } from "../src/index";
+import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("sendRaw", () => {
   it("posts a minimal raw email to /api/v1/send", async () => {

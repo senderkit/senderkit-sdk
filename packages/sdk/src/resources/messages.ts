@@ -1,5 +1,5 @@
-import type { HttpClient } from "../http.js";
-import type { ListMessagesParams, ListMessagesResponse, Message } from "../types.js";
+import type { HttpClient } from "../http";
+import type { ListMessagesParams, ListMessagesResponse, Message } from "../types";
 
 interface RawListResponse {
   data: Message[];

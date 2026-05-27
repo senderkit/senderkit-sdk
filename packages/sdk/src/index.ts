@@ -1,4 +1,4 @@
-export { SenderKit } from "./client.js";
+export { SenderKit } from "./client";
 export {
   SenderKitError,
   SenderKitApiError,
@@ -7,7 +7,7 @@ export {
   SenderKitRateLimitError,
   SenderKitTimeoutError,
   SenderKitNetworkError,
-} from "./errors.js";
+} from "./errors";
 export type {
   BatchSendOptions,
   BatchSendResult,
@@ -27,5 +27,5 @@ export type {
   SenderKitOptions,
   Template,
   TemplateVersion,
-} from "./types.js";
-export { VERSION } from "./version.js";
+} from "./types";
+export { VERSION } from "./version";

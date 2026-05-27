@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SenderKit } from "../src/index.js";
-import { createMockFetch } from "./helpers/mock-fetch.js";
+import { SenderKit } from "../src/index";
+import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("send", () => {
   it("posts to /api/v1/send with correct body and headers", async () => {

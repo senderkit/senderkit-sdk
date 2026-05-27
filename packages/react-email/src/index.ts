@@ -1,12 +1,12 @@
-export { defineTemplate } from "./define-template.js";
-export { createTemplateManifest } from "./manifest.js";
-export { renderTemplate } from "./render.js";
-export type { RenderTemplateOptions } from "./render.js";
+export { defineTemplate } from "./define-template";
+export { createTemplateManifest } from "./manifest";
+export { renderTemplate } from "./render";
+export type { RenderTemplateOptions } from "./render";
 export {
   SenderKitReactEmailError,
   TemplateRenderError,
   TemplateValidationError,
-} from "./errors.js";
+} from "./errors";
 export type {
   ManifestField,
   PreviewTextField,
@@ -15,4 +15,4 @@ export type {
   TemplateDefinition,
   TemplateManifest,
   TemplateSchema,
-} from "./types.js";
+} from "./types";

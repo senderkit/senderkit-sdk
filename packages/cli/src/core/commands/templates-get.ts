@@ -1,7 +1,7 @@
 import type { Template } from "@senderkit/sdk";
 import { z } from "zod";
-import { defineCommand } from "../command.js";
-import { keyValues } from "../../cli/format.js";
+import { defineCommand } from "../command";
+import { keyValues } from "../../cli/format";
 
 const schema = z.object({
   slug: z.string().describe("Template slug."),

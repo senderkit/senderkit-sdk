@@ -8,7 +8,7 @@ import {
   readConfig,
   setConfigValue,
   writeConfig,
-} from "../src/core/config.js";
+} from "../src/core/config";
 
 let originalHome: string | undefined;
 

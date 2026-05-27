@@ -13,7 +13,7 @@ import {
   remoteSpec,
   serverBlock,
   type Runner,
-} from "../src/mcp/install.js";
+} from "../src/mcp/install";
 
 function freshHome(): string {
   return mkdtempSync(join(tmpdir(), "sk-home-"));

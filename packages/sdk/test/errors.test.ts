@@ -5,8 +5,8 @@ import {
   SenderKitAuthenticationError,
   SenderKitRateLimitError,
   SenderKitValidationError,
-} from "../src/index.js";
-import { createMockFetch } from "./helpers/mock-fetch.js";
+} from "../src/index";
+import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("error mapping", () => {
   it("maps 400 to SenderKitValidationError with issues preserved", async () => {

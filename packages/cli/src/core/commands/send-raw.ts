@@ -1,8 +1,8 @@
 import type { SendRawRequest, SendResponse } from "@senderkit/sdk";
 import { z } from "zod";
-import { defineCommand } from "../command.js";
-import { success, keyValues } from "../../cli/format.js";
-import { channelEnum, jsonRecord, metadataRecord } from "../schema.js";
+import { defineCommand } from "../command";
+import { success, keyValues } from "../../cli/format";
+import { channelEnum, jsonRecord, metadataRecord } from "../schema";
 
 const schema = z.object({
   channel: channelEnum.describe("Channel: email, sms, or push."),

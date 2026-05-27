@@ -1,5 +1,5 @@
 import { SenderKit } from "@senderkit/sdk";
-import { readConfig } from "./config.js";
+import { readConfig } from "./config";
 
 export interface ResolveOptions {
   apiKey?: string;

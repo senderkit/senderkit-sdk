@@ -8,7 +8,7 @@ import {
 } from "@senderkit/sdk";
 import { ZodError } from "zod";
 import pc from "picocolors";
-import { MissingApiKeyError } from "../core/context.js";
+import { MissingApiKeyError } from "../core/context";
 
 /** Convert any thrown error into a user-facing message. */
 export function describeError(err: unknown): string {

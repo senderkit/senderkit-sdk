@@ -1,9 +1,9 @@
 import { Command as Commander } from "commander";
-import { registry } from "./core/registry.js";
-import { registerCommands } from "./cli/adapter.js";
-import { registerBuiltins } from "./cli/builtins.js";
-import { registerMcp } from "./cli/mcp-command.js";
-import { VERSION } from "./version.js";
+import { registry } from "./core/registry";
+import { registerCommands } from "./cli/adapter";
+import { registerBuiltins } from "./cli/builtins";
+import { registerMcp } from "./cli/mcp-command";
+import { VERSION } from "./version";
 
 const program = new Commander();
 

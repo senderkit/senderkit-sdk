@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { sendCommand } from "../src/core/commands/send.js";
-import { sendRawCommand } from "../src/core/commands/send-raw.js";
-import { templatesListCommand } from "../src/core/commands/templates-list.js";
-import { templatesGetCommand } from "../src/core/commands/templates-get.js";
-import { messagesListCommand } from "../src/core/commands/messages-list.js";
-import { stubClient } from "./helpers.js";
+import { sendCommand } from "../src/core/commands/send";
+import { sendRawCommand } from "../src/core/commands/send-raw";
+import { templatesListCommand } from "../src/core/commands/templates-list";
+import { templatesGetCommand } from "../src/core/commands/templates-get";
+import { messagesListCommand } from "../src/core/commands/messages-list";
+import { stubClient } from "./helpers";
 
 describe("send command", () => {
   it("maps input to client.send and formats output", async () => {

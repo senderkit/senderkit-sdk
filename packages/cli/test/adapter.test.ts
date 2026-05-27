@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
-import { runCommand } from "../src/cli/adapter.js";
-import { describeField } from "../src/cli/introspect.js";
-import { sendCommand } from "../src/core/commands/send.js";
-import { templatesGetCommand } from "../src/core/commands/templates-get.js";
-import { messagesListCommand } from "../src/core/commands/messages-list.js";
-import { stubClient } from "./helpers.js";
+import { runCommand } from "../src/cli/adapter";
+import { describeField } from "../src/cli/introspect";
+import { sendCommand } from "../src/core/commands/send";
+import { templatesGetCommand } from "../src/core/commands/templates-get";
+import { messagesListCommand } from "../src/core/commands/messages-list";
+import { stubClient } from "./helpers";
 
 function captureStdout() {
   const chunks: string[] = [];

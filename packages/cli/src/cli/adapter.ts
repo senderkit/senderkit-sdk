@@ -1,9 +1,9 @@
 import { Command as Commander } from "commander";
 import type { z } from "zod";
-import type { Command, CommandCtx } from "../core/command.js";
-import { buildClient } from "../core/context.js";
-import { describeField, kebab } from "./introspect.js";
-import { handleError } from "./errors.js";
+import type { Command, CommandCtx } from "../core/command";
+import { buildClient } from "../core/context";
+import { describeField, kebab } from "./introspect";
+import { handleError } from "./errors";
 
 interface GlobalOpts {
   apiKey?: string;

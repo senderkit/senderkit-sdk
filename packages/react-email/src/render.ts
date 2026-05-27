@@ -1,6 +1,6 @@
 import { createElement, type ComponentType } from "react";
-import { TemplateRenderError, TemplateValidationError } from "./errors.js";
-import type { RenderResult, TemplateDefinition } from "./types.js";
+import { TemplateRenderError, TemplateValidationError } from "./errors";
+import type { RenderResult, TemplateDefinition } from "./types";
 
 export interface RenderTemplateOptions {
   /** When true (default), also render a plain-text version. */

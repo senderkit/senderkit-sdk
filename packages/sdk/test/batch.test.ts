@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SenderKit, SenderKitValidationError } from "../src/index.js";
-import { createMockFetch } from "./helpers/mock-fetch.js";
+import { SenderKit, SenderKitValidationError } from "../src/index";
+import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("sendBatch", () => {
   it("returns empty array for empty input", async () => {

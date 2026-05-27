@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { describe, expect, it, expectTypeOf } from "vitest";
-import { defineTemplate, SenderKitReactEmailError } from "../src/index.js";
+import { defineTemplate, SenderKitReactEmailError } from "../src/index";
 
 interface WelcomeProps {
   name: string;

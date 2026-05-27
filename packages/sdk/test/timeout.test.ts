@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SenderKit, SenderKitTimeoutError } from "../src/index.js";
-import { createMockFetch } from "./helpers/mock-fetch.js";
+import { SenderKit, SenderKitTimeoutError } from "../src/index";
+import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("timeout", () => {
   it("aborts and throws SenderKitTimeoutError when fetch exceeds timeout", async () => {

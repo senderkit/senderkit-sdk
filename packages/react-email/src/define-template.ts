@@ -1,5 +1,5 @@
-import { SenderKitReactEmailError } from "./errors.js";
-import type { TemplateDefinition } from "./types.js";
+import { SenderKitReactEmailError } from "./errors";
+import type { TemplateDefinition } from "./types";
 
 /**
  * Define a SenderKit-ready React Email template.

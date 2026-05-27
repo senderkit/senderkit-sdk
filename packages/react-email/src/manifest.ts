@@ -1,4 +1,4 @@
-import type { ManifestField, TemplateDefinition, TemplateManifest } from "./types.js";
+import type { ManifestField, TemplateDefinition, TemplateManifest } from "./types";
 
 function describeField<TProps>(
   field: string | ((props: TProps) => string) | undefined,

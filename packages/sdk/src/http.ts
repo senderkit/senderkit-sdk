@@ -6,8 +6,8 @@ import {
   SenderKitTimeoutError,
   SenderKitValidationError,
   type ApiErrorBody,
-} from "./errors.js";
-import { VERSION } from "./version.js";
+} from "./errors";
+import { VERSION } from "./version";
 
 export interface HttpClientConfig {
   apiKey: string;

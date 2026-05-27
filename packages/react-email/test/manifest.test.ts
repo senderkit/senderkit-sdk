@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
-import { createTemplateManifest, defineTemplate } from "../src/index.js";
+import { createTemplateManifest, defineTemplate } from "../src/index";
 
 interface Props {
   name: string;
