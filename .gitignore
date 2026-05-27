@@ -9,3 +9,4 @@ coverage
 .vitest-cache
 .turbo
 .idea
+.claude/settings.local.json

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { SenderKit, SenderKitError, SenderKitValidationError } from "@senderkit/sdk";
 
-const senderkit = new SenderKit({ apiKey: process.env.SENDERKIT_API_KEY! });
+let client: SenderKit | undefined;
+function senderkit(): SenderKit {
+  return (client ??= new SenderKit({ apiKey: process.env.SENDERKIT_API_KEY! }));
+}
 
 const SUPPORT_INBOX = process.env.SUPPORT_INBOX ?? "support@example.com";
 
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
     : payload.fromEmail;
 
   try {
-    const result = await senderkit.sendRaw({
+    const result = await senderkit().sendRaw({
       channel: "email",
       to: SUPPORT_INBOX,
       content: {

@@ -50,7 +50,7 @@ describe("renderTemplate", () => {
     const result = await renderTemplate(welcomeTemplate);
     expect(result.text).toBeDefined();
     // react-email uppercases <h1> in plain-text rendering.
-    expect(result.text?.toLowerCase()).toContain("John");
+    expect(result.text?.toLowerCase()).toContain("john");
     expect(result.text).toContain("https://example.com/login");
   });
 

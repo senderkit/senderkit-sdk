@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { SenderKit, SenderKitError, SenderKitValidationError } from "@senderkit/sdk";
 
-const senderkit = new SenderKit({ apiKey: process.env.SENDERKIT_API_KEY! });
+let client: SenderKit | undefined;
+function senderkit(): SenderKit {
+  return (client ??= new SenderKit({ apiKey: process.env.SENDERKIT_API_KEY! }));
+}
 
 interface WelcomePayload {
   email: string;
@@ -20,7 +23,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await senderkit.send({
+    const result = await senderkit().send({
       template: "welcome",
       to: payload.email,
       data: { name: payload.name ?? "there" },

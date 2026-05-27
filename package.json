@@ -10,8 +10,14 @@
   },
   "packageManager": "pnpm@10.13.1",
   "scripts": {
-    "build": "pnpm --filter @senderkit/sdk --filter @senderkit/cli build",
-    "test": "pnpm --filter @senderkit/sdk --filter @senderkit/cli test",
-    "typecheck": "pnpm -r typecheck"
+    "build": "pnpm --filter \"@senderkit/*\" build",
+    "test": "pnpm --filter \"@senderkit/*\" test",
+    "typecheck": "pnpm -r typecheck",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0"
   }
 }
