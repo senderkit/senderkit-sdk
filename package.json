@@ -1,0 +1,17 @@
+{
+  "name": "senderkit-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "description": "SenderKit SDK monorepo — official TypeScript SDK and examples",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "scripts": {
+    "build": "pnpm --filter @senderkit/sdk build",
+    "test": "pnpm --filter @senderkit/sdk test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

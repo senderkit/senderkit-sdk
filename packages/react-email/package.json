@@ -1,0 +1,74 @@
+{
+  "name": "@senderkit/react-email",
+  "version": "0.1.0",
+  "description": "Bridge React Email templates to SenderKit production workflows — metadata, preview data, payload typing, and manifest generation.",
+  "license": "MIT",
+  "homepage": "https://github.com/senderkit/senderkit-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/senderkit/senderkit-sdk.git",
+    "directory": "packages/react-email"
+  },
+  "bugs": {
+    "url": "https://github.com/senderkit/senderkit-sdk/issues"
+  },
+  "keywords": [
+    "senderkit",
+    "react-email",
+    "transactional",
+    "email",
+    "template",
+    "notifications"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "@react-email/render": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "@react-email/render": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@react-email/render": "^1.0.0",
+    "@types/node": "^20.14.0",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
