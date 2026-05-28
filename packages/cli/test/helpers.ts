@@ -5,6 +5,7 @@ export interface StubCalls {
   sendRaw?: unknown;
   getSlug?: string;
   listParams?: unknown;
+  getMessageId?: string;
 }
 
 const queued = { id: "msg_x", status: "queued" as const, livemode: false };
@@ -52,6 +53,18 @@ export function stubClient(): { client: SenderKit; calls: StubCalls } {
       list: async (params: unknown) => {
         calls.listParams = params;
         return { data: [], nextCursor: null };
+      },
+      get: async (id: string) => {
+        calls.getMessageId = id;
+        return {
+          id: "internal_1",
+          publicId: id,
+          status: "delivered",
+          channel: "email",
+          templateSlug: "welcome",
+          recipient: "a@b.com",
+          createdAt: "2026-05-10T00:00:00Z",
+        };
       },
     },
   } as unknown as SenderKit;

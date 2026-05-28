@@ -4,6 +4,7 @@ import { sendRawCommand } from "./commands/send-raw";
 import { templatesListCommand } from "./commands/templates-list";
 import { templatesGetCommand } from "./commands/templates-get";
 import { messagesListCommand } from "./commands/messages-list";
+import { messagesGetCommand } from "./commands/messages-get";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registry: Command<any, any>[] = [
@@ -12,4 +13,5 @@ export const registry: Command<any, any>[] = [
   templatesListCommand,
   templatesGetCommand,
   messagesListCommand,
+  messagesGetCommand,
 ];

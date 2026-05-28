@@ -27,4 +27,12 @@ export class MessagesResource {
       nextCursor: res.nextCursor ?? res.next_cursor ?? null,
     };
   }
+
+  async get(id: string): Promise<Message> {
+    if (!id) throw new TypeError("messages.get(id): id is required");
+    return this.http.request<Message>({
+      method: "GET",
+      path: `/v1/messages/${encodeURIComponent(id)}`,
+    });
+  }
 }

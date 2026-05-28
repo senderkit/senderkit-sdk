@@ -86,4 +86,34 @@ describe("messages", () => {
     const res = await sk.messages.list();
     expect(res.nextCursor).toBeNull();
   });
+
+  it("gets a message by id with URL encoding", async () => {
+    const mock = createMockFetch([
+      {
+        status: 200,
+        body: {
+          id: "internal_1",
+          publicId: "msg_abc",
+          status: "delivered",
+          channel: "email",
+          templateSlug: "welcome",
+          recipient: "a@b.com",
+          createdAt: "2026-05-10T00:00:00Z",
+        },
+      },
+    ]);
+    const sk = new SenderKit({
+      apiKey: "sk_test_x",
+      fetch: mock.fetch,
+      baseUrl: "https://api.example.com",
+    });
+    const msg = await sk.messages.get("msg_abc+1");
+    expect(msg.publicId).toBe("msg_abc");
+    expect(mock.calls[0]!.url).toBe("https://api.example.com/v1/messages/msg_abc%2B1");
+  });
+
+  it("throws when id missing", async () => {
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: createMockFetch().fetch });
+    await expect(sk.messages.get("")).rejects.toThrow(/id is required/);
+  });
 });

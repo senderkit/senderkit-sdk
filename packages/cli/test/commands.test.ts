@@ -4,6 +4,7 @@ import { sendRawCommand } from "../src/core/commands/send-raw";
 import { templatesListCommand } from "../src/core/commands/templates-list";
 import { templatesGetCommand } from "../src/core/commands/templates-get";
 import { messagesListCommand } from "../src/core/commands/messages-list";
+import { messagesGetCommand } from "../src/core/commands/messages-get";
 import { stubClient } from "./helpers";
 
 describe("send command", () => {
@@ -78,5 +79,14 @@ describe("read commands", () => {
     const { client, calls } = stubClient();
     await messagesListCommand.run({ status: "delivered", limit: 10 }, { client });
     expect(calls.listParams).toMatchObject({ status: "delivered", limit: 10 });
+  });
+
+  it("messages get passes the id through and formats output", async () => {
+    const { client, calls } = stubClient();
+    const out = await messagesGetCommand.run({ id: "msg_abc" }, { client });
+    expect(calls.getMessageId).toBe("msg_abc");
+    const formatted = messagesGetCommand.format(out);
+    expect(formatted).toContain("msg_abc");
+    expect(formatted).toContain("delivered");
   });
 });

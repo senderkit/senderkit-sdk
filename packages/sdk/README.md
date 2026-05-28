@@ -188,6 +188,8 @@ const { data, nextCursor } = await senderkit.messages.list({
   status: "delivered",
   template: "welcome",
 });
+
+const message = await senderkit.messages.get("msg_…");
 ```
 
 ## Next.js route handler
@@ -237,6 +239,7 @@ Use [`@senderkit/react-email`](../react-email) to wrap React Email components wi
 | `templates.list()` | `Promise<Template[]>` |
 | `templates.get(slug)` | `Promise<Template>` |
 | `messages.list(params?)` | `Promise<{ data: Message[]; nextCursor: string \| null }>` |
+| `messages.get(id)` | `Promise<Message>` |
 
 ## License
 
