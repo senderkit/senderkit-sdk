@@ -35,6 +35,33 @@ Per-package scripts (`build`, `test`, `test:watch`, `typecheck`) are available v
    user-facing summary. Releases are automated from changesets on merge to `main`.
 5. Open a pull request. CI runs build, test, and typecheck on every PR.
 
+## Pre-release / beta channel
+
+Use the Changesets pre-release workflow to publish a beta version without touching the `latest` dist-tag. This is useful for testing infrastructure changes (e.g. CI, publishing pipeline) or getting early feedback on breaking changes.
+
+**Enter pre-release mode on a dedicated branch:**
+
+```bash
+git checkout -b beta
+pnpm changeset pre enter beta
+```
+
+Add changesets and commit normally. When merged to `beta`, the release workflow publishes with the `beta` dist-tag:
+
+```bash
+npm install @senderkit/sdk@beta
+```
+
+**Exit pre-release mode** (merge back to `main` once stable):
+
+```bash
+pnpm changeset pre exit
+git add .changeset/pre.json
+git commit -m "chore: exit pre-release mode"
+```
+
+> Only maintainers with npm publish access should merge to `beta` or manage pre-release mode.
+
 ## Reporting bugs & requesting features
 
 Use the GitHub issue templates. For security issues, **do not** open a public

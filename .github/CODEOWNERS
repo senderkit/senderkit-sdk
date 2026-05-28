@@ -1,0 +1,8 @@
+# All changes require maintainer review
+* @tuyakhov
+
+# Release-critical files — changes here require explicit owner approval
+.github/workflows/release.yml  @tuyakhov
+.changeset/config.json          @tuyakhov
+pnpm-lock.yaml                  @tuyakhov
+package.json                    @tuyakhov

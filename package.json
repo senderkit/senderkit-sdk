@@ -12,6 +12,7 @@
   "scripts": {
     "build": "pnpm --filter \"@senderkit/*\" build",
     "test": "pnpm --filter \"@senderkit/*\" test",
+    "test:coverage": "pnpm --filter \"@senderkit/*\" test:coverage",
     "typecheck": "pnpm -r typecheck",
     "changeset": "changeset",
     "version": "changeset version",

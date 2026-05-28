@@ -197,5 +197,12 @@ function sleep(ms: number): Promise<void> {
 function generateIdempotencyKey(): string {
   const c = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
   if (c?.randomUUID) return c.randomUUID();
-  return `sk-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  // Unreachable on Node >=18 (engines field). Secure fallback for exotic runtimes.
+  const bytes = new Uint8Array(16);
+  (globalThis as { crypto: Crypto }).crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+  return [...bytes]
+    .map((b, i) => ([4, 6, 8, 10].includes(i) ? "-" : "") + b.toString(16).padStart(2, "0"))
+    .join("");
 }

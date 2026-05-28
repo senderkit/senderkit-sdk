@@ -1,5 +1,10 @@
 # @senderkit/cli
 
+[![npm version](https://img.shields.io/npm/v/@senderkit/cli)](https://www.npmjs.com/package/@senderkit/cli)
+[![CI](https://github.com/senderkit/senderkit-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/senderkit/senderkit-sdk/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/senderkit/senderkit-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/senderkit/senderkit-sdk)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/senderkit/senderkit-sdk/badge)](https://scorecard.dev/viewer/?uri=github.com/senderkit/senderkit-sdk)
+
 The SenderKit command-line interface and MCP server. Send transactional
 notifications and inspect templates/messages from your terminal — or let an AI
 assistant (Claude Code, Claude Desktop, Cursor) do it over MCP.

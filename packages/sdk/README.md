@@ -1,5 +1,10 @@
 # @senderkit/sdk
 
+[![npm version](https://img.shields.io/npm/v/@senderkit/sdk)](https://www.npmjs.com/package/@senderkit/sdk)
+[![CI](https://github.com/senderkit/senderkit-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/senderkit/senderkit-sdk/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/senderkit/senderkit-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/senderkit/senderkit-sdk)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/senderkit/senderkit-sdk/badge)](https://scorecard.dev/viewer/?uri=github.com/senderkit/senderkit-sdk)
+
 Official TypeScript SDK for [SenderKit](https://senderkit.com) — notification infrastructure for modern SaaS apps. Send welcome emails, password resets, billing notifications, and other transactional messages with a single, predictable API.
 
 - **ESM + CJS** dual-publish — works with `import` and `require`
