@@ -3,7 +3,12 @@ import { registry } from "./core/registry";
 import { registerCommands } from "./cli/adapter";
 import { registerBuiltins } from "./cli/builtins";
 import { registerMcp } from "./cli/mcp-command";
+import { handleError, setJsonMode } from "./cli/errors";
 import { VERSION } from "./version";
+
+// Detect `--json` before commander parses so error paths (including parse
+// errors) honor the flag and emit structured JSON instead of colored text.
+setJsonMode(process.argv.includes("--json"));
 
 const program = new Commander();
 
@@ -20,7 +25,4 @@ registerCommands(program, registry);
 registerBuiltins(program);
 registerMcp(program);
 
-program.parseAsync(process.argv).catch((err) => {
-  process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
-  process.exit(1);
-});
+program.parseAsync(process.argv).catch(handleError);
