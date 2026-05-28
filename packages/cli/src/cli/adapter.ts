@@ -15,8 +15,10 @@ interface GlobalOpts {
  * Assemble a command's raw input from positional args and options, run it, and
  * print the result (human-readable or `--json`). Exported for direct testing.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function runCommand(
-  command: Command,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  command: Command<any, any>,
   rawInput: Record<string, unknown>,
   globals: GlobalOpts,
   ctx?: CommandCtx,
@@ -32,7 +34,8 @@ export async function runCommand(
 }
 
 /** Register every registry command onto the commander program. */
-export function registerCommands(program: Commander, registry: Command[]): void {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function registerCommands(program: Commander, registry: Command<any, any>[]): void {
   for (const command of registry) {
     const leaf = resolveParent(program, command.path).command(
       command.path[command.path.length - 1]!,
@@ -53,7 +56,7 @@ export function registerCommands(program: Commander, registry: Command[]): void 
     // Remaining fields become options.
     for (const [name, field] of Object.entries(shape)) {
       if (positional.has(name)) continue;
-      const info = describeField(field as z.ZodTypeAny);
+      const info = describeField(field);
       const flag = kebab(name);
       let desc = info.description ?? "";
       if (info.enumValues) desc += ` (choices: ${info.enumValues.join(", ")})`;

@@ -5,6 +5,7 @@ import { templatesListCommand } from "../src/core/commands/templates-list";
 import { templatesGetCommand } from "../src/core/commands/templates-get";
 import { messagesListCommand } from "../src/core/commands/messages-list";
 import { messagesGetCommand } from "../src/core/commands/messages-get";
+import { messagesCancelCommand } from "../src/core/commands/messages-cancel";
 import { stubClient } from "./helpers";
 
 describe("send command", () => {
@@ -21,6 +22,29 @@ describe("send command", () => {
   });
 });
 
+describe("send command — envelope forwarding", () => {
+  it("threads cc/bcc/replyTo/attachments through to client.send", async () => {
+    const { client, calls } = stubClient();
+    await sendCommand.run(
+      {
+        template: "welcome",
+        to: "u@x.com",
+        cc: ["c@x.com"],
+        bcc: ["b@x.com"],
+        replyTo: "r@x.com",
+        attachments: [{ filename: "n.txt", contentType: "text/plain", content: "aGk=" }],
+      },
+      { client },
+    );
+    expect(calls.send).toMatchObject({
+      cc: ["c@x.com"],
+      bcc: ["b@x.com"],
+      replyTo: "r@x.com",
+      attachments: [{ filename: "n.txt", contentType: "text/plain", content: "aGk=" }],
+    });
+  });
+});
+
 describe("send-raw command", () => {
   it("builds an email request", async () => {
     const { client, calls } = stubClient();
@@ -32,6 +56,32 @@ describe("send-raw command", () => {
       channel: "email",
       to: "u@x.com",
       content: { subject: "Hi", html: "<p>x</p>" },
+    });
+  });
+
+  it("threads cc/bcc/replyTo/attachments onto raw email content", async () => {
+    const { client, calls } = stubClient();
+    await sendRawCommand.run(
+      {
+        channel: "email",
+        to: "u@x.com",
+        subject: "Hi",
+        html: "<p>x</p>",
+        cc: ["c@x.com"],
+        bcc: ["b@x.com"],
+        replyTo: "r@x.com",
+        attachments: [{ filename: "n.txt", contentType: "text/plain", content: "aGk=" }],
+      },
+      { client },
+    );
+    expect(calls.sendRaw).toMatchObject({
+      channel: "email",
+      content: {
+        cc: ["c@x.com"],
+        bcc: ["b@x.com"],
+        replyTo: "r@x.com",
+        attachments: [{ filename: "n.txt", contentType: "text/plain", content: "aGk=" }],
+      },
     });
   });
 
@@ -104,5 +154,13 @@ describe("read commands", () => {
     const formatted = messagesGetCommand.format(out);
     expect(formatted).toContain("msg_abc");
     expect(formatted).toContain("delivered");
+  });
+
+  it("messages cancel passes the id and formats output", async () => {
+    const { client, calls } = stubClient();
+    const out = await messagesCancelCommand.run({ id: "msg_abc" }, { client });
+    expect(calls.cancelMessageId).toBe("msg_abc");
+    expect(out).toEqual({ id: "msg_abc", status: "canceled" });
+    expect(messagesCancelCommand.format(out)).toContain("msg_abc");
   });
 });

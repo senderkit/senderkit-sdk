@@ -15,7 +15,27 @@ export interface SenderKitOptions {
   fetch?: typeof fetch;
 }
 
-export interface SendRequest {
+export interface Attachment {
+  filename: string;
+  contentType: string;
+  /** Base64-encoded bytes. Provider caps total attachments at 10 MB. */
+  content: string;
+  inline?: boolean;
+  contentId?: string;
+}
+
+export interface EmailEnvelope {
+  /** Cc recipients (email only). */
+  cc?: string[];
+  /** Bcc recipients (email only). */
+  bcc?: string[];
+  /** Reply-To address (email only). */
+  replyTo?: string;
+  /** Inline or file attachments (email only). 10 MB total budget across all attachments. */
+  attachments?: Attachment[];
+}
+
+export interface SendRequest extends EmailEnvelope {
   /** Template slug (e.g. `"welcome"`). */
   template: string;
   /** Recipient address. */
@@ -34,7 +54,7 @@ export interface SendRequest {
   idempotencyKey?: string;
 }
 
-export interface RawEmailContent {
+export interface RawEmailContent extends EmailEnvelope {
   subject: string;
   preheader?: string;
   html: string;
@@ -154,4 +174,10 @@ export interface ListMessagesParams {
 export interface ListMessagesResponse {
   data: Message[];
   nextCursor: string | null;
+}
+
+export interface CancelMessageResponse {
+  /** Public message id (e.g. `msg_…`). */
+  id: string;
+  status: "canceled";
 }

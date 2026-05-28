@@ -36,11 +36,22 @@ describe("buildMcpServer", () => {
 });
 
 describe("registry", () => {
-  it("exposes uniquely-named senderkit_ tools", () => {
+  it("exposes uniquely-named senderkit_ tools matching the app-hosted server", () => {
     const names = registry.map((c) => c.mcpName);
     expect(new Set(names).size).toBe(names.length);
     expect(names.every((n) => n.startsWith("senderkit_"))).toBe(true);
-    expect(names).toContain("senderkit_send");
-    expect(names).toContain("senderkit_templates_list");
+    // The seven tools that both the CLI-bundled stdio server and the
+    // app-hosted HTTP server are required to expose.
+    expect(new Set(names)).toEqual(
+      new Set([
+        "senderkit_send",
+        "senderkit_send_raw",
+        "senderkit_templates_list",
+        "senderkit_templates_get",
+        "senderkit_messages_list",
+        "senderkit_messages_get",
+        "senderkit_cancel_message",
+      ]),
+    );
   });
 });

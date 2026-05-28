@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/mcp-schemas.ts"],
   format: ["esm", "cjs"],
   target: "es2022",
   dts: true,
@@ -10,5 +10,6 @@ export default defineConfig({
   treeshake: true,
   splitting: false,
   minify: false,
+  external: ["zod"],
   outExtension: ({ format }) => ({ js: format === "cjs" ? ".cjs" : ".js" }),
 });

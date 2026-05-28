@@ -73,6 +73,10 @@ export class SenderKit {
     if (request.version !== undefined) body["version"] = request.version;
     if (request.metadata) body["metadata"] = request.metadata;
     if (request.scheduledAt) body["scheduledAt"] = toIsoString(request.scheduledAt);
+    if (request.cc) body["cc"] = request.cc;
+    if (request.bcc) body["bcc"] = request.bcc;
+    if (request.replyTo) body["replyTo"] = request.replyTo;
+    if (request.attachments) body["attachments"] = request.attachments;
 
     return this.http.request<SendResponse>({
       method: "POST",

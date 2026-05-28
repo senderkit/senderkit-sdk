@@ -9,9 +9,12 @@ export {
   SenderKitNetworkError,
 } from "./errors";
 export type {
+  Attachment,
   BatchSendOptions,
   BatchSendResult,
+  CancelMessageResponse,
   Channel,
+  EmailEnvelope,
   ListMessagesParams,
   ListMessagesResponse,
   Message,
