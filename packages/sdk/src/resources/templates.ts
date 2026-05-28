@@ -5,11 +5,11 @@ export class TemplatesResource {
   constructor(private readonly http: HttpClient) {}
 
   async list(): Promise<Template[]> {
-    const res = await this.http.request<{ data: Template[] } | Template[]>({
+    const res = await this.http.request<{ data: Template[] }>({
       method: "GET",
       path: "/v1/templates",
     });
-    return Array.isArray(res) ? res : res.data;
+    return res.data;
   }
 
   async get(slug: string): Promise<Template> {

@@ -23,15 +23,6 @@ describe("templates", () => {
     expect(mock.calls[0]!.url).toContain("/v1/templates");
   });
 
-  it("lists templates from bare array response", async () => {
-    const mock = createMockFetch([
-      { status: 200, body: [{ slug: "x", name: "X", channels: ["email"] }] },
-    ]);
-    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
-    const list = await sk.templates.list();
-    expect(list).toHaveLength(1);
-  });
-
   it("gets a template by slug with URL encoding", async () => {
     const mock = createMockFetch([
       { status: 200, body: { slug: "welcome+v2", name: "Welcome v2", channels: ["email"] } },
@@ -68,7 +59,7 @@ describe("messages", () => {
               createdAt: "2026-05-10T00:00:00Z",
             },
           ],
-          next_cursor: "abc",
+          nextCursor: "abc",
         },
       },
     ]);

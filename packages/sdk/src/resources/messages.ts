@@ -3,7 +3,6 @@ import type { ListMessagesParams, ListMessagesResponse, Message } from "../types
 
 interface RawListResponse {
   data: Message[];
-  next_cursor?: string | null;
   nextCursor?: string | null;
 }
 
@@ -30,7 +29,7 @@ export class MessagesResource {
     });
     return {
       data: res.data,
-      nextCursor: res.nextCursor ?? res.next_cursor ?? null,
+      nextCursor: res.nextCursor ?? null,
     };
   }
 
