@@ -1,6 +1,6 @@
 {
   "name": "@senderkit/react-email",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bridge React Email templates to SenderKit production workflows — metadata, preview data, payload typing, and manifest generation.",
   "license": "MIT",
   "homepage": "https://github.com/senderkit/senderkit-sdk#readme",
