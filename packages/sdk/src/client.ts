@@ -60,6 +60,7 @@ export class SenderKit {
     if (request.channel) body["channel"] = request.channel;
     if (request.version !== undefined) body["version"] = request.version;
     if (request.metadata) body["metadata"] = request.metadata;
+    if (request.scheduledAt) body["scheduledAt"] = toIsoString(request.scheduledAt);
 
     return this.http.request<SendResponse>({
       method: "POST",
@@ -83,6 +84,7 @@ export class SenderKit {
     };
     if (request.metadata) body["metadata"] = request.metadata;
     if (request.interpolate) body["interpolate"] = true;
+    if (request.scheduledAt) body["scheduledAt"] = toIsoString(request.scheduledAt);
     if (request.channel === "email" && request.from) body["from"] = request.from;
 
     return this.http.request<SendResponse>({
@@ -147,4 +149,8 @@ export class SenderKit {
     await Promise.all(workers);
     return results;
   }
+}
+
+function toIsoString(value: string | Date): string {
+  return value instanceof Date ? value.toISOString() : value;
 }

@@ -118,4 +118,44 @@ describe("send", () => {
     // @ts-expect-error
     await expect(sk.send({ template: "a" })).rejects.toThrow(/to/);
   });
+
+  it("forwards scheduledAt as an ISO string verbatim", async () => {
+    const mock = createMockFetch([
+      { status: 202, body: { id: "msg_1", status: "queued", livemode: false } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    await sk.send({
+      template: "ping",
+      to: "x@x.com",
+      scheduledAt: "2026-06-01T09:00:00Z",
+    });
+    expect(mock.calls[0]!.body).toEqual({
+      template: "ping",
+      to: "x@x.com",
+      vars: {},
+      scheduledAt: "2026-06-01T09:00:00Z",
+    });
+  });
+
+  it("serializes a Date scheduledAt to ISO 8601", async () => {
+    const mock = createMockFetch([
+      { status: 202, body: { id: "msg_1", status: "queued", livemode: false } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    await sk.send({
+      template: "ping",
+      to: "x@x.com",
+      scheduledAt: new Date("2026-06-01T09:00:00Z"),
+    });
+    expect(mock.calls[0]!.body).toMatchObject({ scheduledAt: "2026-06-01T09:00:00.000Z" });
+  });
+
+  it("omits scheduledAt from the body when not provided", async () => {
+    const mock = createMockFetch([
+      { status: 202, body: { id: "msg_1", status: "queued", livemode: false } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    await sk.send({ template: "ping", to: "x@x.com" });
+    expect(mock.calls[0]!.body).not.toHaveProperty("scheduledAt");
+  });
 });

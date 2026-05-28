@@ -48,11 +48,23 @@ const { id } = await senderkit.send({
 });
 ```
 
+Defer delivery with `scheduledAt` — accepts an ISO 8601 string or a `Date`:
+
+```ts
+await senderkit.send({
+  template: "trial-ending",
+  to: "user@example.com",
+  scheduledAt: "2026-06-01T09:00:00Z",
+});
+```
+
 The response shape:
 
 ```ts
-{ id: "msg_…", status: "queued", livemode: boolean }
+{ id: "msg_…", status: "queued" | "scheduled", livemode: boolean }
 ```
+
+`status` is `"scheduled"` when `scheduledAt` is in the future, otherwise `"queued"`.
 
 ### `sendRaw`
 
@@ -86,7 +98,7 @@ await senderkit.sendRaw({
 });
 ```
 
-Raw sends accept the same retry, idempotency, and error-handling behavior as template sends. Pass `interpolate: true` together with `vars` to opt into server-side variable substitution inside `content`.
+Raw sends accept the same retry, idempotency, and error-handling behavior as template sends. Pass `interpolate: true` together with `vars` to opt into server-side variable substitution inside `content`. Add `scheduledAt` to defer delivery, same as with `send`.
 
 ### `sendBatch`
 

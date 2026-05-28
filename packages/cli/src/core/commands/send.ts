@@ -11,6 +11,11 @@ const schema = z.object({
   channel: channelEnum.describe("Force a channel (defaults to template's primary).").optional(),
   version: z.coerce.number().int().describe("Pin a specific template version.").optional(),
   metadata: metadataRecord("Free-form metadata as a JSON object.").optional(),
+  scheduledAt: z
+    .string()
+    .datetime({ offset: true })
+    .describe("ISO 8601 timestamp for scheduled delivery (e.g. 2026-06-01T09:00:00Z).")
+    .optional(),
   idempotencyKey: z
     .string()
     .describe("Idempotency key. Auto-generated if omitted.")
@@ -31,6 +36,7 @@ export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
       channel: input.channel,
       version: input.version,
       metadata: input.metadata,
+      scheduledAt: input.scheduledAt,
       idempotencyKey: input.idempotencyKey,
     }),
   format: (res) =>

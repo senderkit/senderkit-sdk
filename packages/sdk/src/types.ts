@@ -28,6 +28,8 @@ export interface SendRequest {
   version?: number;
   /** Free-form metadata attached to the message. Indexed server-side for filtering. */
   metadata?: Record<string, string | number | boolean>;
+  /** Schedule delivery for a future time. ISO 8601 string or `Date`. Omit to send immediately. */
+  scheduledAt?: string | Date;
   /** Idempotency key. If omitted, the SDK auto-generates one so safe retries don't duplicate sends. */
   idempotencyKey?: string;
 }
@@ -60,6 +62,8 @@ interface SendRawBase {
   metadata?: Record<string, string | number | boolean>;
   /** When true, the server runs variable substitution over `content`. */
   interpolate?: boolean;
+  /** Schedule delivery for a future time. ISO 8601 string or `Date`. Omit to send immediately. */
+  scheduledAt?: string | Date;
   /** Idempotency key. If omitted, the SDK auto-generates one. */
   idempotencyKey?: string;
 }
@@ -89,8 +93,8 @@ export type SendRawRequest =
 export interface SendResponse {
   /** Message id (e.g. `"msg_…"`). */
   id: string;
-  /** Initial status. Currently always `"queued"`. */
-  status: "queued";
+  /** Initial status. `"scheduled"` for sends with `scheduledAt` in the future; otherwise `"queued"`. */
+  status: "queued" | "scheduled";
   /** Whether the request was processed against live mode. Derived from the API key prefix. */
   livemode: boolean;
 }
@@ -103,7 +107,7 @@ export interface BatchSendOptions {
 }
 
 export type BatchSendResult =
-  | { ok: true; index: number; id: string; status: "queued"; livemode: boolean }
+  | { ok: true; index: number; id: string; status: "queued" | "scheduled"; livemode: boolean }
   | { ok: false; index: number; error: SenderKitError };
 
 export interface TemplateVersion {

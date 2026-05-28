@@ -183,6 +183,43 @@ describe("sendRaw", () => {
     expect(k1).not.toBe(k2);
   });
 
+  it("forwards scheduledAt verbatim and serializes Date to ISO 8601", async () => {
+    const mock = createMockFetch([
+      { status: 202, body: { id: "msg_1", status: "queued", livemode: false } },
+      { status: 202, body: { id: "msg_2", status: "queued", livemode: false } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+
+    await sk.sendRaw({
+      channel: "email",
+      to: "user@example.com",
+      content: { subject: "Hi", html: "<p>x</p>" },
+      scheduledAt: "2026-06-01T09:00:00Z",
+    });
+    expect(mock.calls[0]!.body).toMatchObject({ scheduledAt: "2026-06-01T09:00:00Z" });
+
+    await sk.sendRaw({
+      channel: "sms",
+      to: "+15555550123",
+      content: { body: "hi" },
+      scheduledAt: new Date("2026-06-01T09:00:00Z"),
+    });
+    expect(mock.calls[1]!.body).toMatchObject({ scheduledAt: "2026-06-01T09:00:00.000Z" });
+  });
+
+  it("omits scheduledAt from the body when not provided", async () => {
+    const mock = createMockFetch([
+      { status: 202, body: { id: "msg_1", status: "queued", livemode: false } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    await sk.sendRaw({
+      channel: "sms",
+      to: "+15555550123",
+      content: { body: "hi" },
+    });
+    expect(mock.calls[0]!.body).not.toHaveProperty("scheduledAt");
+  });
+
   it("throws when to, channel, or content is missing", async () => {
     const sk = new SenderKit({ apiKey: "sk_test_x", fetch: createMockFetch().fetch });
     await expect(

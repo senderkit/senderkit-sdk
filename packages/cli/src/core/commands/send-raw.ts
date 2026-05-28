@@ -27,6 +27,11 @@ const schema = z.object({
     .boolean()
     .describe("Run server-side variable substitution over content.")
     .optional(),
+  scheduledAt: z
+    .string()
+    .datetime({ offset: true })
+    .describe("ISO 8601 timestamp for scheduled delivery (e.g. 2026-06-01T09:00:00Z).")
+    .optional(),
   idempotencyKey: z.string().describe("Idempotency key.").optional(),
 });
 
@@ -36,6 +41,7 @@ function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
     vars: input.vars,
     metadata: input.metadata,
     interpolate: input.interpolate,
+    scheduledAt: input.scheduledAt,
     idempotencyKey: input.idempotencyKey,
   };
 
