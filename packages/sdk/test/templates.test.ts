@@ -20,7 +20,7 @@ describe("templates", () => {
     expect(list).toHaveLength(2);
     expect(list[0]!.slug).toBe("welcome");
     expect(mock.calls[0]!.method).toBe("GET");
-    expect(mock.calls[0]!.url).toContain("/api/v1/templates");
+    expect(mock.calls[0]!.url).toContain("/v1/templates");
   });
 
   it("lists templates from bare array response", async () => {
@@ -43,7 +43,7 @@ describe("templates", () => {
     });
     const tpl = await sk.templates.get("welcome+v2");
     expect(tpl.slug).toBe("welcome+v2");
-    expect(mock.calls[0]!.url).toBe("https://api.example.com/api/v1/templates/welcome%2Bv2");
+    expect(mock.calls[0]!.url).toBe("https://api.example.com/v1/templates/welcome%2Bv2");
   });
 
   it("throws when slug missing", async () => {

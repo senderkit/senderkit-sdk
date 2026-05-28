@@ -3,7 +3,7 @@ import { SenderKit } from "../src/index";
 import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("sendRaw", () => {
-  it("posts a minimal raw email to /api/v1/send", async () => {
+  it("posts a minimal raw email to /v1/send", async () => {
     const mock = createMockFetch([
       { status: 202, body: { id: "msg_raw1", status: "queued", livemode: false } },
     ]);
@@ -26,7 +26,7 @@ describe("sendRaw", () => {
     expect(mock.calls).toHaveLength(1);
     const call = mock.calls[0]!;
     expect(call.method).toBe("POST");
-    expect(call.url).toBe("https://api.example.com/api/v1/send");
+    expect(call.url).toBe("https://api.example.com/v1/send");
     expect(call.headers["authorization"]).toBe("Bearer sk_test_x");
     expect(call.headers["idempotency-key"]).toBeTruthy();
     expect(call.body).toEqual({
@@ -53,7 +53,7 @@ describe("sendRaw", () => {
         text: "Hello {{name}}",
       },
       from: "no-reply@example.com",
-      data: { name: "Ada" },
+      vars: { name: "Ada" },
       metadata: { source: "test", attempt: 1 },
       interpolate: true,
     });

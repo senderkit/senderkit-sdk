@@ -30,7 +30,7 @@ const senderkit = new SenderKit({
 await senderkit.send({
   template: "welcome",
   to: "user@example.com",
-  data: { name: "John" },
+  vars: { name: "John" },
 });
 ```
 
@@ -42,7 +42,7 @@ await senderkit.send({
 const { id } = await senderkit.send({
   template: "welcome",            // template slug
   to: "user@example.com",         // recipient
-  data: { name: "John" },        // template variables
+  vars: { name: "John" },        // template variables
   channel: "email",               // optional; defaults to template's primary channel
   idempotencyKey: "welcome-u123", // optional; prevents duplicate sends on retry
 });
@@ -86,7 +86,7 @@ await senderkit.sendRaw({
 });
 ```
 
-Raw sends accept the same retry, idempotency, and error-handling behavior as template sends. Pass `interpolate: true` together with `data` to opt into server-side variable substitution inside `content`.
+Raw sends accept the same retry, idempotency, and error-handling behavior as template sends. Pass `interpolate: true` together with `vars` to opt into server-side variable substitution inside `content`.
 
 ### `sendBatch`
 
@@ -94,8 +94,8 @@ Fan out many messages at once. Returns one result per item — failures don't ab
 
 ```ts
 const results = await senderkit.sendBatch([
-  { template: "welcome", to: "user1@example.com", data: { name: "John" } },
-  { template: "trial-ending", to: "user2@example.com", data: { daysLeft: 3 } },
+  { template: "welcome", to: "user1@example.com", vars: { name: "John" } },
+  { template: "trial-ending", to: "user2@example.com", vars: { daysLeft: 3 } },
 ]);
 
 for (const r of results) {
@@ -130,7 +130,7 @@ Every `send` call includes an `Idempotency-Key` header. If you don't pass one, t
 await senderkit.send({
   template: "invoice-paid",
   to: "user@example.com",
-  data: { invoice: "inv_123" },
+  vars: { invoice: "inv_123" },
   idempotencyKey: `invoice-paid:inv_123`,
 });
 ```
@@ -204,7 +204,7 @@ export async function POST(req: Request) {
   const result = await senderkit.send({
     template: "welcome",
     to: email,
-    data: { name },
+    vars: { name },
     idempotencyKey: `welcome:${email}`,
   });
   return NextResponse.json(result, { status: 202 });
@@ -222,7 +222,7 @@ Use [`@senderkit/react-email`](../react-email) to wrap React Email components wi
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `apiKey` | `string` | — | **Required.** `sk_live_…` or `sk_test_…`. |
-| `baseUrl` | `string` | `https://api.senderkit.com` | Override the API endpoint. |
+| `baseUrl` | `string` | `https://senderkit.com/api` | Override the API endpoint. |
 | `timeout` | `number` | `30000` | Per-request timeout in ms. |
 | `maxRetries` | `number` | `2` | Retries on network / timeout / 429 / 5xx. |
 | `fetch` | `typeof fetch` | `globalThis.fetch` | Inject a custom fetch (tests, edge runtimes). |

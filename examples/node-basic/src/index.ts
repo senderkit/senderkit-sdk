@@ -32,7 +32,7 @@ try {
     const result = await senderkit.send({
       template: "welcome",
       to,
-      data: { name: process.env["NAME"] ?? "Anton" },
+      vars: { name: process.env["NAME"] ?? "Anton" },
       idempotencyKey: `welcome:${to}`,
     });
     console.log("queued", result);

@@ -7,7 +7,7 @@ export class TemplatesResource {
   async list(): Promise<Template[]> {
     const res = await this.http.request<{ data: Template[] } | Template[]>({
       method: "GET",
-      path: "/api/v1/templates",
+      path: "/v1/templates",
     });
     return Array.isArray(res) ? res : res.data;
   }
@@ -16,7 +16,7 @@ export class TemplatesResource {
     if (!slug) throw new TypeError("templates.get(slug): slug is required");
     return this.http.request<Template>({
       method: "GET",
-      path: `/api/v1/templates/${encodeURIComponent(slug)}`,
+      path: `/v1/templates/${encodeURIComponent(slug)}`,
     });
   }
 }

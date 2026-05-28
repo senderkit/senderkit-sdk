@@ -11,7 +11,7 @@ import type {
   SenderKitOptions,
 } from "./types";
 
-const DEFAULT_BASE_URL = "https://api.senderkit.com";
+const DEFAULT_BASE_URL = "https://senderkit.com/api";
 const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
 const DEFAULT_BATCH_CONCURRENCY = 5;
@@ -55,7 +55,7 @@ export class SenderKit {
     const body: Record<string, unknown> = {
       template: request.template,
       to: request.to,
-      vars: request.data ?? {},
+      vars: request.vars ?? {},
     };
     if (request.channel) body["channel"] = request.channel;
     if (request.version !== undefined) body["version"] = request.version;
@@ -63,7 +63,7 @@ export class SenderKit {
 
     return this.http.request<SendResponse>({
       method: "POST",
-      path: "/api/v1/send",
+      path: "/v1/send",
       body,
       idempotencyKey: request.idempotencyKey,
       autoIdempotency: true,
@@ -79,7 +79,7 @@ export class SenderKit {
       channel: request.channel,
       to: request.to,
       content: request.content,
-      vars: request.data ?? {},
+      vars: request.vars ?? {},
     };
     if (request.metadata) body["metadata"] = request.metadata;
     if (request.interpolate) body["interpolate"] = true;
@@ -87,7 +87,7 @@ export class SenderKit {
 
     return this.http.request<SendResponse>({
       method: "POST",
-      path: "/api/v1/send",
+      path: "/v1/send",
       body,
       idempotencyKey: request.idempotencyKey,
       autoIdempotency: true,

@@ -13,7 +13,7 @@ export class MessagesResource {
   async list(params: ListMessagesParams = {}): Promise<ListMessagesResponse> {
     const res = await this.http.request<RawListResponse>({
       method: "GET",
-      path: "/api/v1/messages",
+      path: "/v1/messages",
       query: {
         limit: params.limit,
         cursor: params.cursor,

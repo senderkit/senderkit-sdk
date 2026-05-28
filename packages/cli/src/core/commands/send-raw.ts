@@ -21,7 +21,7 @@ const schema = z.object({
   sound: z.string().describe("Notification sound (push).").optional(),
   pushData: jsonRecord("Push data payload as a JSON object of strings (push).").optional(),
   // shared
-  data: jsonRecord("Variables for interpolation as a JSON object.").optional(),
+  vars: jsonRecord("Variables for interpolation as a JSON object.").optional(),
   metadata: metadataRecord("Free-form metadata as a JSON object.").optional(),
   interpolate: z.coerce
     .boolean()
@@ -33,7 +33,7 @@ const schema = z.object({
 function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
   const base = {
     to: input.to,
-    data: input.data,
+    vars: input.vars,
     metadata: input.metadata,
     interpolate: input.interpolate,
     idempotencyKey: input.idempotencyKey,

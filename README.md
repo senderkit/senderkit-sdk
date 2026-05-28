@@ -36,7 +36,7 @@ const senderkit = new SenderKit({
 await senderkit.send({
   template: "welcome",
   to: "user@example.com",
-  data: { name: "John" },
+  vars: { name: "John" },
 });
 ```
 

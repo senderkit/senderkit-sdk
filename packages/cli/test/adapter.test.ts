@@ -26,11 +26,11 @@ describe("runCommand", () => {
     const { chunks } = captureStdout();
     await runCommand(
       sendCommand,
-      { template: "welcome", to: "u@x.com", data: '{"name":"Jo"}' },
+      { template: "welcome", to: "u@x.com", vars: '{"name":"Jo"}' },
       { json: false },
       { client },
     );
-    expect(calls.send).toMatchObject({ data: { name: "Jo" } });
+    expect(calls.send).toMatchObject({ vars: { name: "Jo" } });
     expect(chunks.join("")).toContain("Queued message");
   });
 
@@ -61,12 +61,12 @@ describe("describeField", () => {
 
   it("marks required vs optional", () => {
     expect(describeField(shape.template).optional).toBe(false);
-    expect(describeField(shape.data).optional).toBe(true);
+    expect(describeField(shape.vars).optional).toBe(true);
   });
 
   it("detects kinds", () => {
     expect(describeField(shape.template).kind).toBe("string");
-    expect(describeField(shape.data).kind).toBe("json");
+    expect(describeField(shape.vars).kind).toBe("json");
     expect(describeField(shape.version).kind).toBe("number");
     const channel = describeField(shape.channel);
     expect(channel.kind).toBe("enum");
@@ -74,6 +74,6 @@ describe("describeField", () => {
   });
 
   it("carries descriptions through wrappers", () => {
-    expect(describeField(shape.data).description).toMatch(/JSON object/);
+    expect(describeField(shape.vars).description).toMatch(/JSON object/);
   });
 });

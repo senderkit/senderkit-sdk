@@ -7,7 +7,7 @@ import { channelEnum, jsonRecord, metadataRecord } from "../schema";
 const schema = z.object({
   template: z.string().describe("Template slug (e.g. \"welcome\")."),
   to: z.string().describe("Recipient address."),
-  data: jsonRecord("Template variables as a JSON object.").optional(),
+  vars: jsonRecord("Template variables as a JSON object.").optional(),
   channel: channelEnum.describe("Force a channel (defaults to template's primary).").optional(),
   version: z.coerce.number().int().describe("Pin a specific template version.").optional(),
   metadata: metadataRecord("Free-form metadata as a JSON object.").optional(),
@@ -27,7 +27,7 @@ export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
     client.send({
       template: input.template,
       to: input.to,
-      data: input.data,
+      vars: input.vars,
       channel: input.channel,
       version: input.version,
       metadata: input.metadata,

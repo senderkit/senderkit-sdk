@@ -10,10 +10,10 @@ describe("send command", () => {
   it("maps input to client.send and formats output", async () => {
     const { client, calls } = stubClient();
     const out = await sendCommand.run(
-      { template: "welcome", to: "u@x.com", data: { name: "Jo" } },
+      { template: "welcome", to: "u@x.com", vars: { name: "Jo" } },
       { client },
     );
-    expect(calls.send).toMatchObject({ template: "welcome", to: "u@x.com", data: { name: "Jo" } });
+    expect(calls.send).toMatchObject({ template: "welcome", to: "u@x.com", vars: { name: "Jo" } });
     expect(out.id).toBe("msg_x");
     expect(sendCommand.format(out)).toContain("msg_x");
     expect(sendCommand.format(out)).toContain("test");

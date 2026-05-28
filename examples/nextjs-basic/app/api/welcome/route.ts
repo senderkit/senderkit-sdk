@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     const result = await senderkit().send({
       template: "welcome",
       to: payload.email,
-      data: { name: payload.name ?? "there" },
+      vars: { name: payload.name ?? "there" },
       idempotencyKey: `welcome:${payload.email}`,
     });
     return NextResponse.json(result, { status: 202 });

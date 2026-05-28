@@ -3,7 +3,7 @@ import { SenderKit } from "../src/index";
 import { createMockFetch } from "./helpers/mock-fetch";
 
 describe("send", () => {
-  it("posts to /api/v1/send with correct body and headers", async () => {
+  it("posts to /v1/send with correct body and headers", async () => {
     const mock = createMockFetch([
       { status: 202, body: { id: "msg_abc", status: "queued", livemode: false } },
     ]);
@@ -16,14 +16,14 @@ describe("send", () => {
     const res = await sk.send({
       template: "welcome",
       to: "user@example.com",
-      data: { name: "John" },
+      vars: { name: "John" },
     });
 
     expect(res).toEqual({ id: "msg_abc", status: "queued", livemode: false });
     expect(mock.calls).toHaveLength(1);
     const call = mock.calls[0]!;
     expect(call.method).toBe("POST");
-    expect(call.url).toBe("https://api.example.com/api/v1/send");
+    expect(call.url).toBe("https://api.example.com/v1/send");
     expect(call.headers["authorization"]).toBe("Bearer sk_test_123");
     expect(call.headers["content-type"]).toBe("application/json");
     expect(call.headers["user-agent"]).toMatch(/^senderkit-node\//);
@@ -35,7 +35,7 @@ describe("send", () => {
     });
   });
 
-  it("translates data -> vars and omits empty data as {}", async () => {
+  it("defaults missing vars to {}", async () => {
     const mock = createMockFetch([
       { status: 202, body: { id: "msg_1", status: "queued", livemode: true } },
     ]);
@@ -80,7 +80,7 @@ describe("send", () => {
     await sk.send({
       template: "ping",
       to: "x@x.com",
-      data: { v: 1 },
+      vars: { v: 1 },
       channel: "email",
       version: 3,
     });

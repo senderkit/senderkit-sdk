@@ -65,7 +65,7 @@ describe("sendBatch", () => {
 
     const results = await sk.sendBatch(
       [
-        { template: "welcome", to: "1@x.com", data: { name: "A" } },
+        { template: "welcome", to: "1@x.com", vars: { name: "A" } },
         {
           channel: "email",
           to: "2@x.com",

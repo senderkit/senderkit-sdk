@@ -5,7 +5,7 @@ export type Channel = "email" | "sms" | "push";
 export interface SenderKitOptions {
   /** API key. Use `sk_live_…` for production, `sk_test_…` for test mode. */
   apiKey: string;
-  /** Override the API base URL. Defaults to `https://api.senderkit.com`. */
+  /** Override the API base URL. Defaults to `https://senderkit.com/api`. */
   baseUrl?: string;
   /** Request timeout in milliseconds. Defaults to 30_000. */
   timeout?: number;
@@ -21,7 +21,7 @@ export interface SendRequest {
   /** Recipient address. */
   to: string;
   /** Template variables. */
-  data?: Record<string, unknown>;
+  vars?: Record<string, unknown>;
   /** Force a specific channel. Defaults to the template's primary channel. */
   channel?: Channel;
   /** Pin a specific template version. */
@@ -55,7 +55,7 @@ interface SendRawBase {
   /** Recipient address. */
   to: string;
   /** Variables for `interpolate`. Sent as `vars` on the wire. */
-  data?: Record<string, unknown>;
+  vars?: Record<string, unknown>;
   /** Free-form metadata attached to the message. */
   metadata?: Record<string, string | number | boolean>;
   /** When true, the server runs variable substitution over `content`. */

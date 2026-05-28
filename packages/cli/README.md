@@ -34,7 +34,7 @@ Mode (live vs test) is derived from the key prefix — `sk_live_…` or `sk_test
 ## Commands
 
 ```bash
-senderkit send <template> <to> [--data '{…}'] [--channel email|sms|push] \
+senderkit send <template> <to> [--vars '{…}'] [--channel email|sms|push] \
                                [--version N] [--metadata '{…}'] [--idempotency-key K]
 
 senderkit send-raw <to> --channel email --subject "Hi" --html "<p>…</p>" [--text …] [--from …]
