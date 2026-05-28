@@ -199,7 +199,7 @@ function generateIdempotencyKey(): string {
   if (c?.randomUUID) return c.randomUUID();
   // Unreachable on Node >=18 (engines field). Secure fallback for exotic runtimes.
   const bytes = new Uint8Array(16);
-  (globalThis as { crypto: Crypto }).crypto.getRandomValues(bytes);
+  (globalThis as { crypto: { getRandomValues(a: Uint8Array): void } }).crypto.getRandomValues(bytes);
   bytes[6] = (bytes[6]! & 0x0f) | 0x40;
   bytes[8] = (bytes[8]! & 0x3f) | 0x80;
   return [...bytes]
