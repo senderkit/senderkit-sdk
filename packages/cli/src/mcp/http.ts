@@ -66,7 +66,16 @@ export async function handleHttpRequest(
     return;
   }
 
-  const server = buildMcpServer(buildClient({ apiKey: token }));
+  let server;
+  try {
+    server = buildMcpServer(buildClient({ apiKey: token }));
+  } catch (err) {
+    sendJson(res, 401, {
+      error: "unauthorized",
+      message: err instanceof Error ? err.message : "Invalid API key.",
+    });
+    return;
+  }
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   res.on("close", () => {
     void transport.close();

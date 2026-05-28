@@ -19,6 +19,8 @@ const DEFAULT_BATCH_CONCURRENCY = 5;
 export class SenderKit {
   readonly templates: TemplatesResource;
   readonly messages: MessagesResource;
+  /** Mode derived from the API key prefix: `sk_test_…` → `"test"`, anything else → `"live"`. */
+  readonly mode: "live" | "test";
   private readonly http: HttpClient;
 
   constructor(options: SenderKitOptions) {
@@ -28,6 +30,14 @@ export class SenderKit {
     if (!options.apiKey || typeof options.apiKey !== "string") {
       throw new TypeError("SenderKit: apiKey is required");
     }
+    if (
+      !options.apiKey.startsWith("sk_live_") &&
+      !options.apiKey.startsWith("sk_test_")
+    ) {
+      throw new TypeError(
+        "SenderKit: apiKey must start with `sk_live_` or `sk_test_`",
+      );
+    }
 
     const fetchImpl = options.fetch ?? globalThis.fetch;
     if (typeof fetchImpl !== "function") {
@@ -35,6 +45,8 @@ export class SenderKit {
         "SenderKit: no global fetch available. Pass `fetch` in options or use Node.js 18+.",
       );
     }
+
+    this.mode = options.apiKey.startsWith("sk_test_") ? "test" : "live";
 
     this.http = new HttpClient({
       apiKey: options.apiKey,

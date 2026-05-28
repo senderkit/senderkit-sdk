@@ -29,4 +29,20 @@ describe("SenderKit constructor", () => {
     expect(typeof sk.templates.get).toBe("function");
     expect(typeof sk.messages.list).toBe("function");
   });
+
+  it("derives mode from the api key prefix", () => {
+    const fetch = createMockFetch().fetch;
+    expect(new SenderKit({ apiKey: "sk_test_abc", fetch }).mode).toBe("test");
+    expect(new SenderKit({ apiKey: "sk_live_abc", fetch }).mode).toBe("live");
+  });
+
+  it("rejects api keys without the sk_live_/sk_test_ prefix", () => {
+    const fetch = createMockFetch().fetch;
+    expect(() => new SenderKit({ apiKey: "sk_unknown_abc", fetch })).toThrow(
+      /sk_live_.*sk_test_/,
+    );
+    expect(() => new SenderKit({ apiKey: "abc123", fetch })).toThrow(
+      /sk_live_.*sk_test_/,
+    );
+  });
 });

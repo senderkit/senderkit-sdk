@@ -134,6 +134,18 @@ The mode is encoded in your API key — no flag to set:
 
 Switch environments by swapping the key.
 
+Inspect the client's mode before sending — useful for dev-environment guardrails:
+
+```ts
+const senderkit = new SenderKit({ apiKey: process.env.SENDERKIT_API_KEY! });
+
+if (process.env.NODE_ENV === "production" && senderkit.mode === "test") {
+  throw new Error("refusing to boot prod with a test key");
+}
+```
+
+`mode` is `"test"` when the key starts with `sk_test_`, otherwise `"live"`.
+
 ## Idempotency
 
 Every `send` call includes an `Idempotency-Key` header. If you don't pass one, the SDK auto-generates a UUID per call so transparent retries (network blips, 429s, 5xx) never duplicate a send. Pass your own key when you need end-to-end deduplication across your own retries:
