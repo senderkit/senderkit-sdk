@@ -1,4 +1,4 @@
-import { createInterface } from "node:readline/promises";
+import { createInterface } from "node:readline";
 import { Command as Commander } from "commander";
 import { SenderKit } from "@senderkit/sdk";
 import pc from "picocolors";
@@ -77,10 +77,8 @@ export function registerBuiltins(program: Commander): void {
     .command("login")
     .description("Prompt for an API key, verify it, and save it.")
     .action(async () => {
-      const rl = createInterface({ input: process.stdin, output: process.stdout });
       try {
-        const apiKey = (await rl.question("SenderKit API key: ")).trim();
-        rl.close();
+        const apiKey = (await readApiKey()).trim();
         if (!apiKey) throw new Error("No API key entered.");
 
         const baseUrl = resolveBaseUrl();
@@ -90,8 +88,72 @@ export function registerBuiltins(program: Commander): void {
         setConfigValue("apiKey", apiKey);
         process.stdout.write(`${success(`Saved API key to ${configPath()}`)}\n`);
       } catch (err) {
-        rl.close();
         handleError(err);
       }
     });
+}
+
+async function readApiKey(): Promise<string> {
+  if (process.stdin.isTTY) {
+    return readSecretFromTty("SenderKit API key: ");
+  }
+  return readFirstLine();
+}
+
+function readFirstLine(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const rl = createInterface({ input: process.stdin });
+    rl.once("line", (line) => {
+      rl.close();
+      resolve(line);
+    });
+    rl.once("close", () => resolve(""));
+    rl.once("error", reject);
+  });
+}
+
+const CTRL_C = "\x03";
+const DEL = "\x7f";
+const BS = "\x08";
+
+function readSecretFromTty(prompt: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const stdin = process.stdin;
+    const stdout = process.stdout;
+    stdout.write(prompt);
+
+    const wasRaw = stdin.isRaw;
+    stdin.setRawMode(true);
+    stdin.resume();
+    stdin.setEncoding("utf8");
+
+    let buf = "";
+    const cleanup = (): void => {
+      stdin.removeListener("data", onData);
+      stdin.setRawMode(wasRaw);
+      stdin.pause();
+    };
+    const onData = (data: string): void => {
+      for (const ch of data) {
+        if (ch === "\r" || ch === "\n") {
+          cleanup();
+          stdout.write("\n");
+          resolve(buf);
+          return;
+        }
+        if (ch === CTRL_C) {
+          cleanup();
+          stdout.write("\n");
+          reject(new Error("Aborted."));
+          return;
+        }
+        if (ch === DEL || ch === BS) {
+          buf = buf.slice(0, -1);
+          continue;
+        }
+        if (ch >= " ") buf += ch;
+      }
+    };
+    stdin.on("data", onData);
+  });
 }
