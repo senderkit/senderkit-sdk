@@ -1,5 +1,10 @@
 import type { HttpClient } from "../http";
-import type { ListMessagesParams, ListMessagesResponse, Message } from "../types";
+import type {
+  CancelMessageResponse,
+  ListMessagesParams,
+  ListMessagesResponse,
+  Message,
+} from "../types";
 
 interface RawListResponse {
   data: Message[];
@@ -37,6 +42,18 @@ export class MessagesResource {
     if (!id) throw new TypeError("messages.get(id): id is required");
     return this.http.request<Message>({
       method: "GET",
+      path: `/v1/messages/${encodeURIComponent(id)}`,
+    });
+  }
+
+  /**
+   * Cancel a still-pending message. Only `scheduled` and `queued` messages are
+   * cancelable; later states return a 409 from the server.
+   */
+  async cancel(id: string): Promise<CancelMessageResponse> {
+    if (!id) throw new TypeError("messages.cancel(id): id is required");
+    return this.http.request<CancelMessageResponse>({
+      method: "DELETE",
       path: `/v1/messages/${encodeURIComponent(id)}`,
     });
   }

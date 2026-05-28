@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { SenderKit } from "@senderkit/sdk";
+import { SEND_TOOL_LIVE_MODE_NOTE } from "@senderkit/sdk/mcp-schemas";
 import type { z } from "zod";
 import { registry } from "../core/registry";
 import { buildClient } from "../core/context";
@@ -22,7 +23,7 @@ export function buildMcpServer(client: SenderKit): McpServer {
 
   for (const command of registry) {
     const description = SEND_TOOLS.has(command.mcpName)
-      ? `${command.summary} Dispatches a real message; live vs test mode is determined by the API key prefix (sk_live_ / sk_test_).`
+      ? command.summary + SEND_TOOL_LIVE_MODE_NOTE
       : command.summary;
 
     server.registerTool(

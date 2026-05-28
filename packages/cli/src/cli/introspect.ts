@@ -1,5 +1,3 @@
-import type { z } from "zod";
-
 export type FieldKind = "string" | "number" | "boolean" | "enum" | "json";
 
 export interface FieldInfo {
@@ -10,47 +8,75 @@ export interface FieldInfo {
 }
 
 interface ZodDefLike {
-  typeName?: string;
-  description?: string;
-  innerType?: { _def: ZodDefLike };
-  schema?: { _def: ZodDefLike };
+  type?: string;
+  innerType?: { _def: ZodDefLike; description?: string };
+  // ZodPipe (Zod 4): used by preprocess to wrap the inner schema.
+  out?: { _def: ZodDefLike; description?: string };
+  in?: { _def: ZodDefLike };
+  entries?: Record<string, unknown>;
   values?: string[];
+  description?: string;
 }
 
-/** Inspect a single zod field, unwrapping optional/default/effects wrappers. */
-export function describeField(field: z.ZodTypeAny): FieldInfo {
-  let cur = field as unknown as { _def: ZodDefLike };
+interface ZodFieldLike {
+  _def: ZodDefLike;
+  description?: string;
+}
+
+function readDescription(field: ZodFieldLike): string | undefined {
+  // Zod 4 stores `.describe(…)` in z.globalRegistry, exposed as `.description`.
+  // Fall back to `_def.description` for older shapes / direct construction.
+  return field.description ?? field._def?.description;
+}
+
+/** Inspect a single zod field, unwrapping optional/default/preprocess wrappers. */
+export function describeField(field: unknown): FieldInfo {
+  let cur = field as unknown as ZodFieldLike;
   let optional = false;
   let description: string | undefined;
 
-  // Walk down wrapper types to the concrete schema.
+  // Walk wrappers down to the concrete schema. Description is captured from
+  // whichever layer set it first (outer-most wins).
   for (;;) {
-    const def = cur._def;
-    if (def.description && !description) description = def.description;
-    const tn = def.typeName;
-    if (tn === "ZodOptional" || tn === "ZodDefault") {
+    const desc = readDescription(cur);
+    if (desc && !description) description = desc;
+
+    const def = cur._def ?? {};
+    const t = def.type;
+
+    if (t === "optional" || t === "default" || t === "prefault" || t === "nullable") {
       optional = true;
-      cur = def.innerType as { _def: ZodDefLike };
+      if (!def.innerType) break;
+      cur = def.innerType as ZodFieldLike;
       continue;
     }
-    if (tn === "ZodEffects") {
-      cur = def.schema as { _def: ZodDefLike };
+    // z.preprocess(fn, inner) is a ZodPipe whose `out` is the inner schema.
+    if (t === "pipe" && def.out) {
+      cur = def.out as ZodFieldLike;
       continue;
     }
     break;
   }
 
-  const def = cur._def;
-  switch (def.typeName) {
-    case "ZodNumber":
+  const def = cur._def ?? {};
+  switch (def.type) {
+    case "number":
+    case "int":
       return { optional, kind: "number", description };
-    case "ZodBoolean":
+    case "boolean":
       return { optional, kind: "boolean", description };
-    case "ZodEnum":
-      return { optional, kind: "enum", description, enumValues: def.values };
-    case "ZodRecord":
-    case "ZodObject":
-    case "ZodArray":
+    case "enum": {
+      // Zod 4 stores enum members on `_def.entries` (object keyed by value).
+      const values = def.entries
+        ? Object.keys(def.entries)
+        : Array.isArray(def.values)
+          ? def.values
+          : undefined;
+      return { optional, kind: "enum", description, enumValues: values };
+    }
+    case "record":
+    case "object":
+    case "array":
       return { optional, kind: "json", description };
     default:
       return { optional, kind: "string", description };

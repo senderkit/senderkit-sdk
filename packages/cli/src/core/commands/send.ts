@@ -1,26 +1,10 @@
 import type { SendResponse } from "@senderkit/sdk";
+import { sendInput } from "@senderkit/sdk/mcp-schemas";
 import { z } from "zod";
 import { defineCommand } from "../command";
 import { success, keyValues } from "../../cli/format";
-import { channelEnum, jsonRecord, metadataRecord } from "../schema";
 
-const schema = z.object({
-  template: z.string().describe("Template slug (e.g. \"welcome\")."),
-  to: z.string().describe("Recipient address."),
-  vars: jsonRecord("Template variables as a JSON object.").optional(),
-  channel: channelEnum.describe("Force a channel (defaults to template's primary).").optional(),
-  version: z.coerce.number().int().describe("Pin a specific template version.").optional(),
-  metadata: metadataRecord("Free-form metadata as a JSON object.").optional(),
-  scheduledAt: z
-    .string()
-    .datetime({ offset: true })
-    .describe("ISO 8601 timestamp for scheduled delivery (e.g. 2026-06-01T09:00:00Z).")
-    .optional(),
-  idempotencyKey: z
-    .string()
-    .describe("Idempotency key. Auto-generated if omitted.")
-    .optional(),
-});
+const schema = z.object(sendInput);
 
 export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
   path: ["send"],
@@ -38,6 +22,10 @@ export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
       metadata: input.metadata,
       scheduledAt: input.scheduledAt,
       idempotencyKey: input.idempotencyKey,
+      cc: input.cc,
+      bcc: input.bcc,
+      replyTo: input.replyTo,
+      attachments: input.attachments,
     }),
   format: (res) =>
     `${success(`Queued message ${res.id}`)}\n${keyValues({

@@ -1,9 +1,10 @@
 import type { Template } from "@senderkit/sdk";
+import { templatesListInput } from "@senderkit/sdk/mcp-schemas";
 import { z } from "zod";
 import { defineCommand } from "../command";
 import { table } from "../../cli/format";
 
-const schema = z.object({});
+const schema = z.object(templatesListInput);
 
 export const templatesListCommand = defineCommand<typeof schema.shape, Template[]>({
   path: ["templates", "list"],

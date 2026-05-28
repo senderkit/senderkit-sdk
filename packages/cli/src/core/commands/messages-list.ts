@@ -1,20 +1,11 @@
 import type { ListMessagesResponse } from "@senderkit/sdk";
+import { messagesListInput } from "@senderkit/sdk/mcp-schemas";
 import { z } from "zod";
 import { defineCommand } from "../command";
 import { table } from "../../cli/format";
-import { channelEnum, metadataRecord } from "../schema";
 import pc from "picocolors";
 
-const schema = z.object({
-  limit: z.coerce.number().int().positive().describe("Max messages to return.").optional(),
-  cursor: z.string().describe("Pagination cursor.").optional(),
-  status: z.string().describe("Filter by status (e.g. delivered).").optional(),
-  channel: channelEnum.describe("Filter by channel.").optional(),
-  template: z.string().describe("Filter by template slug.").optional(),
-  metadata: metadataRecord(
-    "Filter by metadata as a JSON object (each key/value must match).",
-  ).optional(),
-});
+const schema = z.object(messagesListInput);
 
 export const messagesListCommand = defineCommand<
   typeof schema.shape,

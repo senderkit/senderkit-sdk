@@ -1,39 +1,10 @@
 import type { SendRawRequest, SendResponse } from "@senderkit/sdk";
+import { sendRawInput } from "@senderkit/sdk/mcp-schemas";
 import { z } from "zod";
 import { defineCommand } from "../command";
 import { success, keyValues } from "../../cli/format";
-import { channelEnum, jsonRecord, metadataRecord } from "../schema";
 
-const schema = z.object({
-  channel: channelEnum.describe("Channel: email, sms, or push."),
-  to: z.string().describe("Recipient address."),
-  // email
-  subject: z.string().describe("Email subject (email).").optional(),
-  preheader: z.string().describe("Email preheader (email).").optional(),
-  html: z.string().describe("Email HTML body (email).").optional(),
-  text: z.string().describe("Email plain-text body (email).").optional(),
-  from: z.string().describe("From override (email).").optional(),
-  // sms + push
-  body: z.string().describe("Message body (sms, push).").optional(),
-  // push
-  title: z.string().describe("Notification title (push).").optional(),
-  badge: z.coerce.number().int().describe("Badge count (push).").optional(),
-  sound: z.string().describe("Notification sound (push).").optional(),
-  pushData: jsonRecord("Push data payload as a JSON object of strings (push).").optional(),
-  // shared
-  vars: jsonRecord("Variables for interpolation as a JSON object.").optional(),
-  metadata: metadataRecord("Free-form metadata as a JSON object.").optional(),
-  interpolate: z.coerce
-    .boolean()
-    .describe("Run server-side variable substitution over content.")
-    .optional(),
-  scheduledAt: z
-    .string()
-    .datetime({ offset: true })
-    .describe("ISO 8601 timestamp for scheduled delivery (e.g. 2026-06-01T09:00:00Z).")
-    .optional(),
-  idempotencyKey: z.string().describe("Idempotency key.").optional(),
-});
+const schema = z.object(sendRawInput);
 
 function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
   const base = {
@@ -58,6 +29,10 @@ function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
         html: input.html,
         text: input.text,
         preheader: input.preheader,
+        cc: input.cc,
+        bcc: input.bcc,
+        replyTo: input.replyTo,
+        attachments: input.attachments,
       },
     };
   }
