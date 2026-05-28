@@ -147,6 +147,8 @@ export interface ListMessagesParams {
   status?: string;
   channel?: Channel;
   template?: string;
+  /** Filter by metadata attached at send time. Each key/value pair must match. */
+  metadata?: Record<string, string | number | boolean>;
 }
 
 export interface ListMessagesResponse {

@@ -87,6 +87,16 @@ describe("messages", () => {
     expect(res.nextCursor).toBeNull();
   });
 
+  it("flattens metadata filter into bracketed query keys", async () => {
+    const mock = createMockFetch([{ status: 200, body: { data: [] } }]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    await sk.messages.list({ metadata: { orderId: "123", tier: 1, vip: true } });
+    const url = mock.calls[0]!.url;
+    expect(url).toContain("metadata%5BorderId%5D=123");
+    expect(url).toContain("metadata%5Btier%5D=1");
+    expect(url).toContain("metadata%5Bvip%5D=true");
+  });
+
   it("gets a message by id with URL encoding", async () => {
     const mock = createMockFetch([
       {

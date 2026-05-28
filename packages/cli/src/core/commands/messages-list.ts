@@ -2,7 +2,7 @@ import type { ListMessagesResponse } from "@senderkit/sdk";
 import { z } from "zod";
 import { defineCommand } from "../command";
 import { table } from "../../cli/format";
-import { channelEnum } from "../schema";
+import { channelEnum, metadataRecord } from "../schema";
 import pc from "picocolors";
 
 const schema = z.object({
@@ -11,6 +11,9 @@ const schema = z.object({
   status: z.string().describe("Filter by status (e.g. delivered).").optional(),
   channel: channelEnum.describe("Filter by channel.").optional(),
   template: z.string().describe("Filter by template slug.").optional(),
+  metadata: metadataRecord(
+    "Filter by metadata as a JSON object (each key/value must match).",
+  ).optional(),
 });
 
 export const messagesListCommand = defineCommand<
@@ -28,6 +31,7 @@ export const messagesListCommand = defineCommand<
       status: input.status,
       channel: input.channel,
       template: input.template,
+      metadata: input.metadata,
     }),
   format: (res) => {
     if (res.data.length === 0) return "No messages found.";

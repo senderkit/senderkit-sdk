@@ -81,6 +81,22 @@ describe("read commands", () => {
     expect(calls.listParams).toMatchObject({ status: "delivered", limit: 10 });
   });
 
+  it("messages list forwards metadata filter", async () => {
+    const { client, calls } = stubClient();
+    await messagesListCommand.run(
+      { metadata: { orderId: "123", tier: 1 } },
+      { client },
+    );
+    expect(calls.listParams).toMatchObject({ metadata: { orderId: "123", tier: 1 } });
+  });
+
+  it("messages list parses metadata JSON from CLI string input", () => {
+    const parsed = messagesListCommand.schema.parse({
+      metadata: '{"orderId":"123","tier":1}',
+    });
+    expect(parsed.metadata).toEqual({ orderId: "123", tier: 1 });
+  });
+
   it("messages get passes the id through and formats output", async () => {
     const { client, calls } = stubClient();
     const out = await messagesGetCommand.run({ id: "msg_abc" }, { client });
