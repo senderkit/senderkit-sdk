@@ -27,6 +27,28 @@ function jsonOrPassthrough(value: unknown): unknown {
   }
 }
 
+/**
+ * Accept either a real array (MCP) or a string (CLI) for list-valued flags. A
+ * JSON-array string is parsed; any other string is split on commas (so
+ * `--cc a@x.com,b@y.com` works). Non-string, non-array values pass through for
+ * the downstream `z.array` to reject with a clear error.
+ */
+function csvOrJsonArray(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (trimmed.startsWith("[")) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return value;
+    }
+  }
+  return trimmed
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
+
 const channel = z.enum(["email", "sms", "push"]);
 
 const vars = z
@@ -81,13 +103,19 @@ const attachment = z.object({
 });
 
 const emailEnvelope = {
-  cc: z.array(z.string()).optional().describe("Email-only. Cc recipients."),
-  bcc: z.array(z.string()).optional().describe("Email-only. Bcc recipients."),
+  cc: z
+    .preprocess(csvOrJsonArray, z.array(z.string()))
+    .optional()
+    .describe("Email-only. Cc recipients (CLI: comma-separated or JSON array)."),
+  bcc: z
+    .preprocess(csvOrJsonArray, z.array(z.string()))
+    .optional()
+    .describe("Email-only. Bcc recipients (CLI: comma-separated or JSON array)."),
   replyTo: z.string().optional().describe("Email-only. Reply-To address."),
   attachments: z
-    .array(attachment)
+    .preprocess(jsonOrPassthrough, z.array(attachment))
     .optional()
-    .describe("Email-only. Up to 10 MB total across all attachments."),
+    .describe("Email-only. JSON array; up to 10 MB total across all attachments."),
 };
 
 /** Shape for `senderkit_send` — templated send. */

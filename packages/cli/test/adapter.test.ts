@@ -54,6 +54,92 @@ describe("runCommand", () => {
       runCommand(templatesGetCommand, {}, { json: false }, { client }),
     ).rejects.toBeInstanceOf(ZodError);
   });
+
+  it("coerces a single --cc string into a one-element array", async () => {
+    const { client, calls } = stubClient();
+    captureStdout();
+    await runCommand(
+      sendCommand,
+      { template: "welcome", to: "u@x.com", cc: "a@x.com" },
+      { json: false },
+      { client },
+    );
+    expect(calls.send).toMatchObject({ cc: ["a@x.com"] });
+  });
+
+  it("splits a comma-separated --bcc string into an array", async () => {
+    const { client, calls } = stubClient();
+    captureStdout();
+    await runCommand(
+      sendCommand,
+      { template: "welcome", to: "u@x.com", bcc: "a@x.com, b@y.com" },
+      { json: false },
+      { client },
+    );
+    expect(calls.send).toMatchObject({ bcc: ["a@x.com", "b@y.com"] });
+  });
+
+  it("parses a JSON-array --cc string", async () => {
+    const { client, calls } = stubClient();
+    captureStdout();
+    await runCommand(
+      sendCommand,
+      { template: "welcome", to: "u@x.com", cc: '["a@x.com","b@y.com"]' },
+      { json: false },
+      { client },
+    );
+    expect(calls.send).toMatchObject({ cc: ["a@x.com", "b@y.com"] });
+  });
+
+  it("passes a real cc array through unchanged (MCP path)", async () => {
+    const { client, calls } = stubClient();
+    captureStdout();
+    await runCommand(
+      sendCommand,
+      { template: "welcome", to: "u@x.com", cc: ["a@x.com", "b@y.com"] },
+      { json: false },
+      { client },
+    );
+    expect(calls.send).toMatchObject({ cc: ["a@x.com", "b@y.com"] });
+  });
+
+  it("parses a JSON-string --attachments value into an array", async () => {
+    const { client, calls } = stubClient();
+    captureStdout();
+    const attachment = {
+      filename: "invoice.pdf",
+      contentType: "application/pdf",
+      content: "Zm9v",
+    };
+    await runCommand(
+      sendCommand,
+      {
+        template: "welcome",
+        to: "u@x.com",
+        attachments: JSON.stringify([attachment]),
+      },
+      { json: false },
+      { client },
+    );
+    expect(calls.send).toMatchObject({ attachments: [attachment] });
+  });
+
+  it("passes a real attachments array through unchanged (MCP path)", async () => {
+    const { client, calls } = stubClient();
+    captureStdout();
+    const attachment = {
+      filename: "invoice.pdf",
+      contentType: "application/pdf",
+      content: "Zm9v",
+    };
+    await runCommand(
+      sendCommand,
+      { template: "welcome", to: "u@x.com", attachments: [attachment] },
+      { json: false },
+      { client },
+    );
+    expect(calls.send).toMatchObject({ attachments: [attachment] });
+  });
 });
 
 describe("describeField", () => {
