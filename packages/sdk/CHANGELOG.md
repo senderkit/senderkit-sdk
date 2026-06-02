@@ -1,5 +1,16 @@
 # @senderkit/sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- 78f4d81: Add web-push channel support
+
+  Web push (browser notifications) is now a first-class channel alongside email, sms, and push.
+  - SDK: `Channel` includes `"web-push"`; new `RawWebPushContent` and `SendRawWebPushRequest` types. `sendRaw({ channel: "web-push", to, content })` where `to` is the JSON-encoded browser `PushSubscription` and `content` carries `title`, `body`, and optional `icon`/`clickUrl`/`data`/`badge`.
+  - MCP schemas: `channel` enum accepts `web-push`; `send_raw` gains `icon` and `clickUrl` inputs.
+  - CLI: `senderkit send-raw <subscription> --channel web-push --title … --body … [--icon …] [--click-url …]`.
+
 ## 0.2.1
 
 ### Patch Changes
