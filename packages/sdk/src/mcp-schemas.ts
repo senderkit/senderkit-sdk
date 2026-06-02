@@ -49,7 +49,7 @@ function csvOrJsonArray(value: unknown): unknown {
     .filter((entry) => entry.length > 0);
 }
 
-const channel = z.enum(["email", "sms", "push"]);
+const channel = z.enum(["email", "sms", "push", "web-push"]);
 
 const vars = z
   .preprocess(jsonOrPassthrough, z.record(z.string(), z.unknown()))
@@ -133,21 +133,28 @@ export const sendInput = {
 
 /** Shape for `senderkit_send_raw` — inline content send. */
 export const sendRawInput = {
-  channel: channel.describe("Channel: email, sms, or push."),
-  to: z.string().describe("Recipient address."),
+  channel: channel.describe("Channel: email, sms, push, or web-push."),
+  to: z
+    .string()
+    .describe(
+      "Recipient address. For web-push, the JSON-encoded browser PushSubscription (endpoint + keys).",
+    ),
   // email
   subject: z.string().optional().describe("Email subject (email)."),
   preheader: z.string().optional().describe("Email preheader (email)."),
   html: z.string().optional().describe("Email HTML body (email)."),
   text: z.string().optional().describe("Email plain-text body (email)."),
   from: z.string().optional().describe("From override (email)."),
-  // sms + push
-  body: z.string().optional().describe("Message body (sms, push)."),
-  // push
-  title: z.string().optional().describe("Notification title (push)."),
-  badge: nonNegativeInt.describe("Badge count (push)."),
+  // sms + push + web-push
+  body: z.string().optional().describe("Message body (sms, push, web-push)."),
+  // push + web-push
+  title: z.string().optional().describe("Notification title (push, web-push)."),
+  badge: nonNegativeInt.describe("Badge count (push, web-push)."),
   sound: z.string().optional().describe("Notification sound (push)."),
-  pushData: pushData.describe("Push data payload as a JSON object of strings (push)."),
+  pushData: pushData.describe("Data payload as a JSON object of strings (push, web-push)."),
+  // web-push
+  icon: z.string().optional().describe("Icon URL shown in the notification (web-push)."),
+  clickUrl: z.string().optional().describe("URL opened when the notification is clicked (web-push)."),
   // shared
   vars,
   metadata,

@@ -156,7 +156,7 @@ describe("describeField", () => {
     expect(describeField(shape.version).kind).toBe("number");
     const channel = describeField(shape.channel);
     expect(channel.kind).toBe("enum");
-    expect(channel.enumValues).toEqual(["email", "sms", "push"]);
+    expect(channel.enumValues).toEqual(["email", "sms", "push", "web-push"]);
   });
 
   it("carries descriptions through wrappers", () => {

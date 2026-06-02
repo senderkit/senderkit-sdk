@@ -87,7 +87,7 @@ await senderkit.sendRaw({
 });
 ```
 
-SMS and push work the same way — switch the `channel` and the `content` shape:
+SMS, push, and web-push work the same way — switch the `channel` and the `content` shape:
 
 ```ts
 await senderkit.sendRaw({
@@ -100,6 +100,18 @@ await senderkit.sendRaw({
   channel: "push",
   to: "ExponentPushToken[xxx]",
   content: { title: "Shipped", body: "Tracking #ABC", badge: 1 },
+});
+
+// Web push (browser). `to` is the JSON-encoded browser PushSubscription.
+await senderkit.sendRaw({
+  channel: "web-push",
+  to: JSON.stringify(subscription), // { endpoint, keys: { p256dh, auth } }
+  content: {
+    title: "Back in stock",
+    body: "The item you wanted is available.",
+    icon: "https://app.example.com/icon-192.png",
+    clickUrl: "https://app.example.com/product/42",
+  },
 });
 ```
 
