@@ -42,6 +42,24 @@ function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
     return { ...base, channel: "sms", content: { body: input.body } };
   }
 
+  if (input.channel === "web-push") {
+    if (!input.title || !input.body) {
+      throw new Error("send-raw web-push requires --title and --body.");
+    }
+    return {
+      ...base,
+      channel: "web-push",
+      content: {
+        title: input.title,
+        body: input.body,
+        icon: input.icon,
+        clickUrl: input.clickUrl,
+        data: input.pushData as Record<string, string> | undefined,
+        badge: input.badge,
+      },
+    };
+  }
+
   // push
   if (!input.title || !input.body) {
     throw new Error("send-raw push requires --title and --body.");

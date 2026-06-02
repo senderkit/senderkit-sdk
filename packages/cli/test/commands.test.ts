@@ -110,6 +110,39 @@ describe("send-raw command", () => {
       sendRawCommand.run({ channel: "sms", to: "+1" }, { client }),
     ).rejects.toThrow(/--body/);
   });
+
+  it("builds a web-push request with icon, clickUrl, and data", async () => {
+    const { client, calls } = stubClient();
+    await sendRawCommand.run(
+      {
+        channel: "web-push",
+        to: "{\"endpoint\":\"https://x\",\"keys\":{\"p256dh\":\"p\",\"auth\":\"a\"}}",
+        title: "Hi",
+        body: "yo",
+        icon: "https://x/i.png",
+        clickUrl: "https://x/go",
+        pushData: { k: "v" },
+      },
+      { client },
+    );
+    expect(calls.sendRaw).toMatchObject({
+      channel: "web-push",
+      content: {
+        title: "Hi",
+        body: "yo",
+        icon: "https://x/i.png",
+        clickUrl: "https://x/go",
+        data: { k: "v" },
+      },
+    });
+  });
+
+  it("rejects web-push without title/body", async () => {
+    const { client } = stubClient();
+    await expect(
+      sendRawCommand.run({ channel: "web-push", to: "{}" }, { client }),
+    ).rejects.toThrow(/--title and --body/);
+  });
 });
 
 describe("read commands", () => {

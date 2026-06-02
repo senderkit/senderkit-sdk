@@ -1,6 +1,6 @@
 import type { SenderKitError } from "./errors";
 
-export type Channel = "email" | "sms" | "push";
+export type Channel = "email" | "sms" | "push" | "web-push";
 
 export interface SenderKitOptions {
   /** API key. Use `sk_live_…` for production, `sk_test_…` for test mode. */
@@ -73,6 +73,17 @@ export interface RawPushContent {
   sound?: string;
 }
 
+export interface RawWebPushContent {
+  title: string;
+  body: string;
+  /** Icon URL shown in the browser notification. */
+  icon?: string;
+  /** URL opened when the notification is clicked. */
+  clickUrl?: string;
+  data?: Record<string, string>;
+  badge?: number;
+}
+
 interface SendRawBase {
   /** Recipient address. */
   to: string;
@@ -105,10 +116,16 @@ export interface SendRawPushRequest extends SendRawBase {
   content: RawPushContent;
 }
 
+export interface SendRawWebPushRequest extends SendRawBase {
+  channel: "web-push";
+  content: RawWebPushContent;
+}
+
 export type SendRawRequest =
   | SendRawEmailRequest
   | SendRawSmsRequest
-  | SendRawPushRequest;
+  | SendRawPushRequest
+  | SendRawWebPushRequest;
 
 export interface SendResponse {
   /** Message id (e.g. `"msg_…"`). */

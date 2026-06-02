@@ -126,6 +126,45 @@ describe("sendRaw", () => {
     });
   });
 
+  it("sends a raw web-push notification with all optional fields", async () => {
+    const mock = createMockFetch([
+      { status: 202, body: { id: "msg_wp", status: "queued", livemode: false } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+
+    const subscription = JSON.stringify({
+      endpoint: "https://fcm.googleapis.com/fcm/send/abc",
+      keys: { p256dh: "p", auth: "a" },
+    });
+
+    await sk.sendRaw({
+      channel: "web-push",
+      to: subscription,
+      content: {
+        title: "Back in stock",
+        body: "The item you wanted is available.",
+        icon: "https://app.example.com/icon-192.png",
+        clickUrl: "https://app.example.com/product/42",
+        data: { productId: "42" },
+        badge: 1,
+      },
+    });
+
+    expect(mock.calls[0]!.body).toEqual({
+      channel: "web-push",
+      to: subscription,
+      content: {
+        title: "Back in stock",
+        body: "The item you wanted is available.",
+        icon: "https://app.example.com/icon-192.png",
+        clickUrl: "https://app.example.com/product/42",
+        data: { productId: "42" },
+        badge: 1,
+      },
+      vars: {},
+    });
+  });
+
   it("does not include `from` for non-email channels", async () => {
     const mock = createMockFetch([
       { status: 202, body: { id: "msg_sms", status: "queued", livemode: false } },
