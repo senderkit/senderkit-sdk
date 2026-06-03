@@ -241,10 +241,10 @@ describe("remote install", () => {
   });
 
   it("claudeAddArgsRemote builds an http transport command", () => {
-    const args = claudeAddArgsRemote(remoteSpec("sk_test_abc", "https://mcp.senderkit.com/mcp"));
+    const args = claudeAddArgsRemote(remoteSpec("sk_test_abc", "https://mcp.senderkit.com"));
     expect(args).toEqual([
       "mcp", "add", "senderkit", "--scope", "user", "--transport", "http",
-      "https://mcp.senderkit.com/mcp", "--header", "Authorization: Bearer sk_test_abc",
+      "https://mcp.senderkit.com", "--header", "Authorization: Bearer sk_test_abc",
     ]);
   });
 });

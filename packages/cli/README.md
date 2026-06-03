@@ -100,7 +100,7 @@ Instead of spawning the local process, clients can connect to a hosted SenderKit
 MCP endpoint over HTTP. Add `--remote` to `install`:
 
 ```bash
-senderkit mcp install --remote                       # default https://mcp.senderkit.com/mcp
+senderkit mcp install --remote                       # default https://mcp.senderkit.com
 senderkit mcp install --remote --url https://my-host/mcp --client cursor
 ```
 

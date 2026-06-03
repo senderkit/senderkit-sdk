@@ -25,7 +25,7 @@ export interface ServerBlock {
 export const SERVER_NAME = "senderkit";
 
 /** Default hosted SenderKit MCP endpoint. */
-export const DEFAULT_REMOTE_URL = "https://mcp.senderkit.com/mcp";
+export const DEFAULT_REMOTE_URL = "https://mcp.senderkit.com";
 
 /** A remote (hosted) MCP server: a URL plus auth headers. */
 export interface RemoteSpec {
