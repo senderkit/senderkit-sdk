@@ -265,7 +265,7 @@ Use [`@senderkit/react-email`](../react-email) to wrap React Email components wi
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `apiKey` | `string` | — | **Required.** `sk_live_…` or `sk_test_…`. |
-| `baseUrl` | `string` | `https://senderkit.com/api` | Override the API endpoint. |
+| `baseUrl` | `string` | `https://api.senderkit.com` | Override the API endpoint. |
 | `timeout` | `number` | `30000` | Per-request timeout in ms. |
 | `maxRetries` | `number` | `2` | Retries on network / timeout / 429 / 5xx. |
 | `fetch` | `typeof fetch` | `globalThis.fetch` | Inject a custom fetch (tests, edge runtimes). |

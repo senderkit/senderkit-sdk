@@ -5,7 +5,7 @@ export type Channel = "email" | "sms" | "push" | "web-push";
 export interface SenderKitOptions {
   /** API key. Use `sk_live_…` for production, `sk_test_…` for test mode. */
   apiKey: string;
-  /** Override the API base URL. Defaults to `https://senderkit.com/api`. */
+  /** Override the API base URL. Defaults to `https://api.senderkit.com`. */
   baseUrl?: string;
   /** Request timeout in milliseconds. Defaults to 30_000. */
   timeout?: number;

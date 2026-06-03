@@ -11,7 +11,7 @@ import type {
   SenderKitOptions,
 } from "./types";
 
-const DEFAULT_BASE_URL = "https://senderkit.com/api";
+const DEFAULT_BASE_URL = "https://api.senderkit.com";
 const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
 const DEFAULT_BATCH_CONCURRENCY = 5;
