@@ -22,13 +22,13 @@ importers:
         version: link:../../packages/sdk
       next:
         specifier: ^16.0.0
-        version: 16.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 16.2.6(react-dom@19.2.7(react@19.2.6))(react@19.2.6)
       react:
         specifier: ^19.0.0
         version: 19.2.6
       react-dom:
-        specifier: ^19.0.0
-        version: 19.2.6(react@19.2.6)
+        specifier: ^19.2.7
+        version: 19.2.7(react@19.2.6)
     devDependencies:
       '@types/node':
         specifier: ^20.14.0
@@ -103,7 +103,7 @@ importers:
     devDependencies:
       '@react-email/render':
         specifier: ^1.0.0
-        version: 1.4.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 1.4.0(react-dom@19.2.7(react@19.2.6))(react@19.2.6)
       '@types/node':
         specifier: ^20.14.0
         version: 20.19.40
@@ -117,8 +117,8 @@ importers:
         specifier: ^19.0.0
         version: 19.2.6
       react-dom:
-        specifier: ^19.0.0
-        version: 19.2.6(react@19.2.6)
+        specifier: ^19.2.7
+        version: 19.2.7(react@19.2.6)
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(postcss@8.5.15)(tsx@4.21.0)(typescript@5.9.3)
@@ -1759,10 +1759,10 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
-  react-dom@19.2.6:
-    resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
+  react-dom@19.2.7:
+    resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
     peerDependencies:
-      react: ^19.2.6
+      react: ^19.2.7
 
   react-promise-suspense@0.3.4:
     resolution: {integrity: sha512-I42jl7L3Ze6kZaq+7zXWSunBa3b1on5yfvUW6Eo/3fFOj6dZ5Bqmcd264nJbTK/gn1HjjILAjSwnZbV4RpSaNQ==}
@@ -1956,6 +1956,10 @@ packages:
 
   tinyglobby@0.2.16:
     resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
+    engines: {node: '>=12.0.0'}
+
+  tinyglobby@0.2.17:
+    resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
 
   tinyrainbow@3.1.0:
@@ -2599,12 +2603,12 @@ snapshots:
 
   '@oxc-project/types@0.132.0': {}
 
-  '@react-email/render@1.4.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+  '@react-email/render@1.4.0(react-dom@19.2.7(react@19.2.6))(react@19.2.6)':
     dependencies:
       html-to-text: 9.0.5
       prettier: 3.8.3
       react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
+      react-dom: 19.2.7(react@19.2.6)
       react-promise-suspense: 0.3.4
 
   '@rolldown/binding-android-arm64@1.0.2':
@@ -3435,7 +3439,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next@16.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+  next@16.2.6(react-dom@19.2.7(react@19.2.6))(react@19.2.6):
     dependencies:
       '@next/env': 16.2.6
       '@swc/helpers': 0.5.15
@@ -3443,7 +3447,7 @@ snapshots:
       caniuse-lite: 1.0.30001792
       postcss: 8.5.15
       react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
+      react-dom: 19.2.7(react@19.2.6)
       styled-jsx: 5.1.6(react@19.2.6)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.6
@@ -3571,7 +3575,7 @@ snapshots:
       iconv-lite: 0.7.2
       unpipe: 1.0.0
 
-  react-dom@19.2.6(react@19.2.6):
+  react-dom@19.2.7(react@19.2.6):
     dependencies:
       react: 19.2.6
       scheduler: 0.27.0
@@ -3839,6 +3843,11 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
 
+  tinyglobby@0.2.17:
+    dependencies:
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
+
   tinyrainbow@3.1.0: {}
 
   to-regex-range@5.0.1:
@@ -3912,7 +3921,7 @@ snapshots:
       picomatch: 4.0.4
       postcss: 8.5.15
       rolldown: 1.0.2
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 20.19.40
       esbuild: 0.27.7
