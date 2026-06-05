@@ -192,10 +192,20 @@ export const cancelMessageInput = {
   id: z.string().describe('Public message id (e.g. "msg_…") to cancel.'),
 };
 
+/** Shape for `senderkit_context`. No inputs. */
+export const contextInput = {};
+
 /**
  * Description-suffix appended to `senderkit_send` and `senderkit_send_raw`
  * so callers know the request will dispatch a real message and the mode
  * depends on the API key prefix. Kept here so both servers stay in sync.
+ *
+ * This wording is specific to the API-key transport (the CLI-bundled stdio /
+ * HTTP server). The app-hosted server also accepts OAuth connections, where the
+ * mode comes from consent rather than a key prefix, so it supplies its own note.
+ * Both surface the live/test mode via the `senderkit_context` tool and the
+ * `mode` field on send results.
  */
 export const SEND_TOOL_LIVE_MODE_NOTE =
-  " Dispatches a real message; live vs test mode is determined by the API key prefix (sk_live_ / sk_test_).";
+  " Dispatches a real message; live vs test mode is determined by the API key prefix" +
+  " (sk_live_ / sk_test_). Call senderkit_context first if you need to confirm the active mode.";

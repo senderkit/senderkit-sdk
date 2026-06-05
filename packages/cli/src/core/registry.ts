@@ -6,6 +6,7 @@ import { templatesGetCommand } from "./commands/templates-get";
 import { messagesListCommand } from "./commands/messages-list";
 import { messagesGetCommand } from "./commands/messages-get";
 import { messagesCancelCommand } from "./commands/messages-cancel";
+import { contextCommand } from "./commands/context";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registry: Command<any, any>[] = [
@@ -16,4 +17,5 @@ export const registry: Command<any, any>[] = [
   messagesListCommand,
   messagesGetCommand,
   messagesCancelCommand,
+  contextCommand,
 ];
