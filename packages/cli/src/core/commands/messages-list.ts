@@ -13,7 +13,9 @@ export const messagesListCommand = defineCommand<
 >({
   path: ["messages", "list"],
   mcpName: "senderkit_messages_list",
+  title: "List Messages",
   summary: "List messages, optionally filtered.",
+  annotations: { readOnlyHint: true },
   schema,
   run: (input, { client }) =>
     client.messages.list({

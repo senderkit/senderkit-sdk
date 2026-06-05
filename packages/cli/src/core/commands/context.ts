@@ -21,8 +21,10 @@ export interface SenderKitContext {
 export const contextCommand = defineCommand<typeof schema.shape, SenderKitContext>({
   path: ["context"],
   mcpName: "senderkit_context",
+  title: "Get Workspace Context",
   summary:
     "Report the active SenderKit connection mode. Call this before sending if you need to confirm whether messages are really delivered (live) or only recorded (test).",
+  annotations: { readOnlyHint: true },
   schema,
   run: (_input, { client }) =>
     Promise.resolve({ mode: client.mode, livemode: client.mode === "live" }),

@@ -9,7 +9,9 @@ const schema = z.object(templatesListInput);
 export const templatesListCommand = defineCommand<typeof schema.shape, Template[]>({
   path: ["templates", "list"],
   mcpName: "senderkit_templates_list",
+  title: "List Templates",
   summary: "List available templates.",
+  annotations: { readOnlyHint: true },
   schema,
   run: (_input, { client }) => client.templates.list(),
   format: (templates) => {

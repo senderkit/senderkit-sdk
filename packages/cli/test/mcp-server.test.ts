@@ -3,6 +3,8 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { buildMcpServer, withResultMode } from "../src/mcp/server";
 import { buildClient, MissingApiKeyError } from "../src/core/context";
 import { registry } from "../src/core/registry";
@@ -54,6 +56,66 @@ describe("registry", () => {
         "senderkit_context",
       ]),
     );
+  });
+});
+
+describe("tool annotations", () => {
+  // Required by the Anthropic Claude Connectors Directory review: every tool
+  // carries a human-readable title and exactly one behaviour hint.
+  const EXPECTED = {
+    senderkit_context: { title: "Get Workspace Context", hint: "readOnlyHint" },
+    senderkit_send: { title: "Send Templated Message", hint: "destructiveHint" },
+    senderkit_send_raw: { title: "Send Raw Message", hint: "destructiveHint" },
+    senderkit_cancel_message: {
+      title: "Cancel Scheduled Message",
+      hint: "destructiveHint",
+    },
+    senderkit_messages_list: { title: "List Messages", hint: "readOnlyHint" },
+    senderkit_messages_get: { title: "Get Message", hint: "readOnlyHint" },
+    senderkit_templates_list: { title: "List Templates", hint: "readOnlyHint" },
+    senderkit_templates_get: { title: "Get Template", hint: "readOnlyHint" },
+  } as const;
+
+  it("assigns the directory-required title and a single hint to every tool", () => {
+    for (const command of registry) {
+      const expected = EXPECTED[command.mcpName as keyof typeof EXPECTED];
+      expect(expected, `no expectation for ${command.mcpName}`).toBeDefined();
+      expect(command.title).toBe(expected.title);
+
+      // Exactly one of readOnlyHint / destructiveHint, set to true.
+      const hints = command.annotations as Record<string, unknown>;
+      expect(hints[expected.hint]).toBe(true);
+      const other =
+        expected.hint === "readOnlyHint" ? "destructiveHint" : "readOnlyHint";
+      expect(hints[other]).toBeUndefined();
+    }
+  });
+
+  it("covers all eight registered tools", () => {
+    expect(registry.map((c) => c.mcpName).sort()).toEqual(
+      Object.keys(EXPECTED).sort(),
+    );
+  });
+
+  it("surfaces title + annotations over the wire via tools/list", async () => {
+    const server = buildMcpServer(buildClient({ apiKey: "sk_test_introspect" }));
+    const [clientT, serverT] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "introspect", version: "0" });
+    await Promise.all([server.connect(serverT), client.connect(clientT)]);
+
+    try {
+      const { tools } = await client.listTools();
+      expect(tools.map((t) => t.name).sort()).toEqual(Object.keys(EXPECTED).sort());
+
+      for (const tool of tools) {
+        const expected = EXPECTED[tool.name as keyof typeof EXPECTED];
+        expect(tool.title).toBe(expected.title);
+        expect(tool.annotations?.[expected.hint]).toBe(true);
+      }
+    } finally {
+      await client.close();
+      await server.close();
+    }
   });
 });
 

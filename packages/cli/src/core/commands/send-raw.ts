@@ -80,7 +80,9 @@ function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
 export const sendRawCommand = defineCommand<typeof schema.shape, SendResponse>({
   path: ["send-raw"],
   mcpName: "senderkit_send_raw",
+  title: "Send Raw Message",
   summary: "Send inline content without a registered template.",
+  annotations: { destructiveHint: true },
   schema,
   positional: ["to"],
   run: async (input, { client }) => client.sendRaw(buildRequest(input)),

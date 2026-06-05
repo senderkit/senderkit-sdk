@@ -9,7 +9,9 @@ const schema = z.object(messagesGetInput);
 export const messagesGetCommand = defineCommand<typeof schema.shape, Message>({
   path: ["messages", "get"],
   mcpName: "senderkit_messages_get",
+  title: "Get Message",
   summary: "Fetch a single message by ID.",
+  annotations: { readOnlyHint: true },
   schema,
   positional: ["id"],
   run: (input, { client }) => client.messages.get(input.id),

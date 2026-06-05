@@ -9,7 +9,9 @@ const schema = z.object(sendInput);
 export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
   path: ["send"],
   mcpName: "senderkit_send",
+  title: "Send Templated Message",
   summary: "Send a templated message to a recipient.",
+  annotations: { destructiveHint: true },
   schema,
   positional: ["template", "to"],
   run: (input, { client }) =>
