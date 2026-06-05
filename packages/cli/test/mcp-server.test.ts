@@ -3,7 +3,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { buildMcpServer } from "../src/mcp/server";
+import { buildMcpServer, withResultMode } from "../src/mcp/server";
 import { buildClient, MissingApiKeyError } from "../src/core/context";
 import { registry } from "../src/core/registry";
 
@@ -40,8 +40,8 @@ describe("registry", () => {
     const names = registry.map((c) => c.mcpName);
     expect(new Set(names).size).toBe(names.length);
     expect(names.every((n) => n.startsWith("senderkit_"))).toBe(true);
-    // The seven tools that both the CLI-bundled stdio server and the
-    // app-hosted HTTP server are required to expose.
+    // The tools that both the CLI-bundled stdio server and the app-hosted
+    // HTTP server are required to expose.
     expect(new Set(names)).toEqual(
       new Set([
         "senderkit_send",
@@ -51,7 +51,31 @@ describe("registry", () => {
         "senderkit_messages_list",
         "senderkit_messages_get",
         "senderkit_cancel_message",
+        "senderkit_context",
       ]),
     );
+  });
+});
+
+describe("withResultMode", () => {
+  it("stamps mode onto send-tool results", () => {
+    const out = { id: "msg_x", status: "queued", livemode: false };
+    expect(withResultMode("senderkit_send", out, "test")).toEqual({
+      ...out,
+      mode: "test",
+    });
+    expect(withResultMode("senderkit_send_raw", out, "live")).toEqual({
+      ...out,
+      mode: "live",
+    });
+  });
+
+  it("leaves non-send results untouched", () => {
+    const list = [{ slug: "welcome" }];
+    expect(withResultMode("senderkit_templates_list", list, "live")).toBe(list);
+  });
+
+  it("passes non-object outputs through", () => {
+    expect(withResultMode("senderkit_send", null, "live")).toBeNull();
   });
 });

@@ -53,6 +53,9 @@ senderkit templates get <slug>
 
 senderkit messages list [--status delivered] [--channel email] [--template welcome] [--limit 50] [--cursor …]
 senderkit messages get <id>
+senderkit messages cancel <id>
+
+senderkit context   # report the active connection's live/test mode
 ```
 
 Global flags: `--api-key`, `--base-url`, and `--json` (emit raw JSON instead of
@@ -66,7 +69,10 @@ senderkit templates list --json | jq '.[].slug'
 
 `senderkit mcp` runs the server over stdio. Each command is exposed as a tool:
 `senderkit_send`, `senderkit_send_raw`, `senderkit_templates_list`,
-`senderkit_templates_get`, `senderkit_messages_list`, `senderkit_messages_get`.
+`senderkit_templates_get`, `senderkit_messages_list`, `senderkit_messages_get`,
+`senderkit_cancel_message`, and `senderkit_context` (reports the active
+live/test mode; `senderkit_send` / `senderkit_send_raw` results also carry a
+`mode` field).
 
 Auto-configure your client:
 
