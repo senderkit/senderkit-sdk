@@ -9,7 +9,9 @@ const schema = z.object(templatesGetInput);
 export const templatesGetCommand = defineCommand<typeof schema.shape, Template>({
   path: ["templates", "get"],
   mcpName: "senderkit_templates_get",
+  title: "Get Template",
   summary: "Fetch a single template by slug.",
+  annotations: { readOnlyHint: true },
   schema,
   positional: ["slug"],
   run: (input, { client }) => client.templates.get(input.slug),

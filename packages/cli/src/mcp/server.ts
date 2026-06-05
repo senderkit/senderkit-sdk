@@ -46,7 +46,9 @@ export function buildMcpServer(client: SenderKit): McpServer {
     server.registerTool(
       command.mcpName,
       {
+        title: command.title,
         description,
+        annotations: command.annotations,
         inputSchema: command.schema.shape as z.ZodRawShape,
       },
       async (args: Record<string, unknown>) => {
