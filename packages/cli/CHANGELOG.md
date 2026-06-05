@@ -1,5 +1,24 @@
 # @senderkit/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 24de96c: Surface live/test mode through the MCP tool surface, matching the app-hosted server.
+  - New `senderkit_context` tool / `senderkit context` command reports the active connection's `mode` (`live`/`test`) and `livemode`, so an LLM can confirm whether sends are really delivered before calling a send tool.
+  - `senderkit_send` / `senderkit_send_raw` MCP results now include a `mode` field alongside `livemode`.
+  - `SEND_TOOL_LIVE_MODE_NOTE` now points the model at `senderkit_context`; a new `contextInput` schema is exported from `@senderkit/sdk/mcp-schemas`.
+
+- 31d2689: Add MCP tool annotations required by the Anthropic Claude Connectors Directory.
+  - Every MCP tool now declares a human-readable `title` and exactly one behaviour hint (`readOnlyHint` or `destructiveHint`), surfaced through `tools/list` on both the CLI-bundled stdio server and the app-hosted HTTP server.
+  - `Command` gains `title` and a `ToolAnnotations` union typed so a tool is declared as either read-only or destructive — never both, never neither (enforced at compile time).
+  - Read-only: `senderkit_context`, `senderkit_messages_list`, `senderkit_messages_get`, `senderkit_templates_list`, `senderkit_templates_get`. Destructive: `senderkit_send`, `senderkit_send_raw`, `senderkit_cancel_message`.
+
+### Patch Changes
+
+- Updated dependencies [24de96c]
+  - @senderkit/sdk@0.4.0
+
 ## 0.3.1
 
 ### Patch Changes
