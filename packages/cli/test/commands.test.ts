@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { SenderKit } from "@senderkit/sdk";
 import { sendCommand } from "../src/core/commands/send";
 import { sendRawCommand } from "../src/core/commands/send-raw";
 import { templatesListCommand } from "../src/core/commands/templates-list";
@@ -201,16 +200,16 @@ describe("read commands", () => {
 });
 
 describe("context command", () => {
-  it("reports test mode from a sk_test_ key", async () => {
-    const client = new SenderKit({ apiKey: "sk_test_abc" });
+  it("reports the connected workspace + mode from client.context()", async () => {
+    const { client } = stubClient();
     const out = await contextCommand.run({}, { client });
-    expect(out).toEqual({ mode: "test", livemode: false });
-    expect(contextCommand.format(out)).toContain("test");
-  });
-
-  it("reports live mode from a sk_live_ key", async () => {
-    const client = new SenderKit({ apiKey: "sk_live_abc" });
-    const out = await contextCommand.run({}, { client });
-    expect(out).toEqual({ mode: "live", livemode: true });
+    expect(out).toEqual({
+      workspace: { id: "ws_1", slug: "acme", name: "Acme Inc" },
+      mode: "test",
+    });
+    const rendered = contextCommand.format(out);
+    expect(rendered).toContain("Acme Inc");
+    expect(rendered).toContain("acme");
+    expect(rendered).toContain("test");
   });
 });
