@@ -1,17 +1,15 @@
 import type { Template } from "@senderkit/sdk";
 import { templatesListInput } from "@senderkit/sdk/mcp-schemas";
+import { MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
-import { defineCommand } from "../command";
+import { defineCommand, fromSpec } from "../command";
 import { table } from "../../cli/format";
 
 const schema = z.object(templatesListInput);
 
 export const templatesListCommand = defineCommand<typeof schema.shape, Template[]>({
+  ...fromSpec(MCP_TOOLS_BY_NAME.senderkit_templates_list),
   path: ["templates", "list"],
-  mcpName: "senderkit_templates_list",
-  title: "List Templates",
-  summary: "List available templates.",
-  annotations: { readOnlyHint: true },
   schema,
   run: (_input, { client }) => client.templates.list(),
   format: (templates) => {

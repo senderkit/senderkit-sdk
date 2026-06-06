@@ -96,6 +96,19 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
   },
 ];
 
-export const MCP_TOOLS_BY_NAME: Record<string, McpToolSpec> = Object.fromEntries(
+/** Union of every tool name in {@link MCP_TOOLS}. */
+export type McpToolName =
+  | "senderkit_context"
+  | "senderkit_send"
+  | "senderkit_send_raw"
+  | "senderkit_templates_list"
+  | "senderkit_templates_get"
+  | "senderkit_messages_list"
+  | "senderkit_messages_get"
+  | "senderkit_cancel_message";
+
+// Keyed by the finite name union (not `string`) so known-key access stays a
+// non-optional `McpToolSpec` even under `noUncheckedIndexedAccess`.
+export const MCP_TOOLS_BY_NAME = Object.fromEntries(
   MCP_TOOLS.map((t) => [t.name, t]),
-);
+) as Record<McpToolName, McpToolSpec>;

@@ -1,7 +1,8 @@
 import type { ListMessagesResponse } from "@senderkit/sdk";
 import { messagesListInput } from "@senderkit/sdk/mcp-schemas";
+import { MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
-import { defineCommand } from "../command";
+import { defineCommand, fromSpec } from "../command";
 import { table } from "../../cli/format";
 import pc from "picocolors";
 
@@ -11,11 +12,8 @@ export const messagesListCommand = defineCommand<
   typeof schema.shape,
   ListMessagesResponse
 >({
+  ...fromSpec(MCP_TOOLS_BY_NAME.senderkit_messages_list),
   path: ["messages", "list"],
-  mcpName: "senderkit_messages_list",
-  title: "List Messages",
-  summary: "List messages, optionally filtered.",
-  annotations: { readOnlyHint: true },
   schema,
   run: (input, { client }) =>
     client.messages.list({
