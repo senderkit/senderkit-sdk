@@ -1,17 +1,14 @@
 import type { SendResponse } from "@senderkit/sdk";
-import { sendInput } from "@senderkit/sdk/mcp-schemas";
+import { sendInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
-import { defineCommand } from "../command";
+import { defineCommand, fromSpec } from "../command";
 import { success, keyValues } from "../../cli/format";
 
 const schema = z.object(sendInput);
 
 export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
+  ...fromSpec(MCP_TOOLS_BY_NAME.senderkit_send),
   path: ["send"],
-  mcpName: "senderkit_send",
-  title: "Send Templated Message",
-  summary: "Send a templated message to a recipient.",
-  annotations: { destructiveHint: true },
   schema,
   positional: ["template", "to"],
   run: (input, { client }) =>

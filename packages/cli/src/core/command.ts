@@ -1,18 +1,36 @@
 import type { SenderKit } from "@senderkit/sdk";
+import type { McpToolSpec, ToolAnnotations } from "@senderkit/sdk/mcp";
 import type { z } from "zod";
 
 export interface CommandCtx {
   client: SenderKit;
 }
 
+// The behaviour-hint union lives in the shared MCP manifest; re-export it so
+// existing `import { ToolAnnotations } from "../command"` sites keep working.
+export type { ToolAnnotations };
+
 /**
- * MCP tool behaviour hints surfaced to clients (and the Connectors Directory
- * review). Modelled as a union so a tool is declared as *either* read-only
- * *or* destructive — never both, never neither.
+ * Shared command fields derived from the canonical MCP manifest
+ * (`@senderkit/sdk/mcp`). `summary` defaults to the manifest description; pass
+ * `overrides.summary` only when the terminal help text must read differently
+ * than the LLM-facing description (allowlisted in the CLI parity test).
+ *
+ * `schema` is intentionally NOT sourced here — each command imports its
+ * precisely-typed shape from `@senderkit/sdk/mcp` directly so `run`'s input
+ * keeps its exact field types (the manifest erases shapes to `z.ZodRawShape`).
  */
-export type ToolAnnotations =
-  | { readOnlyHint: true; destructiveHint?: never }
-  | { destructiveHint: true; readOnlyHint?: never };
+export function fromSpec(
+  spec: McpToolSpec,
+  overrides?: { summary?: string },
+): Pick<Command, "mcpName" | "title" | "summary" | "annotations"> {
+  return {
+    mcpName: spec.name,
+    title: spec.title,
+    summary: overrides?.summary ?? spec.description,
+    annotations: spec.annotations,
+  };
+}
 
 /**
  * A single capability, declared once and consumed by both the CLI and MCP

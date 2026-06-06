@@ -1,7 +1,7 @@
 import type { SendRawRequest, SendResponse } from "@senderkit/sdk";
-import { sendRawInput } from "@senderkit/sdk/mcp-schemas";
+import { sendRawInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
-import { defineCommand } from "../command";
+import { defineCommand, fromSpec } from "../command";
 import { success, keyValues } from "../../cli/format";
 
 const schema = z.object(sendRawInput);
@@ -78,11 +78,8 @@ function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
 }
 
 export const sendRawCommand = defineCommand<typeof schema.shape, SendResponse>({
+  ...fromSpec(MCP_TOOLS_BY_NAME.senderkit_send_raw),
   path: ["send-raw"],
-  mcpName: "senderkit_send_raw",
-  title: "Send Raw Message",
-  summary: "Send inline content without a registered template.",
-  annotations: { destructiveHint: true },
   schema,
   positional: ["to"],
   run: async (input, { client }) => client.sendRaw(buildRequest(input)),

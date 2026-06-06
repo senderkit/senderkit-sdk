@@ -1,7 +1,7 @@
 import type { CancelMessageResponse } from "@senderkit/sdk";
-import { cancelMessageInput } from "@senderkit/sdk/mcp-schemas";
+import { cancelMessageInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
-import { defineCommand } from "../command";
+import { defineCommand, fromSpec } from "../command";
 import { success, keyValues } from "../../cli/format";
 
 const schema = z.object(cancelMessageInput);
@@ -10,11 +10,8 @@ export const messagesCancelCommand = defineCommand<
   typeof schema.shape,
   CancelMessageResponse
 >({
+  ...fromSpec(MCP_TOOLS_BY_NAME.senderkit_cancel_message),
   path: ["messages", "cancel"],
-  mcpName: "senderkit_cancel_message",
-  title: "Cancel Scheduled Message",
-  summary: "Cancel a still-pending (scheduled or queued) message by ID.",
-  annotations: { destructiveHint: true },
   schema,
   positional: ["id"],
   run: (input, { client }) => client.messages.cancel(input.id),

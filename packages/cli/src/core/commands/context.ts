@@ -1,6 +1,6 @@
-import { contextInput } from "@senderkit/sdk/mcp-schemas";
+import { contextInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
-import { defineCommand } from "../command";
+import { defineCommand, fromSpec } from "../command";
 import { keyValues } from "../../cli/format";
 
 const schema = z.object(contextInput);
@@ -19,12 +19,13 @@ export interface SenderKitContext {
  * app-hosted `senderkit_context` tool.
  */
 export const contextCommand = defineCommand<typeof schema.shape, SenderKitContext>({
+  ...fromSpec(MCP_TOOLS_BY_NAME.senderkit_context, {
+    // CLI help reads terser than the LLM-facing manifest description
+    // (allowlisted in the manifest-parity test).
+    summary:
+      "Report the active SenderKit connection mode. Call this before sending if you need to confirm whether messages are really delivered (live) or only recorded (test).",
+  }),
   path: ["context"],
-  mcpName: "senderkit_context",
-  title: "Get Workspace Context",
-  summary:
-    "Report the active SenderKit connection mode. Call this before sending if you need to confirm whether messages are really delivered (live) or only recorded (test).",
-  annotations: { readOnlyHint: true },
   schema,
   run: (_input, { client }) =>
     Promise.resolve({ mode: client.mode, livemode: client.mode === "live" }),

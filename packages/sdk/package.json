@@ -34,14 +34,14 @@
         "default": "./dist/index.cjs"
       }
     },
-    "./mcp-schemas": {
+    "./mcp": {
       "import": {
-        "types": "./dist/mcp-schemas.d.ts",
-        "default": "./dist/mcp-schemas.js"
+        "types": "./dist/mcp.d.ts",
+        "default": "./dist/mcp.js"
       },
       "require": {
-        "types": "./dist/mcp-schemas.d.cts",
-        "default": "./dist/mcp-schemas.cjs"
+        "types": "./dist/mcp.d.cts",
+        "default": "./dist/mcp.cjs"
       }
     }
   },

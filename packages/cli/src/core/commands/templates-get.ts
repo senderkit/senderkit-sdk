@@ -1,17 +1,14 @@
 import type { Template } from "@senderkit/sdk";
-import { templatesGetInput } from "@senderkit/sdk/mcp-schemas";
+import { templatesGetInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
-import { defineCommand } from "../command";
+import { defineCommand, fromSpec } from "../command";
 import { keyValues } from "../../cli/format";
 
 const schema = z.object(templatesGetInput);
 
 export const templatesGetCommand = defineCommand<typeof schema.shape, Template>({
+  ...fromSpec(MCP_TOOLS_BY_NAME.senderkit_templates_get),
   path: ["templates", "get"],
-  mcpName: "senderkit_templates_get",
-  title: "Get Template",
-  summary: "Fetch a single template by slug.",
-  annotations: { readOnlyHint: true },
   schema,
   positional: ["slug"],
   run: (input, { client }) => client.templates.get(input.slug),
