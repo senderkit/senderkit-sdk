@@ -1,6 +1,5 @@
 import type { CancelMessageResponse } from "@senderkit/sdk";
-import { cancelMessageInput } from "@senderkit/sdk/mcp-schemas";
-import { MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
+import { cancelMessageInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
 import { defineCommand, fromSpec } from "../command";
 import { success, keyValues } from "../../cli/format";

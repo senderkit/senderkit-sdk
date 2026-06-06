@@ -17,9 +17,8 @@ export type { ToolAnnotations };
  * than the LLM-facing description (allowlisted in the CLI parity test).
  *
  * `schema` is intentionally NOT sourced here — each command imports its
- * precisely-typed shape from `@senderkit/sdk/mcp-schemas` directly so `run`'s
- * input keeps its exact field types (the manifest erases shapes to
- * `z.ZodRawShape`).
+ * precisely-typed shape from `@senderkit/sdk/mcp` directly so `run`'s input
+ * keeps its exact field types (the manifest erases shapes to `z.ZodRawShape`).
  */
 export function fromSpec(
   spec: McpToolSpec,

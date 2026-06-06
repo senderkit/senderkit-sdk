@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { SenderKit } from "@senderkit/sdk";
-import { SEND_TOOL_LIVE_MODE_NOTE } from "@senderkit/sdk/mcp-schemas";
+import { SEND_TOOL_LIVE_MODE_NOTE } from "@senderkit/sdk/mcp";
 import type { z } from "zod";
 import { registry } from "../core/registry";
 import { buildClient } from "../core/context";

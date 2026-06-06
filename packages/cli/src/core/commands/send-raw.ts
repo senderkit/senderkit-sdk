@@ -1,6 +1,5 @@
 import type { SendRawRequest, SendResponse } from "@senderkit/sdk";
-import { sendRawInput } from "@senderkit/sdk/mcp-schemas";
-import { MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
+import { sendRawInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
 import { defineCommand, fromSpec } from "../command";
 import { success, keyValues } from "../../cli/format";

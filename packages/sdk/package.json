@@ -34,16 +34,6 @@
         "default": "./dist/index.cjs"
       }
     },
-    "./mcp-schemas": {
-      "import": {
-        "types": "./dist/mcp-schemas.d.ts",
-        "default": "./dist/mcp-schemas.js"
-      },
-      "require": {
-        "types": "./dist/mcp-schemas.d.cts",
-        "default": "./dist/mcp-schemas.cjs"
-      }
-    },
     "./mcp": {
       "import": {
         "types": "./dist/mcp.d.ts",

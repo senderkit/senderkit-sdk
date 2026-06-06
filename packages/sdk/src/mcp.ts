@@ -10,6 +10,10 @@ import {
   cancelMessageInput,
 } from "./mcp-schemas";
 
+// Single MCP entry point: re-export the input shapes + SEND_TOOL_LIVE_MODE_NOTE
+// so everything MCP-related is importable from `@senderkit/sdk/mcp`.
+export * from "./mcp-schemas";
+
 /**
  * MCP behaviour hints surfaced to clients (and the Connectors Directory review).
  * A tool is read-only OR destructive — never both, never neither.

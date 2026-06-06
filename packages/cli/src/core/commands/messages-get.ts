@@ -1,6 +1,5 @@
 import type { Message } from "@senderkit/sdk";
-import { messagesGetInput } from "@senderkit/sdk/mcp-schemas";
-import { MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
+import { messagesGetInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
 import { defineCommand, fromSpec } from "../command";
 import { keyValues } from "../../cli/format";

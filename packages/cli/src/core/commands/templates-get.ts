@@ -1,6 +1,5 @@
 import type { Template } from "@senderkit/sdk";
-import { templatesGetInput } from "@senderkit/sdk/mcp-schemas";
-import { MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
+import { templatesGetInput, MCP_TOOLS_BY_NAME } from "@senderkit/sdk/mcp";
 import { z } from "zod";
 import { defineCommand, fromSpec } from "../command";
 import { keyValues } from "../../cli/format";
