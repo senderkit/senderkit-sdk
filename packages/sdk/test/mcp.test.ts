@@ -20,13 +20,18 @@ describe("MCP_TOOLS", () => {
 
   it("each spec reuses the shared mcp-schemas shape", () => {
     for (const t of MCP_TOOLS) {
-      expect(t.inputSchema).toBe(schemas[EXPECTED[t.name]]);
+      const key = EXPECTED[t.name];
+      expect(key, `unexpected tool ${t.name}`).toBeDefined();
+      expect(t.inputSchema).toBe(schemas[key!]);
     }
   });
 
   it("each tool is read-only XOR destructive, with a non-empty title + description", () => {
     for (const t of MCP_TOOLS) {
-      const a = t.annotations as Record<string, boolean>;
+      const a = t.annotations as {
+        readOnlyHint?: boolean;
+        destructiveHint?: boolean;
+      };
       expect(Boolean(a.readOnlyHint) !== Boolean(a.destructiveHint)).toBe(true);
       expect(t.title.length).toBeGreaterThan(0);
       expect(t.description.length).toBeGreaterThan(0);
