@@ -29,6 +29,7 @@ export type {
   SendRawWebPushRequest,
   SendRequest,
   SendResponse,
+  SenderKitContext,
   SenderKitOptions,
   Template,
   TemplateVersion,

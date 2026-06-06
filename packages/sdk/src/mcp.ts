@@ -41,10 +41,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     name: "senderkit_context",
     title: "Get Workspace Context",
     description:
-      "Returns the active workspace id and send mode (live or test) for this " +
-      "connection. The mode is fixed for the whole connection. Call this before " +
-      "sending so you can tell the user whether messages will be really " +
-      "delivered (live) or only recorded without delivery (test).",
+      "Returns the connected workspace (id, name, slug) and the send mode (live " +
+      "or test) for this connection. The mode is fixed for the whole connection. " +
+      "Call this before sending so you can tell the user which workspace they're " +
+      "in and whether messages will be really delivered (live) or only recorded " +
+      "without delivery (test).",
     annotations: { readOnlyHint: true },
     inputSchema: contextInput,
   },

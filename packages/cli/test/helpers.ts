@@ -72,6 +72,10 @@ export function stubClient(): { client: SenderKit; calls: StubCalls } {
         return { id, status: "canceled" as const };
       },
     },
+    context: async () => ({
+      workspace: { id: "ws_1", slug: "acme", name: "Acme Inc" },
+      mode: "test" as const,
+    }),
   } as unknown as SenderKit;
   return { client, calls };
 }

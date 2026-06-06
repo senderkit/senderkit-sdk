@@ -198,3 +198,9 @@ export interface CancelMessageResponse {
   id: string;
   status: "canceled";
 }
+
+/** Result of `client.context()` — the connected workspace identity + send mode. */
+export interface SenderKitContext {
+  workspace: { id: string; slug: string; name: string };
+  mode: "live" | "test";
+}

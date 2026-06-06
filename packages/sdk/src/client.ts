@@ -8,6 +8,7 @@ import type {
   SendRawRequest,
   SendRequest,
   SendResponse,
+  SenderKitContext,
   SenderKitOptions,
 } from "./types";
 
@@ -84,6 +85,14 @@ export class SenderKit {
       body,
       idempotencyKey: request.idempotencyKey,
       autoIdempotency: true,
+    });
+  }
+
+  /** Fetch the connected workspace identity + send mode from the API. */
+  async context(): Promise<SenderKitContext> {
+    return this.http.request<SenderKitContext>({
+      method: "GET",
+      path: "/v1/context",
     });
   }
 
