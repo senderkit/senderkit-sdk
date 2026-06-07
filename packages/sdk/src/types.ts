@@ -149,7 +149,6 @@ export type BatchSendResult =
 
 export interface TemplateVersion {
   versionNumber: number;
-  content: unknown;
   variables: unknown;
   publishedAt: string | null;
 }
@@ -160,11 +159,21 @@ export interface Template {
   description: string | null;
   status: string;
   updatedAt: string;
-  /** Included by `templates.get`; absent on `templates.list`. */
+  /**
+   * Included by `templates.get`; absent on `templates.list`. Reads are lean —
+   * the rendered version `content` blob is no longer returned (it could overflow
+   * the LLM/MCP context); only metadata (`versionNumber`, `variables`,
+   * `publishedAt`) is included.
+   */
   currentVersion?: TemplateVersion | null;
   [key: string]: unknown;
 }
 
+/**
+ * A message as returned by `messages.list` / `messages.get`. Reads are lean —
+ * the rendered `content` blob is omitted (it could overflow the LLM/MCP context);
+ * `vars`, `timeline`, and `metadata` are still included.
+ */
 export interface Message {
   /** Internal id. */
   id: string;

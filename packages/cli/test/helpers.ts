@@ -43,7 +43,6 @@ export function stubClient(): { client: SenderKit; calls: StubCalls } {
           updatedAt: "2026-01-01T00:00:00Z",
           currentVersion: {
             versionNumber: 2,
-            content: {},
             variables: [],
             publishedAt: "2026-01-01T00:00:00Z",
           },
