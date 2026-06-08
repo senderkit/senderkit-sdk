@@ -4,11 +4,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parse as parseToml } from "smol-toml";
 import {
+  apiKeyRemoteSpec,
   CLIENT_IDS,
   claudeAddArgs,
   claudeAddArgsRemote,
   DEFAULT_REMOTE_URL,
   install,
+  oauthRemoteSpec,
   printSnippet,
   remoteSpec,
   serverBlock,
@@ -182,17 +184,63 @@ describe("printSnippet", () => {
   });
 });
 
-describe("remote install", () => {
-  it("remoteSpec defaults to the hosted URL with a bearer header", () => {
-    const spec = remoteSpec("sk_live_x");
+describe("remote install — OAuth (default)", () => {
+  it("oauthRemoteSpec is url-only with no headers", () => {
+    const spec = oauthRemoteSpec();
     expect(spec.url).toBe(DEFAULT_REMOTE_URL);
-    expect(spec.headers.Authorization).toBe("Bearer sk_live_x");
+    expect(spec.headers).toEqual({});
+    expect(spec.bearerEnvVar).toBeUndefined();
   });
 
-  it("native clients get url + headers", () => {
+  it("native clients get a url-only entry (no credential)", () => {
     const home = freshHome();
-    const remote = remoteSpec("sk_test_abc");
-    install({ client: "cursor", home, remote });
+    install({ client: "cursor", home, remote: oauthRemoteSpec() });
+    const written = JSON.parse(readFileSync(join(home, ".cursor", "mcp.json"), "utf8"));
+    expect(written.mcpServers.senderkit).toEqual({ url: DEFAULT_REMOTE_URL });
+    expect(written.mcpServers.senderkit.headers).toBeUndefined();
+  });
+
+  it("claude-code (file fallback) writes type:http url-only", () => {
+    const home = freshHome();
+    const runner: Runner = { which: () => false, run: () => ({ ok: false, stderr: "" }) };
+    install({ client: "claude-code", home, runner, remote: oauthRemoteSpec() });
+    const written = JSON.parse(readFileSync(join(home, ".claude.json"), "utf8"));
+    expect(written.mcpServers.senderkit).toEqual({ type: "http", url: DEFAULT_REMOTE_URL });
+  });
+
+  it("codex writes a native streamable-HTTP url (no bridge, no token)", () => {
+    const home = freshHome();
+    install({ client: "codex", home, remote: oauthRemoteSpec() });
+    const parsed = parseToml(readFileSync(join(home, ".codex", "config.toml"), "utf8")) as any;
+    expect(parsed.mcp_servers.senderkit.url).toBe(DEFAULT_REMOTE_URL);
+    expect(parsed.mcp_servers.senderkit.command).toBeUndefined();
+    expect(parsed.mcp_servers.senderkit.bearer_token_env_var).toBeUndefined();
+  });
+
+  it("claudeAddArgsRemote omits --header in OAuth mode", () => {
+    const args = claudeAddArgsRemote(oauthRemoteSpec("https://mcp.senderkit.com"));
+    expect(args).toEqual([
+      "mcp", "add", "senderkit", "--scope", "user", "--transport", "http",
+      "https://mcp.senderkit.com",
+    ]);
+  });
+});
+
+describe("remote install — API key (opt-in)", () => {
+  it("apiKeyRemoteSpec carries a bearer header and env-var name", () => {
+    const spec = apiKeyRemoteSpec("sk_live_x");
+    expect(spec.url).toBe(DEFAULT_REMOTE_URL);
+    expect(spec.headers.Authorization).toBe("Bearer sk_live_x");
+    expect(spec.bearerEnvVar).toBe("SENDERKIT_API_KEY");
+  });
+
+  it("remoteSpec stays a back-compat alias for apiKeyRemoteSpec", () => {
+    expect(remoteSpec("k").headers.Authorization).toBe("Bearer k");
+  });
+
+  it("native clients get url + bearer headers", () => {
+    const home = freshHome();
+    install({ client: "cursor", home, remote: apiKeyRemoteSpec("sk_test_abc") });
     const written = JSON.parse(readFileSync(join(home, ".cursor", "mcp.json"), "utf8"));
     expect(written.mcpServers.senderkit).toEqual({
       url: DEFAULT_REMOTE_URL,
@@ -202,7 +250,7 @@ describe("remote install", () => {
 
   it("vscode uses type:http for remote", () => {
     const home = freshHome();
-    install({ client: "vscode", home, remote: remoteSpec("k") });
+    install({ client: "vscode", home, remote: apiKeyRemoteSpec("k") });
     const path =
       process.platform === "darwin"
         ? join(home, "Library", "Application Support", "Code", "User", "mcp.json")
@@ -212,16 +260,25 @@ describe("remote install", () => {
 
   it("opencode uses type:remote for remote", () => {
     const home = freshHome();
-    install({ client: "opencode", home, remote: remoteSpec("k") });
+    install({ client: "opencode", home, remote: apiKeyRemoteSpec("k") });
     const written = JSON.parse(
       readFileSync(join(home, ".config", "opencode", "opencode.json"), "utf8"),
     );
     expect(written.mcp.senderkit).toMatchObject({ type: "remote", url: DEFAULT_REMOTE_URL });
   });
 
-  it("bridge clients get an npx mcp-remote command", () => {
+  it("codex writes a native url + bearer_token_env_var (no bridge)", () => {
     const home = freshHome();
-    install({ client: "claude-desktop", home, remote: remoteSpec("sk_test_abc") });
+    install({ client: "codex", home, remote: apiKeyRemoteSpec("k") });
+    const parsed = parseToml(readFileSync(join(home, ".codex", "config.toml"), "utf8")) as any;
+    expect(parsed.mcp_servers.senderkit.url).toBe(DEFAULT_REMOTE_URL);
+    expect(parsed.mcp_servers.senderkit.bearer_token_env_var).toBe("SENDERKIT_API_KEY");
+    expect(parsed.mcp_servers.senderkit.command).toBeUndefined();
+  });
+
+  it("bridge clients (claude-desktop) get an npx mcp-remote command with header", () => {
+    const home = freshHome();
+    install({ client: "claude-desktop", home, remote: apiKeyRemoteSpec("sk_test_abc") });
     const path = join(home, "Library", "Application Support", "Claude", "claude_desktop_config.json");
     // darwin path; on Linux the file lands elsewhere, so guard.
     if (existsSync(path)) {
@@ -232,16 +289,8 @@ describe("remote install", () => {
     }
   });
 
-  it("codex bridges remote via mcp-remote in TOML", () => {
-    const home = freshHome();
-    install({ client: "codex", home, remote: remoteSpec("k") });
-    const parsed = parseToml(readFileSync(join(home, ".codex", "config.toml"), "utf8")) as any;
-    expect(parsed.mcp_servers.senderkit.command).toBe("npx");
-    expect(parsed.mcp_servers.senderkit.args).toContain("mcp-remote");
-  });
-
-  it("claudeAddArgsRemote builds an http transport command", () => {
-    const args = claudeAddArgsRemote(remoteSpec("sk_test_abc", "https://mcp.senderkit.com"));
+  it("claudeAddArgsRemote builds an http transport command with --header", () => {
+    const args = claudeAddArgsRemote(apiKeyRemoteSpec("sk_test_abc", "https://mcp.senderkit.com"));
     expect(args).toEqual([
       "mcp", "add", "senderkit", "--scope", "user", "--transport", "http",
       "https://mcp.senderkit.com", "--header", "Authorization: Bearer sk_test_abc",

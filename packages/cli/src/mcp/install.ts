@@ -27,10 +27,24 @@ export const SERVER_NAME = "senderkit";
 /** Default hosted SenderKit MCP endpoint. */
 export const DEFAULT_REMOTE_URL = "https://mcp.senderkit.com";
 
-/** A remote (hosted) MCP server: a URL plus auth headers. */
+/** Env var name the hosted server reads for API-key (bearer) auth. */
+export const API_KEY_ENV_VAR = "SENDERKIT_API_KEY";
+
+/**
+ * A remote (hosted) MCP server. `headers` is empty in OAuth mode — the client
+ * performs the OAuth handshake itself and no credential is written to disk.
+ * `bearerEnvVar` is set only in API-key mode, for clients (Codex) that
+ * reference the token by env-var name rather than via an HTTP header.
+ */
 export interface RemoteSpec {
   url: string;
   headers: Record<string, string>;
+  bearerEnvVar?: string;
+}
+
+/** True when this spec carries static API-key auth (vs. OAuth). */
+export function isApiKeyAuth(remote: RemoteSpec): boolean {
+  return Object.keys(remote.headers).length > 0 || remote.bearerEnvVar !== undefined;
 }
 
 /** The base server block. Embeds a concrete key or a placeholder. */
@@ -42,13 +56,29 @@ export function serverBlock(apiKey?: string): ServerBlock {
   };
 }
 
-/** Remote spec pointing at `url`, authenticating with a bearer API key. */
-export function remoteSpec(apiKey?: string, url: string = DEFAULT_REMOTE_URL): RemoteSpec {
+/**
+ * OAuth remote: `url` only, no committed credential. This is the default and
+ * matches the shapes shipped by the senderkit-skills plugin manifests; the
+ * client drives the OAuth sign-in on first use.
+ */
+export function oauthRemoteSpec(url: string = DEFAULT_REMOTE_URL): RemoteSpec {
+  return { url, headers: {} };
+}
+
+/** API-key remote: authenticate with a bearer token (header / env var). Opt-in. */
+export function apiKeyRemoteSpec(apiKey?: string, url: string = DEFAULT_REMOTE_URL): RemoteSpec {
   return {
     url,
-    headers: { Authorization: `Bearer ${apiKey ?? "${SENDERKIT_API_KEY}"}` },
+    headers: { Authorization: `Bearer ${apiKey ?? `\${${API_KEY_ENV_VAR}}`}` },
+    bearerEnvVar: API_KEY_ENV_VAR,
   };
 }
+
+/**
+ * @deprecated Use {@link apiKeyRemoteSpec} (API-key auth) or
+ * {@link oauthRemoteSpec} (OAuth, the default). Retained for back-compat.
+ */
+export const remoteSpec = apiKeyRemoteSpec;
 
 type Format = "json" | "toml";
 
@@ -121,6 +151,15 @@ function headerArgs(headers: Record<string, string>): string[] {
 }
 
 /**
+ * Attach `headers` to a remote config entry only when non-empty. In OAuth mode
+ * `remote.headers` is `{}`, so the written config is `url`-only — no credential
+ * key — matching the plugin manifests.
+ */
+function withHeaders<T extends object>(base: T, remote: RemoteSpec): T {
+  return Object.keys(remote.headers).length > 0 ? { ...base, headers: remote.headers } : base;
+}
+
+/**
  * A stdio→remote bridge entry via `npx mcp-remote`, for clients that lack
  * first-class remote MCP support. Shaped like a normal command server.
  */
@@ -140,11 +179,11 @@ const ADAPTERS: ClientAdapter[] = [
     detect: (home) => existsSync(join(home, ".claude.json")) || existsSync(join(home, ".claude")),
     render: (text, block) => renderJson(text, ["mcpServers", SERVER_NAME], mcpServersEntry(block)),
     renderRemote: (text, remote) =>
-      renderJson(text, ["mcpServers", SERVER_NAME], {
-        type: "http",
-        url: remote.url,
-        headers: remote.headers,
-      }),
+      renderJson(
+        text,
+        ["mcpServers", SERVER_NAME],
+        withHeaders({ type: "http", url: remote.url }, remote),
+      ),
   },
   {
     id: "claude-desktop",
@@ -166,10 +205,7 @@ const ADAPTERS: ClientAdapter[] = [
       existsSync(join(home, ".cursor", "mcp.json")) || existsSync(join(home, ".cursor")),
     render: (text, block) => renderJson(text, ["mcpServers", SERVER_NAME], mcpServersEntry(block)),
     renderRemote: (text, remote) =>
-      renderJson(text, ["mcpServers", SERVER_NAME], {
-        url: remote.url,
-        headers: remote.headers,
-      }),
+      renderJson(text, ["mcpServers", SERVER_NAME], withHeaders({ url: remote.url }, remote)),
   },
   {
     id: "windsurf",
@@ -196,11 +232,11 @@ const ADAPTERS: ClientAdapter[] = [
         env: block.env,
       }),
     renderRemote: (text, remote) =>
-      renderJson(text, ["servers", SERVER_NAME], {
-        type: "http",
-        url: remote.url,
-        headers: remote.headers,
-      }),
+      renderJson(
+        text,
+        ["servers", SERVER_NAME],
+        withHeaders({ type: "http", url: remote.url }, remote),
+      ),
   },
   {
     id: "zed",
@@ -211,10 +247,7 @@ const ADAPTERS: ClientAdapter[] = [
     render: (text, block) =>
       renderJson(text, ["context_servers", SERVER_NAME], mcpServersEntry(block)),
     renderRemote: (text, remote) =>
-      renderJson(text, ["context_servers", SERVER_NAME], {
-        url: remote.url,
-        headers: remote.headers,
-      }),
+      renderJson(text, ["context_servers", SERVER_NAME], withHeaders({ url: remote.url }, remote)),
   },
   {
     id: "codex",
@@ -224,8 +257,14 @@ const ADAPTERS: ClientAdapter[] = [
     detect: (home) => existsSync(join(home, ".codex")),
     render: (text, block) =>
       renderTomlServer(text, { command: block.command, args: block.args, env: block.env }),
-    // Native remote is experimental in Codex → stdio bridge.
-    renderRemote: (text, remote) => renderTomlServer(text, bridgeEntry(remote)),
+    // Codex has stable native streamable-HTTP MCP support with OAuth
+    // (`codex mcp login senderkit`). Write the native `url` entry; in API-key
+    // mode add `bearer_token_env_var` rather than an HTTP header.
+    renderRemote: (text, remote) =>
+      renderTomlServer(text, {
+        url: remote.url,
+        ...(remote.bearerEnvVar ? { bearer_token_env_var: remote.bearerEnvVar } : {}),
+      }),
   },
   {
     id: "opencode",
@@ -241,12 +280,11 @@ const ADAPTERS: ClientAdapter[] = [
         environment: block.env,
       }),
     renderRemote: (text, remote) =>
-      renderJson(text, ["mcp", SERVER_NAME], {
-        type: "remote",
-        url: remote.url,
-        enabled: true,
-        headers: remote.headers,
-      }),
+      renderJson(
+        text,
+        ["mcp", SERVER_NAME],
+        withHeaders({ type: "remote", url: remote.url, enabled: true }, remote),
+      ),
   },
 ];
 
