@@ -1,6 +1,6 @@
 {
   "name": "@senderkit/cli",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "SenderKit command-line interface and MCP server — send notifications and inspect templates/messages from your terminal or AI assistant.",
   "license": "MIT",
   "homepage": "https://github.com/senderkit/senderkit-sdk#readme",
