@@ -52,8 +52,12 @@ export function registerMcp(program: Commander): void {
       "all",
     )
     .option("--print", "Print the config instead of writing files.")
-    .option("--remote", `Point clients at a remote MCP endpoint (default ${DEFAULT_REMOTE_URL}).`)
-    .option("--url <url>", "Remote MCP endpoint URL (implies --remote).")
+    .option(
+      "--local",
+      "Run the MCP server as a local `senderkit mcp` subprocess instead of connecting to the hosted endpoint.",
+    )
+    .option("--remote", `Connect to the hosted MCP endpoint (default ${DEFAULT_REMOTE_URL}).`)
+    .option("--url <url>", "Hosted MCP endpoint URL (implies remote).")
     .option(
       "--api-key-auth",
       "For remote installs, write API-key (bearer) auth instead of OAuth (the default).",
@@ -62,6 +66,7 @@ export function registerMcp(program: Commander): void {
       (opts: {
         client: string;
         print?: boolean;
+        local?: boolean;
         remote?: boolean;
         url?: string;
         apiKeyAuth?: boolean;
@@ -72,14 +77,18 @@ export function registerMcp(program: Commander): void {
               `Unknown client "${opts.client}". Choices: ${CLIENT_CHOICES.join(", ")}.`,
             );
           }
+          if (opts.local && (opts.remote || opts.url)) {
+            throw new Error("--local cannot be combined with --remote/--url.");
+          }
 
           const globals = program.optsWithGlobals() as { apiKey?: string };
           const apiKey = tryResolveApiKey({ apiKey: globals.apiKey });
           const block = serverBlock(apiKey);
           const url = opts.url ?? DEFAULT_REMOTE_URL;
-          const useRemote = Boolean(opts.remote || opts.url);
-          // Remote installs default to OAuth (no committed credential), matching
-          // the senderkit-skills plugin manifests. --api-key-auth opts into bearer.
+          // Remote (hosted) is the default; --local opts into the stdio subprocess.
+          // Remote defaults to OAuth (no committed credential), matching the
+          // senderkit-skills plugin manifests; --api-key-auth opts into bearer.
+          const useRemote = !opts.local;
           const remote = useRemote
             ? opts.apiKeyAuth
               ? apiKeyRemoteSpec(apiKey, url)

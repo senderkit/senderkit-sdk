@@ -77,10 +77,16 @@ live/test mode; `senderkit_send` / `senderkit_send_raw` results also carry a
 Auto-configure your client:
 
 ```bash
-senderkit mcp install                       # all detected clients
+senderkit mcp install                       # all detected clients (hosted endpoint, OAuth)
 senderkit mcp install --client cursor       # a specific client
 senderkit mcp install --client codex --print  # print the config to paste manually
 ```
+
+By default this points your client at the **hosted** SenderKit MCP endpoint
+(`https://mcp.senderkit.com`) over **OAuth** — no local process, no credential on
+disk. You complete sign-in from the client (Claude Code `/mcp`, Cursor →
+Settings → MCP, `codex mcp login senderkit`). This matches the configs shipped by
+the [`senderkit-skills`](https://github.com/senderkit/senderkit-skills) plugin.
 
 Supported clients (each detected by its config directory, and written in its own
 schema):
@@ -97,34 +103,34 @@ schema):
 | opencode | `~/.config/opencode/opencode.json` | `mcp` (`type: "local"`) |
 
 Existing config is edited surgically — comments and other servers are preserved.
-If no key is configured, a `${SENDERKIT_API_KEY}` placeholder is written, and you
-supply the key via the environment instead.
-
-### Remote MCP
-
-Instead of spawning the local process, clients can connect to a hosted SenderKit
-MCP endpoint over HTTP. Add `--remote` to `install`:
-
-```bash
-senderkit mcp install --remote                       # OAuth, default https://mcp.senderkit.com
-senderkit mcp install --remote --url https://my-host/mcp --client cursor
-senderkit mcp install --remote --api-key-auth        # use an API key instead of OAuth
-```
-
-Remote installs default to **OAuth** — a `url`-only entry is written with **no
-credential on disk**, matching the configs shipped by the
-[`senderkit-skills`](https://github.com/senderkit/senderkit-skills) plugin. You
-complete sign-in from the client (Claude Code `/mcp`, Cursor → Settings → MCP,
-`codex mcp login senderkit`).
-
-Pass `--api-key-auth` to use a bearer API key instead: the key travels per
-request in an `Authorization: Bearer sk_…` header (or, for Codex,
-`bearer_token_env_var = "SENDERKIT_API_KEY"` in `config.toml`).
 
 Clients with first-class remote support (Claude Code, Cursor, VS Code, Zed,
 Codex, opencode) get a native URL entry; the rest (Claude Desktop, Windsurf) are
 wired through the [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) stdio
-bridge automatically (which performs the OAuth flow itself when no key is set).
+bridge automatically (which performs the OAuth flow itself).
+
+### API key instead of OAuth
+
+Pass `--api-key-auth` to authenticate the hosted endpoint with a bearer API key
+instead of OAuth. The key travels per request in an `Authorization: Bearer sk_…`
+header (or, for Codex, `bearer_token_env_var = "SENDERKIT_API_KEY"` in
+`config.toml`). If no key is configured, a `${SENDERKIT_API_KEY}` placeholder is
+written and you supply it via the environment.
+
+```bash
+senderkit mcp install --api-key-auth                 # hosted endpoint, bearer key
+senderkit mcp install --url https://my-host/mcp --client cursor   # custom endpoint
+```
+
+### Local subprocess
+
+Prefer to run the server yourself? `--local` writes a config that spawns
+`senderkit mcp` as a local stdio subprocess (authenticated by the
+`SENDERKIT_API_KEY` env var) instead of connecting to the hosted endpoint:
+
+```bash
+senderkit mcp install --local --client cursor
+```
 
 ### Self-hosting the server
 
