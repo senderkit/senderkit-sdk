@@ -2,6 +2,7 @@ import {
   SenderKitApiError,
   SenderKitAuthenticationError,
   SenderKitNetworkError,
+  SenderKitPermissionError,
   SenderKitRateLimitError,
   SenderKitTimeoutError,
   SenderKitValidationError,
@@ -148,8 +149,11 @@ export class HttpClient {
     const requestId = response.headers.get("x-request-id") ?? undefined;
     const args = { status: response.status, message, code, issues, requestId };
 
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
       return new SenderKitAuthenticationError(args);
+    }
+    if (response.status === 403) {
+      return new SenderKitPermissionError(args);
     }
     if (response.status === 400 || response.status === 422) {
       return new SenderKitValidationError(args);

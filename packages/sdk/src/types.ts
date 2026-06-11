@@ -2,6 +2,20 @@ import type { SenderKitError } from "./errors";
 
 export type Channel = "email" | "sms" | "push" | "web-push";
 
+/**
+ * Least-privilege scopes a SenderKit API key (or MCP OAuth connection) can be
+ * restricted to. A key minted without explicit scopes is *unscoped* and has
+ * full access; a scoped key only authorizes the operations in its grant:
+ *
+ * - `read`   — list/get messages & templates, render, fetch context.
+ * - `send`   — create messages (`send`/`sendRaw`) and author template drafts.
+ * - `cancel` — cancel a scheduled or queued message.
+ *
+ * Calling an operation outside a scoped key's grant returns `403`
+ * (`SenderKitPermissionError`, `code: "insufficient_scope"`).
+ */
+export type ApiScope = "read" | "send" | "cancel";
+
 export interface SenderKitOptions {
   /** API key. Use `sk_live_…` for production, `sk_test_…` for test mode. */
   apiKey: string;
