@@ -3,6 +3,7 @@ import {
   SenderKit,
   SenderKitApiError,
   SenderKitAuthenticationError,
+  SenderKitPermissionError,
   SenderKitRateLimitError,
   SenderKitValidationError,
 } from "../src/index";
@@ -34,6 +35,28 @@ describe("error mapping", () => {
     const err = await sk.send({ template: "a", to: "x@x.com" }).catch((e) => e);
     expect(err).toBeInstanceOf(SenderKitAuthenticationError);
     expect(err.status).toBe(401);
+  });
+
+  it("maps 403 insufficient_scope to SenderKitPermissionError (not Authentication)", async () => {
+    const mock = createMockFetch([
+      {
+        status: 403,
+        body: {
+          error: {
+            code: "insufficient_scope",
+            message: 'This connection is missing the required "send" scope.',
+          },
+        },
+      },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch, maxRetries: 0 });
+    const err = await sk.send({ template: "a", to: "x@x.com" }).catch((e) => e);
+    expect(err).toBeInstanceOf(SenderKitPermissionError);
+    // It is an ApiError but NOT an AuthenticationError — the key is valid.
+    expect(err).toBeInstanceOf(SenderKitApiError);
+    expect(err).not.toBeInstanceOf(SenderKitAuthenticationError);
+    expect(err.status).toBe(403);
+    expect(err.code).toBe("insufficient_scope");
   });
 
   it("maps 429 to SenderKitRateLimitError with retryAfter in ms", async () => {

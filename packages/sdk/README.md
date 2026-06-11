@@ -184,6 +184,7 @@ All errors extend `SenderKitError`. Use `instanceof` to branch:
 import {
   SenderKitAuthenticationError,
   SenderKitNetworkError,
+  SenderKitPermissionError,
   SenderKitRateLimitError,
   SenderKitTimeoutError,
   SenderKitValidationError,
@@ -196,6 +197,8 @@ try {
     console.error("Bad request:", err.message, err.issues);
   } else if (err instanceof SenderKitAuthenticationError) {
     console.error("Check your API key");
+  } else if (err instanceof SenderKitPermissionError) {
+    console.error("API key is missing the required scope:", err.message);
   } else if (err instanceof SenderKitRateLimitError) {
     console.warn(`Rate limited, retry after ${err.retryAfter}ms`);
   } else if (err instanceof SenderKitTimeoutError) {
@@ -211,12 +214,32 @@ try {
 | Class | When it fires |
 | --- | --- |
 | `SenderKitValidationError` | 400 / 422 — invalid request, includes `issues` from the API |
-| `SenderKitAuthenticationError` | 401 / 403 — missing or invalid API key |
+| `SenderKitAuthenticationError` | 401 — missing or invalid API key |
+| `SenderKitPermissionError` | 403 — key is valid but lacks the required scope (`code: "insufficient_scope"`) |
 | `SenderKitRateLimitError` | 429 — includes `retryAfter` (ms) |
 | `SenderKitApiError` | other 4xx / 5xx after retries are exhausted |
 | `SenderKitTimeoutError` | request exceeded the configured `timeout` |
 | `SenderKitNetworkError` | fetch threw (DNS, connection refused, …) |
 | `SenderKitError` | base class — catch this to handle them all |
+
+`SenderKitPermissionError` extends `SenderKitApiError` (not `SenderKitAuthenticationError`), so a `catch (SenderKitApiError)` still handles it.
+
+### Scopes
+
+API keys can be restricted to a least-privilege set of scopes. A key minted
+**without** explicit scopes is unscoped and has full access (the default), so
+existing keys are unaffected. A scoped key only authorizes the matching
+operations:
+
+| Scope | Authorizes |
+| --- | --- |
+| `read` | `templates.list` / `templates.get`, `messages.list` / `messages.get`, `context()` |
+| `send` | `send`, `sendRaw`, `sendBatch` |
+| `cancel` | `messages.cancel` |
+
+Calling an operation outside a scoped key's grant returns `403` with
+`code: "insufficient_scope"` — surfaced as `SenderKitPermissionError`. The
+`ApiScope` type (`"read" | "send" | "cancel"`) is exported for convenience.
 
 ## Templates and messages
 

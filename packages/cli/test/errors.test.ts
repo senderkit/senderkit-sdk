@@ -3,12 +3,13 @@ import {
   SenderKitApiError,
   SenderKitAuthenticationError,
   SenderKitNetworkError,
+  SenderKitPermissionError,
   SenderKitRateLimitError,
   SenderKitTimeoutError,
   SenderKitValidationError,
 } from "@senderkit/sdk";
 import { ZodError } from "zod";
-import { describeErrorAsObject, handleError, setJsonMode } from "../src/cli/errors";
+import { describeError, describeErrorAsObject, handleError, setJsonMode } from "../src/cli/errors";
 import { MissingApiKeyError } from "../src/core/context";
 
 describe("describeErrorAsObject", () => {
@@ -30,6 +31,21 @@ describe("describeErrorAsObject", () => {
       status: 422,
       issues: [{ path: "to" }],
     });
+
+    const permission = new SenderKitPermissionError({
+      status: 403,
+      message: 'This connection is missing the required "send" scope.',
+      code: "insufficient_scope",
+      requestId: "req_2",
+    });
+    expect(describeErrorAsObject(permission)).toMatchObject({
+      type: "permission",
+      status: 403,
+      requestId: "req_2",
+    });
+    // Must not be misclassified as authentication or the generic api type.
+    expect(describeErrorAsObject(permission).type).toBe("permission");
+    expect(describeError(permission)).toMatch(/scope/i);
 
     const rate = new SenderKitRateLimitError({
       status: 429,

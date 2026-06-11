@@ -46,6 +46,22 @@ export class SenderKitAuthenticationError extends SenderKitApiError {
   }
 }
 
+/**
+ * 403 — the credential is valid but lacks the scope required for the
+ * operation. The API returns `code: "insufficient_scope"`. Distinct from
+ * {@link SenderKitAuthenticationError} (401), which means the key itself is
+ * missing or invalid. Keys minted without explicit scopes are unscoped and
+ * have full access, so this only fires for scope-restricted keys (or MCP OAuth
+ * connections) used outside their granted scopes.
+ */
+export class SenderKitPermissionError extends SenderKitApiError {
+  constructor(args: ConstructorParameters<typeof SenderKitApiError>[0]) {
+    super(args);
+    this.name = "SenderKitPermissionError";
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
 export class SenderKitValidationError extends SenderKitApiError {
   constructor(args: ConstructorParameters<typeof SenderKitApiError>[0]) {
     super(args);

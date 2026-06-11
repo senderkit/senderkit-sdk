@@ -3,12 +3,14 @@ export {
   SenderKitError,
   SenderKitApiError,
   SenderKitAuthenticationError,
+  SenderKitPermissionError,
   SenderKitValidationError,
   SenderKitRateLimitError,
   SenderKitTimeoutError,
   SenderKitNetworkError,
 } from "./errors";
 export type {
+  ApiScope,
   Attachment,
   BatchSendOptions,
   BatchSendResult,

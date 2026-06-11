@@ -3,6 +3,7 @@ import {
   SenderKitAuthenticationError,
   SenderKitError,
   SenderKitNetworkError,
+  SenderKitPermissionError,
   SenderKitRateLimitError,
   SenderKitTimeoutError,
   SenderKitValidationError,
@@ -15,6 +16,7 @@ export type CliErrorType =
   | "validation"
   | "missing_api_key"
   | "authentication"
+  | "permission"
   | "rate_limit"
   | "timeout"
   | "network"
@@ -49,6 +51,9 @@ export function describeError(err: unknown): string {
   if (err instanceof SenderKitAuthenticationError) {
     return "Authentication failed. Check your API key (--api-key, SENDERKIT_API_KEY, or config).";
   }
+  if (err instanceof SenderKitPermissionError) {
+    return `Permission denied: ${err.message} The API key is valid but lacks the required scope.`;
+  }
   if (err instanceof SenderKitValidationError) {
     const detail = err.issues ? `\n${JSON.stringify(err.issues, null, 2)}` : "";
     return `Request rejected: ${err.message}${detail}`;
@@ -79,6 +84,14 @@ export function describeErrorAsObject(err: unknown): CliErrorPayload {
       type: "authentication",
       message:
         "Authentication failed. Check your API key (--api-key, SENDERKIT_API_KEY, or config).",
+      status: err.status,
+      requestId: err.requestId,
+    };
+  }
+  if (err instanceof SenderKitPermissionError) {
+    return {
+      type: "permission",
+      message: err.message,
       status: err.status,
       requestId: err.requestId,
     };
