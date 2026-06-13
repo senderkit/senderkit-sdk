@@ -52,42 +52,56 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
   {
     name: "senderkit_send",
     title: "Send Templated Message",
-    description: "Send a templated message to a recipient.",
+    description:
+      "Send a transactional email, SMS, push, or web-push notification to a " +
+      "recipient using a saved template.",
     annotations: { destructiveHint: true },
     inputSchema: sendInput,
   },
   {
     name: "senderkit_send_raw",
     title: "Send Raw Message",
-    description: "Send inline content without a registered template.",
+    description:
+      "Send a transactional email, SMS, push, or web-push notification with " +
+      "inline content, without a registered template.",
     annotations: { destructiveHint: true },
     inputSchema: sendRawInput,
   },
   {
     name: "senderkit_templates_list",
     title: "List Templates",
-    description: "List available templates.",
+    description:
+      "List all message templates in the workspace across email, SMS, push, " +
+      "and web-push, with slugs and channels.",
     annotations: { readOnlyHint: true },
     inputSchema: templatesListInput,
   },
   {
     name: "senderkit_templates_get",
     title: "Get Template",
-    description: "Fetch a single template by slug.",
+    description:
+      "Fetch a template's content, variables, and current version by slug — " +
+      "inspect what will actually be delivered before sending or editing.",
     annotations: { readOnlyHint: true },
     inputSchema: templatesGetInput,
   },
   {
     name: "senderkit_messages_list",
     title: "List Messages",
-    description: "List messages, optionally filtered.",
+    description:
+      "List sent and scheduled messages across email, SMS, push, and " +
+      "web-push. Filter by channel, template, delivery status, or metadata — " +
+      "use this to monitor deliverability, debug failed sends, or audit " +
+      "transactional message history.",
     annotations: { readOnlyHint: true },
     inputSchema: messagesListInput,
   },
   {
     name: "senderkit_messages_get",
     title: "Get Message",
-    description: "Fetch a single message by ID.",
+    description:
+      "Fetch full details and delivery status for a single message by ID — " +
+      "check whether a specific email or SMS was delivered, bounced, or failed.",
     annotations: { readOnlyHint: true },
     inputSchema: messagesGetInput,
   },

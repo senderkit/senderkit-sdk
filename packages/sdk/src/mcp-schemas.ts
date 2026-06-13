@@ -118,10 +118,34 @@ const emailEnvelope = {
     .describe("Email-only. JSON array; up to 10 MB total across all attachments."),
 };
 
+/**
+ * The nine message lifecycle statuses (mirrors the app's `messageStatusEnum`).
+ * Bounces normalize to `failed` with the reason on the message timeline.
+ */
+export const MESSAGE_STATUSES = [
+  "scheduled",
+  "queued",
+  "rendered",
+  "dispatched",
+  "sent",
+  "delivered",
+  "failed",
+  "opted_out",
+  "canceled",
+] as const;
+
 /** Shape for `senderkit_send` — templated send. */
 export const sendInput = {
-  template: z.string().describe('Template slug, e.g. "welcome".'),
-  to: z.string().describe("Recipient address."),
+  template: z
+    .string()
+    .describe('Template slug (lowercase), e.g. "welcome".'),
+  to: z
+    .string()
+    .describe(
+      "Recipient address for the template's channel: an email address, an " +
+        "E.164 phone number (sms), a device token (push), or the JSON-encoded " +
+        "browser PushSubscription (web-push).",
+    ),
   vars,
   channel: channel.optional().describe("Force a channel (defaults to the template's primary)."),
   version: positiveInt.describe("Pin a specific template version."),
@@ -169,14 +193,22 @@ export const templatesListInput = {};
 
 /** Shape for `senderkit_templates_get`. */
 export const templatesGetInput = {
-  slug: z.string().describe("Template slug."),
+  slug: z
+    .string()
+    .describe("Template slug (lowercase; slugs are canonicalized on creation)."),
 };
 
 /** Shape for `senderkit_messages_list`. */
 export const messagesListInput = {
   limit: positiveInt.describe("Max messages to return."),
   cursor: z.string().optional().describe("Pagination cursor."),
-  status: z.string().optional().describe("Filter by status (e.g. delivered)."),
+  status: z
+    .enum(MESSAGE_STATUSES)
+    .optional()
+    .describe(
+      "Filter by lifecycle status: scheduled, queued, rendered, dispatched, " +
+        "sent, delivered, failed, opted_out, or canceled.",
+    ),
   channel: channel.optional().describe("Filter by channel."),
   template: z.string().optional().describe("Filter by template slug."),
   metadata: metadata.describe("Filter by metadata (each key/value must match)."),
