@@ -1,6 +1,6 @@
 {
   "name": "@senderkit-examples/node-basic",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "private": true,
   "type": "module",
   "scripts": {
