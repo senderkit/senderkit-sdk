@@ -193,11 +193,17 @@ export interface Message {
   id: string;
   /** Public-facing id (e.g. `msg_…`). */
   publicId: string;
+  /**
+   * Lifecycle status (one of `MESSAGE_STATUSES`). A `blocked` message was
+   * halted by the outbound abuse scanner; `blockedReason` carries the trigger.
+   */
   status: string;
   channel: Channel;
   templateSlug: string | null;
   recipient: string;
   createdAt: string;
+  /** Human-readable reason a `blocked` message was halted. Absent otherwise. */
+  blockedReason?: string | null;
   [key: string]: unknown;
 }
 
