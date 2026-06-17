@@ -119,8 +119,10 @@ const emailEnvelope = {
 };
 
 /**
- * The nine message lifecycle statuses (mirrors the app's `messageStatusEnum`).
+ * The ten message lifecycle statuses (mirrors the app's `messageStatusEnum`).
  * Bounces normalize to `failed` with the reason on the message timeline.
+ * `blocked` is a terminal state set when the outbound abuse scanner halts a
+ * send (the human-readable trigger is on the message's `blockedReason`).
  */
 export const MESSAGE_STATUSES = [
   "scheduled",
@@ -131,6 +133,7 @@ export const MESSAGE_STATUSES = [
   "delivered",
   "failed",
   "opted_out",
+  "blocked",
   "canceled",
 ] as const;
 
@@ -207,7 +210,7 @@ export const messagesListInput = {
     .optional()
     .describe(
       "Filter by lifecycle status: scheduled, queued, rendered, dispatched, " +
-        "sent, delivered, failed, opted_out, or canceled.",
+        "sent, delivered, failed, opted_out, blocked, or canceled.",
     ),
   channel: channel.optional().describe("Filter by channel."),
   template: z.string().optional().describe("Filter by template slug."),
