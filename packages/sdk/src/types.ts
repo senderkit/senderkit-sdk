@@ -195,15 +195,15 @@ export interface Message {
   publicId: string;
   /**
    * Lifecycle status (one of `MESSAGE_STATUSES`). A `blocked` message was
-   * halted by the outbound abuse scanner; `blockedReason` carries the trigger.
+   * halted by the outbound abuse scanner. The detailed trigger is operator-only
+   * and is not returned here — a blocked message exposes only its `blocked`
+   * status and a generic entry on its `timeline`.
    */
   status: string;
   channel: Channel;
   templateSlug: string | null;
   recipient: string;
   createdAt: string;
-  /** Human-readable reason a `blocked` message was halted. Absent otherwise. */
-  blockedReason?: string | null;
   [key: string]: unknown;
 }
 

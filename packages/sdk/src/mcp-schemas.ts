@@ -122,7 +122,8 @@ const emailEnvelope = {
  * The ten message lifecycle statuses (mirrors the app's `messageStatusEnum`).
  * Bounces normalize to `failed` with the reason on the message timeline.
  * `blocked` is a terminal state set when the outbound abuse scanner halts a
- * send (the human-readable trigger is on the message's `blockedReason`).
+ * send. The detailed trigger is operator-only and is never returned on the
+ * message; a blocked message carries only a generic reason on its timeline.
  */
 export const MESSAGE_STATUSES = [
   "scheduled",
