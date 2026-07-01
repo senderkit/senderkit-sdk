@@ -195,15 +195,15 @@ export interface Message {
   publicId: string;
   /**
    * Lifecycle status (one of `MESSAGE_STATUSES`). A `blocked` message was
-   * halted by the outbound abuse scanner; `blockedReason` carries the trigger.
+   * halted by SenderKit's sending policy before delivery; the API surfaces
+   * this only as the `blocked` status and a generic `blocked` timeline entry —
+   * there is no reason field on the message.
    */
   status: string;
   channel: Channel;
   templateSlug: string | null;
   recipient: string;
   createdAt: string;
-  /** Human-readable reason a `blocked` message was halted. Absent otherwise. */
-  blockedReason?: string | null;
   [key: string]: unknown;
 }
 
