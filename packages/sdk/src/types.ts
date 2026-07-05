@@ -194,16 +194,14 @@ export interface Message {
   /** Public-facing id (e.g. `msg_…`). */
   publicId: string;
   /**
-   * Lifecycle status (one of `MESSAGE_STATUSES`). A `blocked` message was
-   * halted by the outbound abuse scanner; `blockedReason` carries the trigger.
+   * Lifecycle status (one of `MESSAGE_STATUSES`). A `blocked` message was not
+   * delivered because it failed a content/delivery policy check.
    */
   status: string;
   channel: Channel;
   templateSlug: string | null;
   recipient: string;
   createdAt: string;
-  /** Human-readable reason a `blocked` message was halted. Absent otherwise. */
-  blockedReason?: string | null;
   [key: string]: unknown;
 }
 
