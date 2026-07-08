@@ -224,6 +224,18 @@ export interface Message {
   channel: Channel;
   templateSlug: string | null;
   recipient: string;
+  /**
+   * First provider-reported email open (open tracking), as an ISO 8601 string,
+   * or `null` if not yet opened. Set once on the first open; later opens don't
+   * update it.
+   */
+  openedAt: string | null;
+  /**
+   * First provider-reported link click, as an ISO 8601 string, or `null` if no
+   * link has been clicked. Set once on the first click; later clicks don't
+   * update it.
+   */
+  clickedAt: string | null;
   createdAt: string;
   [key: string]: unknown;
 }

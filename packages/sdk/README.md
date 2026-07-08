@@ -269,6 +269,12 @@ const { data, nextCursor } = await senderkit.messages.list({
 const message = await senderkit.messages.get("msg_…");
 ```
 
+A returned `Message` carries engagement timestamps when the provider reports
+them: `openedAt` (first email open) and `clickedAt` (first link click). Both are
+ISO 8601 strings, or `null` until the event occurs. The matching
+`message.opened` and `message.clicked` webhook events are delivered as they
+happen (the `message.clicked` payload also includes the clicked `link`).
+
 ## Next.js route handler
 
 ```ts
