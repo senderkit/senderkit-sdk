@@ -19,6 +19,8 @@ export const messagesGetCommand = defineCommand<typeof schema.shape, Message>({
       channel: m.channel,
       template: m.templateSlug,
       recipient: m.recipient,
+      openedAt: m.openedAt,
+      clickedAt: m.clickedAt,
       createdAt: m.createdAt,
     }),
 });
