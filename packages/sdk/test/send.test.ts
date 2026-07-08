@@ -111,6 +111,26 @@ describe("send", () => {
     });
   });
 
+  it("forwards from and fromName overrides when provided", async () => {
+    const mock = createMockFetch([
+      { status: 202, body: { id: "msg_1", status: "queued", livemode: false } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    await sk.send({
+      template: "welcome",
+      to: "user@example.com",
+      from: "no-reply@example.com",
+      fromName: "Acme Support",
+    });
+    expect(mock.calls[0]!.body).toEqual({
+      template: "welcome",
+      to: "user@example.com",
+      vars: {},
+      from: "no-reply@example.com",
+      fromName: "Acme Support",
+    });
+  });
+
   it("throws when template or to is missing", async () => {
     const sk = new SenderKit({ apiKey: "sk_test_x", fetch: createMockFetch().fetch });
     // @ts-expect-error

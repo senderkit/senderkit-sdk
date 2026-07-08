@@ -54,6 +54,18 @@ export interface SendRequest extends EmailEnvelope {
   template: string;
   /** Recipient address. */
   to: string;
+  /**
+   * Per-message From address override (email only, bare address — put the
+   * display name in `fromName`). Falls back to the connection's From address.
+   * On managed sending it is honored only on the workspace's verified domain.
+   */
+  from?: string;
+  /**
+   * Per-message From display name override (email only), rendered as
+   * `Name <address>`. Falls back to the connection's From name. Max 128 chars;
+   * no control characters or angle brackets.
+   */
+  fromName?: string;
   /** Template variables. */
   vars?: Record<string, unknown>;
   /** Force a specific channel. Defaults to the template's primary channel. */
@@ -116,8 +128,18 @@ interface SendRawBase {
 export interface SendRawEmailRequest extends SendRawBase {
   channel: "email";
   content: RawEmailContent;
-  /** Per-message From override (email only). */
+  /**
+   * Per-message From address override (email only, bare address — put the
+   * display name in `fromName`). Falls back to the connection's From address.
+   * On managed sending it is honored only on the workspace's verified domain.
+   */
   from?: string;
+  /**
+   * Per-message From display name override (email only), rendered as
+   * `Name <address>`. Falls back to the connection's From name. Max 128 chars;
+   * no control characters or angle brackets.
+   */
+  fromName?: string;
 }
 
 export interface SendRawSmsRequest extends SendRawBase {

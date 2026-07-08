@@ -25,6 +25,8 @@ export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
       bcc: input.bcc,
       replyTo: input.replyTo,
       attachments: input.attachments,
+      from: input.from,
+      fromName: input.fromName,
     }),
   format: (res) =>
     `${success(`Queued message ${res.id}`)}\n${keyValues({

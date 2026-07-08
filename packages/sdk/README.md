@@ -71,6 +71,19 @@ The response shape:
 
 `status` is `"scheduled"` when `scheduledAt` is in the future, otherwise `"queued"`.
 
+Override the From identity per send (email only) with `from` (bare address) and/or `fromName` (display name). Either can be set on its own; both fall back to the provider connection's configured values. The same two fields work on `sendRaw`.
+
+```ts
+await senderkit.send({
+  template: "welcome",
+  to: "user@example.com",
+  from: "hello@acme.com",   // bare address
+  fromName: "Acme Support", // display name → "Acme Support <hello@acme.com>"
+});
+```
+
+On managed sending, the `from` address is honored only when it's on the workspace's verified sending domain; `fromName` always applies. `fromName` is capped at 128 characters and may not contain control characters or angle brackets.
+
 ### `sendRaw`
 
 Send inline content without registering a template — useful for one-off admin notifications, contact-form replies, AI-generated drafts, or any case where the body is known at call-time.
