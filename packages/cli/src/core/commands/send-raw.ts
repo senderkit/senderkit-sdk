@@ -24,6 +24,7 @@ function buildRequest(input: z.infer<typeof schema>): SendRawRequest {
       ...base,
       channel: "email",
       from: input.from,
+      fromName: input.fromName,
       content: {
         subject: input.subject,
         html: input.html,

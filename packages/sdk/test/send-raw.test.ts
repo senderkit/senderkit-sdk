@@ -53,6 +53,7 @@ describe("sendRaw", () => {
         text: "Hello {{name}}",
       },
       from: "no-reply@example.com",
+      fromName: "Acme Support",
       vars: { name: "Ada" },
       metadata: { source: "test", attempt: 1 },
       interpolate: true,
@@ -71,6 +72,7 @@ describe("sendRaw", () => {
       metadata: { source: "test", attempt: 1 },
       interpolate: true,
       from: "no-reply@example.com",
+      fromName: "Acme Support",
     });
   });
 
@@ -165,22 +167,24 @@ describe("sendRaw", () => {
     });
   });
 
-  it("does not include `from` for non-email channels", async () => {
+  it("does not include `from`/`fromName` for non-email channels", async () => {
     const mock = createMockFetch([
       { status: 202, body: { id: "msg_sms", status: "queued", livemode: false } },
     ]);
     const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
 
-    // Cast-through to verify the runtime guard rejects a stray `from` on SMS.
+    // Cast-through to verify the runtime guard rejects stray From overrides on SMS.
     await sk.sendRaw({
       channel: "sms",
       to: "+15555550123",
       content: { body: "hello" },
-      // @ts-expect-error from is email-only
+      // @ts-expect-error from and fromName are email-only
       from: "no-reply@example.com",
+      fromName: "Acme Support",
     });
 
     expect(mock.calls[0]!.body).not.toHaveProperty("from");
+    expect(mock.calls[0]!.body).not.toHaveProperty("fromName");
   });
 
   it("uses caller idempotencyKey verbatim", async () => {

@@ -102,6 +102,28 @@ const attachment = z.object({
   contentId: z.string().optional(),
 });
 
+/**
+ * Per-send From overrides, identical on templated and raw email sends. `from`
+ * is a bare address; the display name goes in `fromName`, never inline. Both
+ * are email-only and fall back to the provider connection's configured values.
+ */
+const fromOverride = z
+  .string()
+  .optional()
+  .describe(
+    "Email-only. Optional From address override (bare address — put the display " +
+      "name in fromName). Defaults to the connection's From address.",
+  );
+
+const fromName = z
+  .string()
+  .max(128)
+  .optional()
+  .describe(
+    "Email-only. Optional From display name, rendered as `Name <address>`. " +
+      "Max 128 chars; no control characters or angle brackets.",
+  );
+
 const emailEnvelope = {
   cc: z
     .preprocess(csvOrJsonArray, z.array(z.string()))
@@ -156,6 +178,8 @@ export const sendInput = {
   metadata,
   scheduledAt,
   idempotencyKey,
+  from: fromOverride,
+  fromName,
   ...emailEnvelope,
 };
 
@@ -172,7 +196,8 @@ export const sendRawInput = {
   preheader: z.string().optional().describe("Email preheader (email)."),
   html: z.string().optional().describe("Email HTML body (email)."),
   text: z.string().optional().describe("Email plain-text body (email)."),
-  from: z.string().optional().describe("From override (email)."),
+  from: fromOverride,
+  fromName,
   // sms + push + web-push
   body: z.string().optional().describe("Message body (sms, push, web-push)."),
   // push + web-push

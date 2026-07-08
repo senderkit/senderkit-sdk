@@ -78,6 +78,8 @@ export class SenderKit {
     if (request.bcc) body["bcc"] = request.bcc;
     if (request.replyTo) body["replyTo"] = request.replyTo;
     if (request.attachments) body["attachments"] = request.attachments;
+    if (request.from) body["from"] = request.from;
+    if (request.fromName) body["fromName"] = request.fromName;
 
     return this.http.request<SendResponse>({
       method: "POST",
@@ -111,6 +113,7 @@ export class SenderKit {
     if (request.interpolate) body["interpolate"] = true;
     if (request.scheduledAt) body["scheduledAt"] = toIsoString(request.scheduledAt);
     if (request.channel === "email" && request.from) body["from"] = request.from;
+    if (request.channel === "email" && request.fromName) body["fromName"] = request.fromName;
 
     return this.http.request<SendResponse>({
       method: "POST",
