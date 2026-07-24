@@ -8,6 +8,11 @@ import {
   messagesListInput,
   messagesGetInput,
   cancelMessageInput,
+  inboundAddressesListInput,
+  inboundAddressesCreateInput,
+  inboundAddressesDeleteInput,
+  inboundMessagesListInput,
+  inboundMessagesGetInput,
 } from "./mcp-schemas";
 
 // Single MCP entry point: re-export the input shapes + SEND_TOOL_LIVE_MODE_NOTE
@@ -113,6 +118,53 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     annotations: { destructiveHint: true },
     inputSchema: cancelMessageInput,
   },
+  {
+    name: "senderkit_inbound_addresses_list",
+    title: "List Inbound Addresses",
+    description:
+      "List the addresses provisioned on the workspace's shared receiving " +
+      "domain — the addresses that can receive mail into this workspace.",
+    annotations: { readOnlyHint: true },
+    inputSchema: inboundAddressesListInput,
+  },
+  {
+    name: "senderkit_inbound_addresses_create",
+    title: "Create Inbound Address",
+    description:
+      "Provision a new address on the workspace's shared receiving domain so " +
+      "it can receive mail. Optionally forward received mail to another address " +
+      "or bind the address to a specific webhook endpoint.",
+    annotations: { destructiveHint: true },
+    inputSchema: inboundAddressesCreateInput,
+  },
+  {
+    name: "senderkit_inbound_addresses_delete",
+    title: "Delete Inbound Address",
+    description:
+      "Delete an inbound address by its public id. Mail sent to it afterward is " +
+      "dropped like any other unmatched recipient.",
+    annotations: { destructiveHint: true },
+    inputSchema: inboundAddressesDeleteInput,
+  },
+  {
+    name: "senderkit_inbound_messages_list",
+    title: "List Received Messages",
+    description:
+      "List messages received on the workspace's inbound addresses, newest " +
+      "first. Filter by address or page backwards with a `before` timestamp — " +
+      "use this to monitor or triage incoming mail.",
+    annotations: { readOnlyHint: true },
+    inputSchema: inboundMessagesListInput,
+  },
+  {
+    name: "senderkit_inbound_messages_get",
+    title: "Get Received Message",
+    description:
+      "Fetch a single received message by id, including its parsed text/HTML " +
+      "body, stripped reply, headers, scanning verdicts, and attachment list.",
+    annotations: { readOnlyHint: true },
+    inputSchema: inboundMessagesGetInput,
+  },
 ];
 
 /** Union of every tool name in {@link MCP_TOOLS}. */
@@ -124,7 +176,12 @@ export type McpToolName =
   | "senderkit_templates_get"
   | "senderkit_messages_list"
   | "senderkit_messages_get"
-  | "senderkit_cancel_message";
+  | "senderkit_cancel_message"
+  | "senderkit_inbound_addresses_list"
+  | "senderkit_inbound_addresses_create"
+  | "senderkit_inbound_addresses_delete"
+  | "senderkit_inbound_messages_list"
+  | "senderkit_inbound_messages_get";
 
 // Keyed by the finite name union (not `string`) so known-key access stays a
 // non-optional `McpToolSpec` even under `noUncheckedIndexedAccess`.

@@ -16,7 +16,16 @@ export type {
   BatchSendResult,
   CancelMessageResponse,
   Channel,
+  CreateInboundAddressParams,
+  DeleteInboundAddressResponse,
   EmailEnvelope,
+  InboundAddress,
+  InboundAddressPair,
+  InboundAttachment,
+  InboundMessage,
+  InboundMessageStatus,
+  InboundMessageSummary,
+  ListInboundMessagesParams,
   ListMessagesParams,
   ListMessagesResponse,
   Message,
@@ -36,4 +45,5 @@ export type {
   Template,
   TemplateVersion,
 } from "./types";
+export type { BinaryResponse } from "./http";
 export { VERSION } from "./version";

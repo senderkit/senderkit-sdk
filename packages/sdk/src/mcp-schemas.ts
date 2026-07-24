@@ -256,6 +256,61 @@ export const cancelMessageInput = {
 /** Shape for `senderkit_context`. No inputs. */
 export const contextInput = {};
 
+// --------------------------------------------------------------------------- //
+// Inbound — receiving addresses and received mail (`inbound` scope).
+// --------------------------------------------------------------------------- //
+
+/** Shape for `senderkit_inbound_addresses_list`. No inputs. */
+export const inboundAddressesListInput = {};
+
+/** Shape for `senderkit_inbound_addresses_create`. */
+export const inboundAddressesCreateInput = {
+  localPart: z
+    .string()
+    .min(1)
+    .max(64)
+    .optional()
+    .describe(
+      "1-64 chars of a-z 0-9 . _ -, starting and ending alphanumeric. " +
+        "Lowercased. Omit to auto-generate an unguessable local part.",
+    ),
+  description: z.string().max(200).optional().describe("Optional human label for the address."),
+  forwardTo: z
+    .string()
+    .max(320)
+    .optional()
+    .describe("Optional address to also forward received mail to. Cannot be another inbound address."),
+  webhookEndpointId: z
+    .string()
+    .uuid()
+    .optional()
+    .describe(
+      "Optional webhook endpoint id to bind this address to. When unset, " +
+        "message.received events fan out to every endpoint subscribed to them.",
+    ),
+};
+
+/** Shape for `senderkit_inbound_addresses_delete`. */
+export const inboundAddressesDeleteInput = {
+  id: z.string().describe('Public inbound address id (e.g. "inb_…") to delete.'),
+};
+
+/** Shape for `senderkit_inbound_messages_list`. */
+export const inboundMessagesListInput = {
+  limit: positiveInt.describe("Max messages to return (1-100)."),
+  before: z
+    .string()
+    .datetime({ offset: true })
+    .optional()
+    .describe("Only return messages received before this ISO 8601 timestamp (for backward paging)."),
+  address: z.string().optional().describe("Filter to messages received on this address's public id."),
+};
+
+/** Shape for `senderkit_inbound_messages_get`. */
+export const inboundMessagesGetInput = {
+  id: z.string().describe('Public inbound message id (e.g. "rcv_…").'),
+};
+
 /**
  * Description-suffix appended to `senderkit_send` and `senderkit_send_raw`
  * so callers know the request will dispatch a real message and the mode

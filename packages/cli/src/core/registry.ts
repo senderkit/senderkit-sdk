@@ -7,6 +7,11 @@ import { messagesListCommand } from "./commands/messages-list";
 import { messagesGetCommand } from "./commands/messages-get";
 import { messagesCancelCommand } from "./commands/messages-cancel";
 import { contextCommand } from "./commands/context";
+import { inboundAddressesListCommand } from "./commands/inbound-addresses-list";
+import { inboundAddressesCreateCommand } from "./commands/inbound-addresses-create";
+import { inboundAddressesDeleteCommand } from "./commands/inbound-addresses-delete";
+import { inboundMessagesListCommand } from "./commands/inbound-messages-list";
+import { inboundMessagesGetCommand } from "./commands/inbound-messages-get";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registry: Command<any, any>[] = [
@@ -18,4 +23,9 @@ export const registry: Command<any, any>[] = [
   messagesGetCommand,
   messagesCancelCommand,
   contextCommand,
+  inboundAddressesListCommand,
+  inboundAddressesCreateCommand,
+  inboundAddressesDeleteCommand,
+  inboundMessagesListCommand,
+  inboundMessagesGetCommand,
 ];

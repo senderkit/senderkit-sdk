@@ -26,6 +26,18 @@ export interface RequestOptions {
   idempotencyKey?: string;
   /** When true and no idempotencyKey supplied, the client generates one so retries are safe. */
   autoIdempotency?: boolean;
+  /** Override the `Accept` header (defaults to `application/json`). */
+  accept?: string;
+}
+
+/** A non-JSON response body (e.g. raw MIME, attachment bytes) plus its metadata. */
+export interface BinaryResponse {
+  /** The response body as raw bytes. */
+  data: Uint8Array;
+  /** The response `Content-Type` (e.g. `message/rfc822`, `application/pdf`). */
+  contentType: string;
+  /** Filename parsed from `Content-Disposition`, when present. */
+  filename?: string;
 }
 
 const RETRY_BASE_MS = 250;
@@ -35,6 +47,26 @@ export class HttpClient {
   constructor(private readonly config: HttpClientConfig) {}
 
   async request<T>(options: RequestOptions): Promise<T> {
+    const response = await this.execute(options);
+    return (await this.parseJson<T>(response)) as T;
+  }
+
+  /**
+   * Like {@link request} but returns the raw response bytes instead of parsed
+   * JSON — for endpoints that stream binary (raw MIME source, attachments).
+   */
+  async requestBinary(options: RequestOptions): Promise<BinaryResponse> {
+    const response = await this.execute(options);
+    const data = new Uint8Array(await response.arrayBuffer());
+    return {
+      data,
+      contentType: response.headers.get("content-type") ?? "application/octet-stream",
+      filename: parseContentDispositionFilename(response.headers.get("content-disposition")),
+    };
+  }
+
+  /** Run the request with retries/error mapping, returning the successful `Response`. */
+  private async execute(options: RequestOptions): Promise<Response> {
     const url = this.buildUrl(options.path, options.query);
     const headers = this.buildHeaders(options);
     const init: RequestInit = {
@@ -57,7 +89,7 @@ export class HttpClient {
         clearTimeout(timer);
 
         if (response.ok) {
-          return (await this.parseJson<T>(response)) as T;
+          return response;
         }
 
         const error = await this.toApiError(response);
@@ -116,7 +148,7 @@ export class HttpClient {
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.config.apiKey}`,
       "Content-Type": "application/json",
-      Accept: "application/json",
+      Accept: options.accept ?? "application/json",
       "User-Agent": `senderkit-node/${VERSION}`,
     };
     const idempotencyKey =
@@ -196,6 +228,25 @@ function computeBackoff(attempt: number, overrideMs?: number): number {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Pull a filename out of a `Content-Disposition` header, preferring the RFC 5987
+ * `filename*` (percent-decoded) form over the plain `filename`. Returns
+ * `undefined` when neither is present.
+ */
+function parseContentDispositionFilename(header: string | null): string | undefined {
+  if (!header) return undefined;
+  const extended = /filename\*\s*=\s*(?:[^']*'[^']*')?([^;]+)/i.exec(header);
+  if (extended?.[1]) {
+    try {
+      return decodeURIComponent(extended[1].trim());
+    } catch {
+      // Fall through to the plain filename.
+    }
+  }
+  const plain = /filename\s*=\s*"?([^";]+)"?/i.exec(header);
+  return plain?.[1]?.trim();
 }
 
 function generateIdempotencyKey(): string {
