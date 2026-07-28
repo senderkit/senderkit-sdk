@@ -289,7 +289,10 @@ export interface InboundAddress {
 export interface CreateInboundAddressParams {
   /**
    * 1–64 chars of `a-z 0-9 . _ -`, starting and ending alphanumeric. Lowercased.
-   * Omit to auto-generate an unguessable `rcv-xxxxxxxxxx` local part.
+   * Omit to auto-generate an unguessable `rcv-xxxxxxxxxx` local part. Pass `"*"`
+   * for a catch-all that receives mail for every local part no exact address
+   * claims (an exact address always wins; the catch-all counts as one address
+   * against the plan cap).
    */
   localPart?: string;
   description?: string;
@@ -300,12 +303,81 @@ export interface CreateInboundAddressParams {
   forwardTo?: string;
   /**
    * Optional webhook endpoint to bind this address to. When unset,
-   * `message.received` events fan out to every endpoint subscribed to it.
+   * `message.received` events fan out to every endpoint subscribed to it. Must
+   * be an endpoint whose mode matches this address's `livemode`.
    */
   webhookEndpointId?: string;
+  /**
+   * A verified custom inbound domain (its `id` from `inbound.domains.list`) to
+   * mint the address on. Omit for the workspace's shared
+   * `{slug}.in.senderkit.email` domain.
+   */
+  domainId?: string;
+  /**
+   * Live mode. Defaults to `true`. A test-mode address (`false`) receives real
+   * mail but fans out only to test-mode webhook endpoints and doesn't count
+   * against quota.
+   */
+  livemode?: boolean;
 }
 
 export interface DeleteInboundAddressResponse {
+  deleted: true;
+}
+
+/**
+ * A DNS record a custom inbound domain must publish before it can receive.
+ * Surface these to the user verbatim; verification only completes once they are
+ * live.
+ */
+export interface InboundDnsRecord {
+  type: "TXT" | "MX";
+  /** Host/name to create the record at. */
+  name: string;
+  /** Record value. */
+  value: string;
+  /** MX priority, when `type` is `"MX"`. */
+  priority?: number;
+  /** Why the record is needed (e.g. domain-ownership DKIM, receiving MX). */
+  purpose: string;
+}
+
+/**
+ * A custom inbound domain — a domain the workspace claimed to receive mail on
+ * (e.g. `inbound.acme.com`), alongside the automatically-provisioned shared
+ * `{slug}.in.senderkit.email` domain.
+ */
+export interface InboundDomain {
+  /** Inbound domain id (UUID). */
+  id: string;
+  /** The domain, e.g. `inbound.acme.com`. */
+  domain: string;
+  /** `shared` for the managed domain, `custom` for a claimed one. */
+  kind: string;
+  /** Verification status, e.g. `pending` or `verified`. */
+  status: string;
+  /** DNS records still required to verify (empty once verified). */
+  records: InboundDnsRecord[];
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+export interface CreateInboundDomainParams {
+  /**
+   * Custom domain to claim for receiving, e.g. `"inbound.acme.com"`. Must not be
+   * already claimed and must not be a `senderkit.com`/`senderkit.email` suffix.
+   */
+  domain: string;
+  /**
+   * Only set `true` after the user has explicitly confirmed. Omit on the first
+   * attempt: if the domain already has live MX records pointing elsewhere, the
+   * call fails with a `409` (`existing_mx`) naming the current mail host(s), so
+   * you can confirm before redirecting all of that domain's mail to SenderKit.
+   */
+  acknowledgeExistingMx?: boolean;
+}
+
+export interface DeleteInboundDomainResponse {
   deleted: true;
 }
 

@@ -125,3 +125,95 @@ describe("inbound.messages", () => {
     expect(mock.calls).toHaveLength(0);
   });
 });
+
+describe("inbound.addresses custom domains + catch-all", () => {
+  it("sends domainId, livemode, and a catch-all local part when provided", async () => {
+    const mock = createMockFetch([
+      { status: 201, body: { id: "inb_4", address: "*@inbound.acme.com" } },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    const created = await sk.inbound.addresses.create({
+      localPart: "*",
+      domainId: "11111111-1111-1111-1111-111111111111",
+      livemode: false,
+    });
+    expect(created.id).toBe("inb_4");
+    expect(mock.calls[0]!.body).toEqual({
+      localPart: "*",
+      domainId: "11111111-1111-1111-1111-111111111111",
+      livemode: false,
+    });
+  });
+});
+
+describe("inbound.domains", () => {
+  it("lists domains from { domains: [...] }", async () => {
+    const mock = createMockFetch([
+      {
+        status: 200,
+        body: {
+          domains: [
+            { id: "d1", domain: "acme.in.senderkit.email", kind: "shared", status: "verified", records: [] },
+            { id: "d2", domain: "inbound.acme.com", kind: "custom", status: "pending", records: [] },
+          ],
+        },
+      },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    const list = await sk.inbound.domains.list();
+    expect(list).toHaveLength(2);
+    expect(list[1]!.domain).toBe("inbound.acme.com");
+    expect(mock.calls[0]!.method).toBe("GET");
+    expect(mock.calls[0]!.url).toContain("/v1/inbound/domains");
+  });
+
+  it("claims a domain and returns the DNS records to publish", async () => {
+    const mock = createMockFetch([
+      {
+        status: 201,
+        body: {
+          id: "d3",
+          domain: "inbound.acme.com",
+          kind: "custom",
+          status: "pending",
+          records: [{ type: "MX", name: "inbound.acme.com", value: "inbound-smtp.senderkit.email", priority: 10, purpose: "receiving" }],
+        },
+      },
+    ]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    const created = await sk.inbound.domains.create({
+      domain: "inbound.acme.com",
+      acknowledgeExistingMx: true,
+    });
+    expect(created.records[0]!.type).toBe("MX");
+    expect(mock.calls[0]!.method).toBe("POST");
+    expect(mock.calls[0]!.body).toEqual({
+      domain: "inbound.acme.com",
+      acknowledgeExistingMx: true,
+    });
+  });
+
+  it("throws when create domain missing", async () => {
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: createMockFetch().fetch });
+    // @ts-expect-error exercising the runtime guard
+    await expect(sk.inbound.domains.create({})).rejects.toThrow(/domain is required/);
+  });
+
+  it("deletes a domain by id with URL encoding", async () => {
+    const mock = createMockFetch([{ status: 200, body: { deleted: true } }]);
+    const sk = new SenderKit({
+      apiKey: "sk_test_x",
+      fetch: mock.fetch,
+      baseUrl: "https://api.example.com",
+    });
+    const res = await sk.inbound.domains.delete("d 3");
+    expect(res.deleted).toBe(true);
+    expect(mock.calls[0]!.method).toBe("DELETE");
+    expect(mock.calls[0]!.url).toBe("https://api.example.com/v1/inbound/domains/d%203");
+  });
+
+  it("throws when delete id missing", async () => {
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: createMockFetch().fetch });
+    await expect(sk.inbound.domains.delete("")).rejects.toThrow(/id is required/);
+  });
+});

@@ -16,6 +16,9 @@ const EXPECTED: Record<string, keyof typeof schemas> = {
   senderkit_inbound_addresses_delete: "inboundAddressesDeleteInput",
   senderkit_inbound_messages_list: "inboundMessagesListInput",
   senderkit_inbound_messages_get: "inboundMessagesGetInput",
+  senderkit_inbound_domains_list: "inboundDomainsListInput",
+  senderkit_inbound_domains_create: "inboundDomainsCreateInput",
+  senderkit_inbound_domains_delete: "inboundDomainsDeleteInput",
 };
 
 describe("MCP_TOOLS", () => {

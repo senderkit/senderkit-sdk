@@ -272,7 +272,8 @@ export const inboundAddressesCreateInput = {
     .optional()
     .describe(
       "1-64 chars of a-z 0-9 . _ -, starting and ending alphanumeric. " +
-        "Lowercased. Omit to auto-generate an unguessable local part.",
+        'Lowercased. Omit to auto-generate an unguessable local part. Pass "*" ' +
+        "for a catch-all that receives every local part no exact address claims.",
     ),
   description: z.string().max(200).optional().describe("Optional human label for the address."),
   forwardTo: z
@@ -288,11 +289,53 @@ export const inboundAddressesCreateInput = {
       "Optional webhook endpoint id to bind this address to. When unset, " +
         "message.received events fan out to every endpoint subscribed to them.",
     ),
+  domainId: z
+    .string()
+    .uuid()
+    .optional()
+    .describe(
+      "A verified custom inbound domain id (from senderkit_inbound_domains_list) " +
+        "to mint the address on. Omit for the workspace's shared receiving domain.",
+    ),
+  livemode: z
+    .boolean()
+    .optional()
+    .describe(
+      "Live mode (default true). Test-mode addresses receive real mail but fan " +
+        "out only to test webhook endpoints and don't count against quota.",
+    ),
 };
 
 /** Shape for `senderkit_inbound_addresses_delete`. */
 export const inboundAddressesDeleteInput = {
   id: z.string().describe('Public inbound address id (e.g. "inb_…") to delete.'),
+};
+
+/** Shape for `senderkit_inbound_domains_list`. No inputs. */
+export const inboundDomainsListInput = {};
+
+/** Shape for `senderkit_inbound_domains_create`. */
+export const inboundDomainsCreateInput = {
+  domain: z
+    .string()
+    .describe(
+      'Custom domain to claim for receiving, e.g. "inbound.acme.com". Must not ' +
+        "already be claimed and must not be a senderkit.com/senderkit.email suffix.",
+    ),
+  acknowledgeExistingMx: z
+    .boolean()
+    .optional()
+    .describe(
+      "Only pass true after the user has explicitly confirmed they want to " +
+        "redirect this domain's mail to SenderKit. Omit on the first attempt — " +
+        "if the domain already has live MX records, the call fails with an " +
+        "existing_mx error naming the current host(s) so you can confirm first.",
+    ),
+};
+
+/** Shape for `senderkit_inbound_domains_delete`. */
+export const inboundDomainsDeleteInput = {
+  id: z.string().describe("Inbound domain id (UUID) to delete."),
 };
 
 /** Shape for `senderkit_inbound_messages_list`. */

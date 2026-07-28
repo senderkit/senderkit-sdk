@@ -12,6 +12,9 @@ import { inboundAddressesCreateCommand } from "./commands/inbound-addresses-crea
 import { inboundAddressesDeleteCommand } from "./commands/inbound-addresses-delete";
 import { inboundMessagesListCommand } from "./commands/inbound-messages-list";
 import { inboundMessagesGetCommand } from "./commands/inbound-messages-get";
+import { inboundDomainsListCommand } from "./commands/inbound-domains-list";
+import { inboundDomainsCreateCommand } from "./commands/inbound-domains-create";
+import { inboundDomainsDeleteCommand } from "./commands/inbound-domains-delete";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registry: Command<any, any>[] = [
@@ -28,4 +31,7 @@ export const registry: Command<any, any>[] = [
   inboundAddressesDeleteCommand,
   inboundMessagesListCommand,
   inboundMessagesGetCommand,
+  inboundDomainsListCommand,
+  inboundDomainsCreateCommand,
+  inboundDomainsDeleteCommand,
 ];

@@ -20,6 +20,8 @@ export const inboundAddressesCreateCommand = defineCommand<
       description: input.description,
       forwardTo: input.forwardTo,
       webhookEndpointId: input.webhookEndpointId,
+      domainId: input.domainId,
+      livemode: input.livemode,
     }),
   format: (a) =>
     `${success(`Created ${a.address}`)}\n${keyValues({

@@ -13,6 +13,9 @@ import {
   inboundAddressesDeleteInput,
   inboundMessagesListInput,
   inboundMessagesGetInput,
+  inboundDomainsListInput,
+  inboundDomainsCreateInput,
+  inboundDomainsDeleteInput,
 } from "./mcp-schemas";
 
 // Single MCP entry point: re-export the input shapes + SEND_TOOL_LIVE_MODE_NOTE
@@ -131,9 +134,10 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     name: "senderkit_inbound_addresses_create",
     title: "Create Inbound Address",
     description:
-      "Provision a new address on the workspace's shared receiving domain so " +
-      "it can receive mail. Optionally forward received mail to another address " +
-      "or bind the address to a specific webhook endpoint.",
+      "Provision a new address so it can receive mail — on the workspace's " +
+      "shared receiving domain, or a verified custom domain via domainId. " +
+      'Pass localPart "*" for a catch-all. Optionally forward received mail to ' +
+      "another address or bind the address to a specific webhook endpoint.",
     annotations: { destructiveHint: true },
     inputSchema: inboundAddressesCreateInput,
   },
@@ -165,6 +169,40 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     annotations: { readOnlyHint: true },
     inputSchema: inboundMessagesGetInput,
   },
+  {
+    name: "senderkit_inbound_domains_list",
+    title: "List Inbound Domains",
+    description:
+      "List the workspace's inbound domains — the shared receiving domain and " +
+      "any custom domains — with their verification status and, for pending " +
+      "custom domains, the DNS records still required to verify them.",
+    annotations: { readOnlyHint: true },
+    inputSchema: inboundDomainsListInput,
+  },
+  {
+    name: "senderkit_inbound_domains_create",
+    title: "Claim Inbound Domain",
+    description:
+      'Claim a custom domain for receiving mail (e.g. "inbound.acme.com"). ' +
+      "Returns the DNS records (MX, DKIM) the user must publish — tell them " +
+      "exactly what to add. If the domain already has live MX records pointing " +
+      "elsewhere, this fails with an existing_mx error naming the current " +
+      "host(s); get the user's explicit confirmation before retrying with " +
+      "acknowledgeExistingMx, since claiming redirects all of that domain's " +
+      "mail to SenderKit. Nothing is received until the records are live and " +
+      "verification completes.",
+    annotations: { destructiveHint: true },
+    inputSchema: inboundDomainsCreateInput,
+  },
+  {
+    name: "senderkit_inbound_domains_delete",
+    title: "Delete Inbound Domain",
+    description:
+      "Delete a custom inbound domain by id. Its addresses stop receiving mail " +
+      "immediately. The workspace's shared receiving domain cannot be deleted.",
+    annotations: { destructiveHint: true },
+    inputSchema: inboundDomainsDeleteInput,
+  },
 ];
 
 /** Union of every tool name in {@link MCP_TOOLS}. */
@@ -181,7 +219,10 @@ export type McpToolName =
   | "senderkit_inbound_addresses_create"
   | "senderkit_inbound_addresses_delete"
   | "senderkit_inbound_messages_list"
-  | "senderkit_inbound_messages_get";
+  | "senderkit_inbound_messages_get"
+  | "senderkit_inbound_domains_list"
+  | "senderkit_inbound_domains_create"
+  | "senderkit_inbound_domains_delete";
 
 // Keyed by the finite name union (not `string`) so known-key access stays a
 // non-optional `McpToolSpec` even under `noUncheckedIndexedAccess`.
