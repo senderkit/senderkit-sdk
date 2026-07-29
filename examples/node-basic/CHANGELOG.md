@@ -1,5 +1,14 @@
 # @senderkit-examples/node-basic
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [c1caf54]
+- Updated dependencies [1bc020e]
+- Updated dependencies [d8560bb]
+  - @senderkit/sdk@0.13.0
+
 ## 0.0.13
 
 ### Patch Changes
