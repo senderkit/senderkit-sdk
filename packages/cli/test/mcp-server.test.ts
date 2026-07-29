@@ -59,6 +59,9 @@ describe("registry", () => {
         "senderkit_inbound_addresses_delete",
         "senderkit_inbound_messages_list",
         "senderkit_inbound_messages_get",
+        "senderkit_inbound_domains_list",
+        "senderkit_inbound_domains_create",
+        "senderkit_inbound_domains_delete",
       ]),
     );
   });
@@ -98,6 +101,18 @@ describe("tool annotations", () => {
     senderkit_inbound_messages_get: {
       title: "Get Received Message",
       hint: "readOnlyHint",
+    },
+    senderkit_inbound_domains_list: {
+      title: "List Inbound Domains",
+      hint: "readOnlyHint",
+    },
+    senderkit_inbound_domains_create: {
+      title: "Claim Inbound Domain",
+      hint: "destructiveHint",
+    },
+    senderkit_inbound_domains_delete: {
+      title: "Delete Inbound Domain",
+      hint: "destructiveHint",
     },
   } as const;
 

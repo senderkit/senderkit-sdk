@@ -1,8 +1,11 @@
 import type { BinaryResponse, HttpClient } from "../http";
 import type {
   CreateInboundAddressParams,
+  CreateInboundDomainParams,
   DeleteInboundAddressResponse,
+  DeleteInboundDomainResponse,
   InboundAddress,
+  InboundDomain,
   InboundMessage,
   InboundMessageSummary,
   ListInboundMessagesParams,
@@ -37,6 +40,8 @@ export class InboundAddressesResource {
     if (params.webhookEndpointId !== undefined) {
       body["webhookEndpointId"] = params.webhookEndpointId;
     }
+    if (params.domainId !== undefined) body["domainId"] = params.domainId;
+    if (params.livemode !== undefined) body["livemode"] = params.livemode;
     return this.http.request<InboundAddress>({
       method: "POST",
       path: "/v1/inbound/addresses",
@@ -115,13 +120,72 @@ export class InboundMessagesResource {
   }
 }
 
-/** The `inbound` namespace: `addresses` (provisioning) and `messages` (received mail). */
+/** Manage custom inbound domains — claim a domain and read its verification state. */
+export class InboundDomainsResource {
+  constructor(private readonly http: HttpClient) {}
+
+  /**
+   * List the workspace's inbound domains, including the shared
+   * `{slug}.in.senderkit.email` domain when in use.
+   */
+  async list(): Promise<InboundDomain[]> {
+    const res = await this.http.request<{ domains: InboundDomain[] }>({
+      method: "GET",
+      path: "/v1/inbound/domains",
+    });
+    return res.domains;
+  }
+
+  /**
+   * Claim a custom domain for receiving. The result carries the DNS `records`
+   * the user must publish; nothing is received until they are live and the
+   * verification sweep flips the domain to `verified`.
+   *
+   * If the domain already has live MX records pointing elsewhere, this rejects
+   * with a `SenderKitApiError` (`409`, `code: "existing_mx"`) whose `details`
+   * name the current mail host(s) — get the user's explicit confirmation, then
+   * retry with `acknowledgeExistingMx: true`.
+   */
+  async create(params: CreateInboundDomainParams): Promise<InboundDomain> {
+    if (!params?.domain) {
+      throw new TypeError("inbound.domains.create(params): domain is required");
+    }
+    const body: Record<string, unknown> = { domain: params.domain };
+    if (params.acknowledgeExistingMx !== undefined) {
+      body["acknowledgeExistingMx"] = params.acknowledgeExistingMx;
+    }
+    return this.http.request<InboundDomain>({
+      method: "POST",
+      path: "/v1/inbound/domains",
+      body,
+    });
+  }
+
+  /**
+   * Delete a custom inbound domain by id; its addresses stop receiving mail
+   * immediately. The shared domain cannot be deleted (`409`).
+   */
+  async delete(id: string): Promise<DeleteInboundDomainResponse> {
+    if (!id) throw new TypeError("inbound.domains.delete(id): id is required");
+    return this.http.request<DeleteInboundDomainResponse>({
+      method: "DELETE",
+      path: `/v1/inbound/domains/${encodeURIComponent(id)}`,
+    });
+  }
+}
+
+/**
+ * The `inbound` namespace: `addresses` (provisioning), `messages` (received
+ * mail), and `domains` (custom receiving domains).
+ */
 export class InboundResource {
   readonly addresses: InboundAddressesResource;
   readonly messages: InboundMessagesResource;
+  readonly domains: InboundDomainsResource;
 
   constructor(http: HttpClient) {
     this.addresses = new InboundAddressesResource(http);
     this.messages = new InboundMessagesResource(http);
+    this.domains = new InboundDomainsResource(http);
   }
 }
