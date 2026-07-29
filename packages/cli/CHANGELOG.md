@@ -1,5 +1,77 @@
 # @senderkit/cli
 
+## 0.8.0
+
+### Minor Changes
+
+- c1caf54: Add inbound email — receive mail, not just send it.
+
+  A new `inbound` namespace covers three things: **addresses** to receive on,
+  **messages** that arrive on them, and **domains** to receive under. Requires an
+  API key with the `inbound` scope.
+
+  Addresses live on the workspace's shared `{slug}.in.senderkit.email` domain,
+  which is created lazily on first use. Pass a `localPart` to pick one, omit it for
+  an unguessable generated address, or pass `"*"` for a catch-all that takes every
+  local part no exact address claims — an exact address always wins.
+
+  Received mail is retained for **30 days**; fetching the raw source or an
+  attachment after that rejects with a `SenderKitApiError` (`410`).
+  - **SDK:** `client.inbound.addresses` (`list`, `create`, `delete`),
+    `client.inbound.messages` (`list`, `get`, `raw`, `attachment`), and
+    `client.inbound.domains` (`list`, `create`, `delete`). `messages.get` returns
+    the parsed body, headers, attachment metadata and SPF/DKIM/DMARC verdicts;
+    `raw` returns `message/rfc822` bytes and `attachment(id, index)` returns one
+    attachment by its zero-based `index`. Types are exported from the package root
+    — `InboundAddress`, `InboundDomain`, `InboundMessage`,
+    `InboundMessageSummary`, `InboundAttachment`, `InboundDnsRecord`,
+    `InboundMessageStatus`, and the matching param/response types.
+  - **CLI:** eight new commands — `senderkit inbound addresses list|create|delete`,
+    `senderkit inbound messages list|get`, and
+    `senderkit inbound domains list|create|delete`.
+  - **MCP:** eight new tools mirroring those commands, named
+    `senderkit_inbound_{addresses,messages,domains}_*`.
+
+  Claiming a custom domain returns the DNS `records` to publish; nothing is
+  received until they are live and the domain flips to `verified`. If the domain
+  already has MX records pointing elsewhere, `domains.create` rejects with a
+  `SenderKitApiError` (`409`, `code: "existing_mx"`) naming the current mail hosts
+  — confirm with the user, then retry with `acknowledgeExistingMx: true`. The
+  shared domain cannot be deleted.
+
+- 1bc020e: Surface provider-reported open/click engagement on messages.
+  - **`openedAt`** — first provider-reported email open, as an ISO 8601 string, or
+    `null` until opened. Set once on the first open; later opens don't update it.
+  - **`clickedAt`** — first provider-reported link click, as an ISO 8601 string, or
+    `null` until a link is clicked. Set once on the first click; later clicks don't
+    update it.
+
+  Both fields are returned by `messages.get` and `messages.list`.
+  - **SDK:** `openedAt` / `clickedAt` added to the `Message` type.
+  - **CLI:** `senderkit messages get` now prints `openedAt` / `clickedAt`.
+  - **Webhooks:** two new subscribable event types — `message.opened` and
+    `message.clicked`. They're engagement signals and never change a message's
+    status (`delivered` stays terminal). The `message.clicked` payload additionally
+    carries the clicked `link`.
+
+- d8560bb: Add the `suppressed` message lifecycle status.
+
+  The API can now return `suppressed` for a message: the provider accepted the
+  send but never attempted delivery — the recipient address failed validation, or
+  was already suppressed for this sender. It is distinct from `failed`, which is a
+  bounce reported by the receiving mail server.
+  - **SDK:** `suppressed` added to the exported `MESSAGE_STATUSES` list (between
+    `opted_out` and `blocked`), and documented on `Message.status`.
+  - **MCP:** the `senderkit_messages_list` `status` filter now accepts
+    `suppressed`.
+
+### Patch Changes
+
+- Updated dependencies [c1caf54]
+- Updated dependencies [1bc020e]
+- Updated dependencies [d8560bb]
+  - @senderkit/sdk@0.13.0
+
 ## 0.7.0
 
 ### Minor Changes
