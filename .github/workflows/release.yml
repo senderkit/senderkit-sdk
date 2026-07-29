@@ -22,12 +22,14 @@ jobs:
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
+      # Pinned to a major: npm@latest moved to 12.x, which dropped Node 20 and
+      # broke this step. Trusted Publishing needs npm >= 11.5.1.
       - name: Upgrade npm for Trusted Publishing
-        run: npm install -g npm@latest
+        run: npm install -g npm@12
 
       - run: pnpm install --frozen-lockfile
 
