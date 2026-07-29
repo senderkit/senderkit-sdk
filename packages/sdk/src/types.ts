@@ -7,14 +7,15 @@ export type Channel = "email" | "sms" | "push" | "web-push";
  * restricted to. A key minted without explicit scopes is *unscoped* and has
  * full access; a scoped key only authorizes the operations in its grant:
  *
- * - `read`   — list/get messages & templates, render, fetch context.
- * - `send`   — create messages (`send`/`sendRaw`) and author template drafts.
- * - `cancel` — cancel a scheduled or queued message.
+ * - `read`    — list/get messages & templates, render, fetch context.
+ * - `send`    — create messages (`send`/`sendRaw`) and author template drafts.
+ * - `cancel`  — cancel a scheduled or queued message.
+ * - `inbound` — manage inbound addresses and read received mail.
  *
  * Calling an operation outside a scoped key's grant returns `403`
  * (`SenderKitPermissionError`, `code: "insufficient_scope"`).
  */
-export type ApiScope = "read" | "send" | "cancel";
+export type ApiScope = "read" | "send" | "cancel" | "inbound";
 
 export interface SenderKitOptions {
   /** API key. Use `sk_live_…` for production, `sk_test_…` for test mode. */
@@ -265,4 +266,130 @@ export interface CancelMessageResponse {
 export interface SenderKitContext {
   workspace: { id: string; slug: string; name: string };
   mode: "live" | "test";
+}
+
+// --------------------------------------------------------------------------- //
+// Inbound — receiving addresses and received mail. Requires the `inbound` scope.
+// --------------------------------------------------------------------------- //
+
+/** An address provisioned on the workspace's shared receiving domain. */
+export interface InboundAddress {
+  /** Public inbound address id (e.g. `inb_…`). */
+  id: string;
+  /** The full receiving address, e.g. `support@acme.in.senderkit.email`. */
+  address: string;
+  description: string | null;
+  /** Address received mail is also forwarded to, or `null`. */
+  forwardTo: string | null;
+  active: boolean;
+  livemode: boolean;
+  createdAt: string;
+}
+
+export interface CreateInboundAddressParams {
+  /**
+   * 1–64 chars of `a-z 0-9 . _ -`, starting and ending alphanumeric. Lowercased.
+   * Omit to auto-generate an unguessable `rcv-xxxxxxxxxx` local part.
+   */
+  localPart?: string;
+  description?: string;
+  /**
+   * Optional address to also forward received mail to. Cannot point at any
+   * inbound address (rejected as a mail loop).
+   */
+  forwardTo?: string;
+  /**
+   * Optional webhook endpoint to bind this address to. When unset,
+   * `message.received` events fan out to every endpoint subscribed to it.
+   */
+  webhookEndpointId?: string;
+}
+
+export interface DeleteInboundAddressResponse {
+  deleted: true;
+}
+
+/**
+ * `received` — stored and the webhook/forward pipeline ran; `dropped` — arrived
+ * on a verified inbound domain but matched no address; `quota_exceeded` — the
+ * workspace's inbound quota was hit (the row is stored, pipeline skipped).
+ */
+export type InboundMessageStatus = "received" | "dropped" | "quota_exceeded";
+
+/** A received-message summary, as returned by `inbound.messages.list`. */
+export interface InboundMessageSummary {
+  /** Public inbound message id (e.g. `rcv_…`). */
+  id: string;
+  status: InboundMessageStatus;
+  /** The envelope/header From address. */
+  from: string | null;
+  subject: string | null;
+  /** The `+tag` segment of the addressed local part, if any. */
+  plusTag: string | null;
+  sizeBytes: number;
+  receivedAt: string;
+}
+
+export interface InboundAddressPair {
+  email: string;
+  name: string | null;
+}
+
+export interface InboundAttachment {
+  /** Zero-based index; matches the attachment endpoint's path segment. */
+  index: number;
+  filename: string | null;
+  contentType: string;
+  size: number;
+  /**
+   * Authenticated API URL. Fetch it with an `Authorization: Bearer` header
+   * carrying an API key with the `inbound` scope — not a public/signed link.
+   */
+  url: string;
+}
+
+/** A received message, as returned by `inbound.messages.get`. */
+export interface InboundMessage {
+  /** Public inbound message id (e.g. `rcv_…`). */
+  id: string;
+  status: InboundMessageStatus;
+  channel: Channel;
+  /** Canonical receiving address, or `null` for catch-all/unmatched mail. */
+  address: string | null;
+  plusTag: string | null;
+  from: { email: string | null; name: string | null };
+  to: InboundAddressPair[];
+  cc: InboundAddressPair[];
+  envelope: { from: string | null; to: string[] };
+  subject: string | null;
+  /** The mail's `Message-ID` header. */
+  messageId: string | null;
+  inReplyTo: string | null;
+  text: string | null;
+  html: string | null;
+  /** The plain-text reply with quoted history/signature stripped. */
+  strippedReply: string | null;
+  /** Whether the stored body was truncated. */
+  truncated: boolean;
+  headers: Record<string, string>;
+  attachments: InboundAttachment[];
+  /** SES scanning verdicts (e.g. spam/virus/SPF/DKIM), as reported. */
+  verdicts: Record<string, string>;
+  sizeBytes: number;
+  /** Authenticated API URL for the raw RFC 822 source. */
+  rawUrl: string;
+  receivedAt: string;
+  [key: string]: unknown;
+}
+
+export interface ListInboundMessagesParams {
+  /** Page size (1–100). Defaults to 50. */
+  limit?: number;
+  /**
+   * Only return messages received before this time. ISO 8601 string or `Date`.
+   * Combine with the last item's `receivedAt` to page backwards.
+   */
+  before?: string | Date;
+  /** Filter to messages received on this address's public id. */
+  address?: string;
 }

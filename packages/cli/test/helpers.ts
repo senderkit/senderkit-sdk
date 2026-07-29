@@ -7,6 +7,10 @@ export interface StubCalls {
   listParams?: unknown;
   getMessageId?: string;
   cancelMessageId?: string;
+  createInboundAddress?: unknown;
+  deleteInboundAddressId?: string;
+  listInboundParams?: unknown;
+  getInboundMessageId?: string;
 }
 
 const queued = { id: "msg_x", status: "queued" as const, livemode: false };
@@ -69,6 +73,70 @@ export function stubClient(): { client: SenderKit; calls: StubCalls } {
       cancel: async (id: string) => {
         calls.cancelMessageId = id;
         return { id, status: "canceled" as const };
+      },
+    },
+    inbound: {
+      addresses: {
+        list: async () => [
+          {
+            id: "inb_1",
+            address: "support@acme.in.senderkit.email",
+            description: "Support intake",
+            forwardTo: null,
+            active: true,
+            livemode: false,
+            createdAt: "2026-05-10T00:00:00Z",
+          },
+        ],
+        create: async (params: unknown) => {
+          calls.createInboundAddress = params;
+          return {
+            id: "inb_2",
+            address: "sales@acme.in.senderkit.email",
+            description: null,
+            forwardTo: null,
+            active: true,
+            livemode: false,
+            createdAt: "2026-05-10T00:00:00Z",
+          };
+        },
+        delete: async (id: string) => {
+          calls.deleteInboundAddressId = id;
+          return { deleted: true as const };
+        },
+      },
+      messages: {
+        list: async (params: unknown) => {
+          calls.listInboundParams = params;
+          return [];
+        },
+        get: async (id: string) => {
+          calls.getInboundMessageId = id;
+          return {
+            id,
+            status: "received",
+            channel: "email",
+            address: "support@acme.in.senderkit.email",
+            plusTag: null,
+            from: { email: "sender@example.com", name: "Sender" },
+            to: [],
+            cc: [],
+            envelope: { from: "sender@example.com", to: [] },
+            subject: "Hello",
+            messageId: null,
+            inReplyTo: null,
+            text: "Hi",
+            html: null,
+            strippedReply: "Hi",
+            truncated: false,
+            headers: {},
+            attachments: [],
+            verdicts: {},
+            sizeBytes: 42,
+            rawUrl: "https://api.senderkit.com/v1/inbound/messages/" + id + "/raw",
+            receivedAt: "2026-05-10T00:00:00Z",
+          };
+        },
       },
     },
     context: async () => ({

@@ -7,6 +7,11 @@ import { messagesListCommand } from "../src/core/commands/messages-list";
 import { messagesGetCommand } from "../src/core/commands/messages-get";
 import { messagesCancelCommand } from "../src/core/commands/messages-cancel";
 import { contextCommand } from "../src/core/commands/context";
+import { inboundAddressesListCommand } from "../src/core/commands/inbound-addresses-list";
+import { inboundAddressesCreateCommand } from "../src/core/commands/inbound-addresses-create";
+import { inboundAddressesDeleteCommand } from "../src/core/commands/inbound-addresses-delete";
+import { inboundMessagesListCommand } from "../src/core/commands/inbound-messages-list";
+import { inboundMessagesGetCommand } from "../src/core/commands/inbound-messages-get";
 import { stubClient } from "./helpers";
 
 describe("send command", () => {
@@ -211,5 +216,58 @@ describe("context command", () => {
     expect(rendered).toContain("Acme Inc");
     expect(rendered).toContain("acme");
     expect(rendered).toContain("test");
+  });
+});
+
+describe("inbound addresses commands", () => {
+  it("lists inbound addresses", async () => {
+    const { client } = stubClient();
+    const out = await inboundAddressesListCommand.run({}, { client });
+    expect(out).toHaveLength(1);
+    expect(inboundAddressesListCommand.format(out)).toContain(
+      "support@acme.in.senderkit.email",
+    );
+  });
+
+  it("creates an inbound address, threading fields through", async () => {
+    const { client, calls } = stubClient();
+    const out = await inboundAddressesCreateCommand.run(
+      { localPart: "sales", forwardTo: "team@acme.com" },
+      { client },
+    );
+    expect(calls.createInboundAddress).toMatchObject({
+      localPart: "sales",
+      forwardTo: "team@acme.com",
+    });
+    expect(inboundAddressesCreateCommand.format(out)).toContain("sales@acme.in.senderkit.email");
+  });
+
+  it("deletes an inbound address by id", async () => {
+    const { client, calls } = stubClient();
+    const out = await inboundAddressesDeleteCommand.run({ id: "inb_1" }, { client });
+    expect(calls.deleteInboundAddressId).toBe("inb_1");
+    expect(out).toEqual({ deleted: true });
+    expect(inboundAddressesDeleteCommand.format(out)).toMatch(/Deleted/);
+  });
+});
+
+describe("inbound messages commands", () => {
+  it("lists received messages, threading filters through", async () => {
+    const { client, calls } = stubClient();
+    const out = await inboundMessagesListCommand.run(
+      { limit: 5, address: "inb_1" },
+      { client },
+    );
+    expect(calls.listInboundParams).toMatchObject({ limit: 5, address: "inb_1" });
+    expect(out).toEqual([]);
+    expect(inboundMessagesListCommand.format(out)).toContain("No received messages");
+  });
+
+  it("gets a received message by id", async () => {
+    const { client, calls } = stubClient();
+    const out = await inboundMessagesGetCommand.run({ id: "rcv_1" }, { client });
+    expect(calls.getInboundMessageId).toBe("rcv_1");
+    expect(out.id).toBe("rcv_1");
+    expect(inboundMessagesGetCommand.format(out)).toContain("rcv_1");
   });
 });

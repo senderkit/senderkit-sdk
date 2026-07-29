@@ -1,5 +1,6 @@
 import { SenderKitError } from "./errors";
 import { HttpClient } from "./http";
+import { InboundResource } from "./resources/inbound";
 import { MessagesResource } from "./resources/messages";
 import { TemplatesResource } from "./resources/templates";
 import type {
@@ -20,6 +21,8 @@ const DEFAULT_BATCH_CONCURRENCY = 5;
 export class SenderKit {
   readonly templates: TemplatesResource;
   readonly messages: MessagesResource;
+  /** Inbound addresses and received mail. Requires an API key with the `inbound` scope. */
+  readonly inbound: InboundResource;
   /** Mode derived from the API key prefix: `sk_test_…` → `"test"`, anything else → `"live"`. */
   readonly mode: "live" | "test";
   private readonly http: HttpClient;
@@ -59,6 +62,7 @@ export class SenderKit {
 
     this.templates = new TemplatesResource(this.http);
     this.messages = new MessagesResource(this.http);
+    this.inbound = new InboundResource(this.http);
   }
 
   async send(request: SendRequest): Promise<SendResponse> {

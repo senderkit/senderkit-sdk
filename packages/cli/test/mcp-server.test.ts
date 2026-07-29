@@ -54,6 +54,11 @@ describe("registry", () => {
         "senderkit_messages_get",
         "senderkit_cancel_message",
         "senderkit_context",
+        "senderkit_inbound_addresses_list",
+        "senderkit_inbound_addresses_create",
+        "senderkit_inbound_addresses_delete",
+        "senderkit_inbound_messages_list",
+        "senderkit_inbound_messages_get",
       ]),
     );
   });
@@ -74,6 +79,26 @@ describe("tool annotations", () => {
     senderkit_messages_get: { title: "Get Message", hint: "readOnlyHint" },
     senderkit_templates_list: { title: "List Templates", hint: "readOnlyHint" },
     senderkit_templates_get: { title: "Get Template", hint: "readOnlyHint" },
+    senderkit_inbound_addresses_list: {
+      title: "List Inbound Addresses",
+      hint: "readOnlyHint",
+    },
+    senderkit_inbound_addresses_create: {
+      title: "Create Inbound Address",
+      hint: "destructiveHint",
+    },
+    senderkit_inbound_addresses_delete: {
+      title: "Delete Inbound Address",
+      hint: "destructiveHint",
+    },
+    senderkit_inbound_messages_list: {
+      title: "List Received Messages",
+      hint: "readOnlyHint",
+    },
+    senderkit_inbound_messages_get: {
+      title: "Get Received Message",
+      hint: "readOnlyHint",
+    },
   } as const;
 
   it("assigns the directory-required title and a single hint to every tool", () => {
@@ -91,7 +116,7 @@ describe("tool annotations", () => {
     }
   });
 
-  it("covers all eight registered tools", () => {
+  it("covers all registered tools", () => {
     expect(registry.map((c) => c.mcpName).sort()).toEqual(
       Object.keys(EXPECTED).sort(),
     );
