@@ -217,9 +217,11 @@ export interface Message {
   /** Public-facing id (e.g. `msg_…`). */
   publicId: string;
   /**
-   * Lifecycle status (one of `MESSAGE_STATUSES`). A `blocked` message was
-   * halted by automated content safety checks; the generic reason (when any) is
-   * recorded on the message `timeline`.
+   * Lifecycle status (one of `MESSAGE_STATUSES`). A `suppressed` message was
+   * accepted but never attempted — the recipient address failed validation or
+   * was already suppressed for this sender (distinct from `failed`, a real
+   * bounce). A `blocked` message was halted by automated content safety checks;
+   * the generic reason (when any) is recorded on the message `timeline`.
    */
   status: string;
   channel: Channel;
