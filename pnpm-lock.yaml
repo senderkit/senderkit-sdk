@@ -26,13 +26,13 @@ importers:
         version: link:../../packages/sdk
       next:
         specifier: ^16.2.11
-        version: 16.2.11(react-dom@19.2.6(react@19.2.8))(react@19.2.8)
+        version: 16.2.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.2.8
         version: 19.2.8
       react-dom:
-        specifier: ^19.0.0
-        version: 19.2.6(react@19.2.8)
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
     devDependencies:
       '@types/node':
         specifier: ^20.14.0
@@ -110,7 +110,7 @@ importers:
     devDependencies:
       '@react-email/render':
         specifier: ^1.0.0
-        version: 1.4.0(react-dom@19.2.6(react@19.2.8))(react@19.2.8)
+        version: 1.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/node':
         specifier: ^20.14.0
         version: 20.19.40
@@ -124,8 +124,8 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8
       react-dom:
-        specifier: ^19.0.0
-        version: 19.2.6(react@19.2.8)
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(postcss@8.5.22)(tsx@4.21.0)(typescript@5.9.3)
@@ -1768,10 +1768,10 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
-  react-dom@19.2.6:
-    resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
+  react-dom@19.2.8:
+    resolution: {integrity: sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ==}
     peerDependencies:
-      react: ^19.2.6
+      react: ^19.2.8
 
   react-promise-suspense@0.3.4:
     resolution: {integrity: sha512-I42jl7L3Ze6kZaq+7zXWSunBa3b1on5yfvUW6Eo/3fFOj6dZ5Bqmcd264nJbTK/gn1HjjILAjSwnZbV4RpSaNQ==}
@@ -2619,12 +2619,12 @@ snapshots:
 
   '@oxc-project/types@0.133.0': {}
 
-  '@react-email/render@1.4.0(react-dom@19.2.6(react@19.2.8))(react@19.2.8)':
+  '@react-email/render@1.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       html-to-text: 9.0.5
       prettier: 3.8.3
       react: 19.2.8
-      react-dom: 19.2.6(react@19.2.8)
+      react-dom: 19.2.8(react@19.2.8)
       react-promise-suspense: 0.3.4
 
   '@rolldown/binding-android-arm64@1.0.3':
@@ -3446,7 +3446,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next@16.2.11(react-dom@19.2.6(react@19.2.8))(react@19.2.8):
+  next@16.2.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@next/env': 16.2.11
       '@swc/helpers': 0.5.15
@@ -3454,7 +3454,7 @@ snapshots:
       caniuse-lite: 1.0.30001806
       postcss: 8.5.22
       react: 19.2.8
-      react-dom: 19.2.6(react@19.2.8)
+      react-dom: 19.2.8(react@19.2.8)
       styled-jsx: 5.1.6(react@19.2.8)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.11
@@ -3586,7 +3586,7 @@ snapshots:
       iconv-lite: 0.7.2
       unpipe: 1.0.0
 
-  react-dom@19.2.6(react@19.2.8):
+  react-dom@19.2.8(react@19.2.8):
     dependencies:
       react: 19.2.8
       scheduler: 0.27.0
