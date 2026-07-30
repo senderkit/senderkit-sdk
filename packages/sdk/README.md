@@ -275,6 +275,17 @@ ISO 8601 strings, or `null` until the event occurs. The matching
 `message.opened` and `message.clicked` webhook events are delivered as they
 happen (the `message.clicked` payload also includes the clicked `link`).
 
+SenderKit also emits delivery-outcome webhook events you can subscribe an
+endpoint to: `message.sent`, `message.delivered`, `message.failed`,
+`message.opted_out`, `message.complained`, `message.suppressed`, and (for
+inbound mail) `message.received`. `message.complained` fires when the recipient
+marks the message as spam; a complaint emits both `message.complained` and
+`message.opted_out`, so handlers that only watch for opt-outs keep working
+unchanged. `message.suppressed` fires when a send is skipped because the address
+failed validation or was already on the suppression list after an earlier bounce
+or complaint — distinct from `message.failed`, which is a real bounce reported by
+the receiving mail server.
+
 ## Next.js route handler
 
 ```ts
