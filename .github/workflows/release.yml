@@ -26,13 +26,9 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
-      # Pinned to npm 11: Trusted Publishing needs npm >= 11.5.1, but npm 12
-      # hard-errors (EUNKNOWNCONFIG) on the pnpm-only --no-git-checks flag that
-      # changesets passes to `pnpm publish` and pnpm 10 forwards verbatim to
-      # `npm publish`; npm 11 only warns. Revisit once we're on pnpm >= 11,
-      # which publishes via libnpmpublish and spawns no npm at all.
-      - name: Upgrade npm for Trusted Publishing
-        run: npm install -g npm@11
+      # No npm upgrade step needed: pnpm >= 11 publishes via libnpmpublish
+      # with native OIDC Trusted Publishing — npm is only used by changesets
+      # for read-only `npm info` calls, which the runner's default npm handles.
 
       - run: pnpm install --frozen-lockfile
 
