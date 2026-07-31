@@ -281,44 +281,56 @@ export const inboundAddressesCreateInput = {
     .max(64)
     .optional()
     .describe(
-      "1-64 chars of a-z 0-9 . _ -, starting and ending alphanumeric. " +
-        'Lowercased. Omit to auto-generate an unguessable local part. Pass "*" ' +
-        "for a catch-all that receives every local part no exact address claims.",
+      'Local part before the @, e.g. "invoices" for ' +
+        "invoices@{workspace}.in.senderkit.email. Omit to mint an unguessable " +
+        "random one.",
     ),
-  description: z.string().max(200).optional().describe("Optional human label for the address."),
+  description: z
+    .string()
+    .max(200)
+    .optional()
+    .describe("Optional internal note describing what this address is for."),
   forwardTo: z
     .string()
     .max(320)
     .optional()
-    .describe("Optional address to also forward received mail to. Cannot be another inbound address."),
+    .describe(
+      "Email address to forward received mail to. Must be a plausible address " +
+        "and cannot be another inbound address (would create a mail loop).",
+    ),
   webhookEndpointId: z
     .string()
     .uuid()
     .optional()
     .describe(
-      "Optional webhook endpoint id to bind this address to. When unset, " +
-        "message.received events fan out to every endpoint subscribed to them.",
+      "This workspace's webhook endpoint id to fire a message.received event " +
+        "to on receipt. Must be an active endpoint owned by this workspace " +
+        "whose livemode matches this address's livemode (test-mode addresses " +
+        "bind test-mode endpoints; live-mode addresses bind live-mode " +
+        "endpoints).",
     ),
   domainId: z
     .string()
     .uuid()
     .optional()
     .describe(
-      "A verified custom inbound domain id (from senderkit_inbound_domains_list) " +
-        "to mint the address on. Omit for the workspace's shared receiving domain.",
+      "Which verified inbound domain to mint on (from " +
+        "senderkit_inbound_domains_list). Omit for the workspace's shared " +
+        "{slug}.in.senderkit.email domain.",
     ),
   livemode: z
     .boolean()
     .optional()
     .describe(
-      "Live mode (default true). Test-mode addresses receive real mail but fan " +
-        "out only to test webhook endpoints and don't count against quota.",
+      "Live mode (default true). Test-mode addresses receive real mail but " +
+        "fan out only to test-mode webhook endpoints. Every address, test or " +
+        "live, counts toward the plan's inbound-address limit.",
     ),
 };
 
 /** Shape for `senderkit_inbound_addresses_delete`. */
 export const inboundAddressesDeleteInput = {
-  id: z.string().describe('Public inbound address id (e.g. "inb_…") to delete.'),
+  id: z.string().describe('Inbound address publicId (e.g. "inb_…") to delete.'),
 };
 
 /** Shape for `senderkit_inbound_domains_list`. No inputs. */
@@ -329,8 +341,9 @@ export const inboundDomainsCreateInput = {
   domain: z
     .string()
     .describe(
-      'Custom domain to claim for receiving, e.g. "inbound.acme.com". Must not ' +
-        "already be claimed and must not be a senderkit.com/senderkit.email suffix.",
+      'Custom domain to claim for receiving, e.g. "inbound.acme.com". Must ' +
+        "not already be claimed (by this or another workspace) and must not " +
+        "be a senderkit.com/senderkit.email suffix.",
     ),
   acknowledgeExistingMx: z
     .boolean()
@@ -339,7 +352,8 @@ export const inboundDomainsCreateInput = {
       "Only pass true after the user has explicitly confirmed they want to " +
         "redirect this domain's mail to SenderKit. Omit on the first attempt — " +
         "if the domain already has live MX records, the call fails with an " +
-        "existing_mx error naming the current host(s) so you can confirm first.",
+        "existing_mx error naming the current host(s) so you can get that " +
+        "confirmation first.",
     ),
 };
 
@@ -359,15 +373,23 @@ export const inboundMessagesListInput = {
     .describe("Max messages to return, 1-100 (default 50)."),
   before: z
     .string()
-    .datetime({ offset: true })
+    .datetime({
+      offset: true,
+      message: "must be an ISO 8601 timestamp (e.g. 2026-07-31T12:00:00Z)",
+    })
     .optional()
-    .describe("Only return messages received before this ISO 8601 timestamp (for backward paging)."),
-  address: z.string().optional().describe("Filter to messages received on this address's public id."),
+    .describe(
+      "ISO 8601 cursor — only return messages received strictly before this instant.",
+    ),
+  address: z
+    .string()
+    .optional()
+    .describe('Inbound address publicId (e.g. "inb_…") to filter by.'),
 };
 
 /** Shape for `senderkit_inbound_messages_get`. */
 export const inboundMessagesGetInput = {
-  id: z.string().describe('Public inbound message id (e.g. "rcv_…").'),
+  id: z.string().describe('Inbound message publicId (e.g. "rcv_…").'),
 };
 
 /**

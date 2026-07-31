@@ -88,18 +88,21 @@ describe("tool annotations", () => {
     },
     senderkit_inbound_addresses_create: {
       title: "Create Inbound Address",
+      // Additive write: creating an address is fully reversed by deleting it,
+      // so the manifest advertises an explicit non-destructive write.
       hint: "destructiveHint",
+      value: false,
     },
     senderkit_inbound_addresses_delete: {
       title: "Delete Inbound Address",
       hint: "destructiveHint",
     },
     senderkit_inbound_messages_list: {
-      title: "List Received Messages",
+      title: "List Inbound Messages",
       hint: "readOnlyHint",
     },
     senderkit_inbound_messages_get: {
-      title: "Get Received Message",
+      title: "Get Inbound Message",
       hint: "readOnlyHint",
     },
     senderkit_inbound_domains_list: {
@@ -122,9 +125,10 @@ describe("tool annotations", () => {
       expect(expected, `no expectation for ${command.mcpName}`).toBeDefined();
       expect(command.title).toBe(expected.title);
 
-      // Exactly one of readOnlyHint / destructiveHint, set to true.
+      // Exactly one of readOnlyHint / destructiveHint — true unless the entry
+      // pins an explicit value (destructiveHint: false = non-destructive write).
       const hints = command.annotations as Record<string, unknown>;
-      expect(hints[expected.hint]).toBe(true);
+      expect(hints[expected.hint]).toBe("value" in expected ? expected.value : true);
       const other =
         expected.hint === "readOnlyHint" ? "destructiveHint" : "readOnlyHint";
       expect(hints[other]).toBeUndefined();
@@ -150,7 +154,9 @@ describe("tool annotations", () => {
       for (const tool of tools) {
         const expected = EXPECTED[tool.name as keyof typeof EXPECTED];
         expect(tool.title).toBe(expected.title);
-        expect(tool.annotations?.[expected.hint]).toBe(true);
+        expect(tool.annotations?.[expected.hint]).toBe(
+          "value" in expected ? expected.value : true,
+        );
       }
     } finally {
       await client.close();
