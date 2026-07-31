@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { Command as Commander } from "commander";
 import { ZodError } from "zod";
-import { runCommand } from "../src/cli/adapter";
+import { registerCommands, runCommand } from "../src/cli/adapter";
 import { describeField } from "../src/cli/introspect";
 import { sendCommand } from "../src/core/commands/send";
 import { templatesGetCommand } from "../src/core/commands/templates-get";
@@ -161,5 +162,26 @@ describe("describeField", () => {
 
   it("carries descriptions through wrappers", () => {
     expect(describeField(shape.vars).description).toMatch(/JSON object/);
+  });
+});
+
+describe("flagHelp overrides", () => {
+  it("send --cc/--bcc document CLI input conventions, not the MCP wire shape", () => {
+    const program = new Commander();
+    registerCommands(program, [sendCommand]);
+    const leaf = program.commands.find((c) => c.name() === "send")!;
+    for (const long of ["--cc", "--bcc"]) {
+      const option = leaf.options.find((o) => o.long === long)!;
+      expect(option.description, long).toMatch(/comma-separated or a JSON array/);
+      expect(option.description, long).not.toMatch(/JSON array of addresses/);
+    }
+  });
+
+  it("flags without an override keep the shared schema description", () => {
+    const program = new Commander();
+    registerCommands(program, [sendCommand]);
+    const leaf = program.commands.find((c) => c.name() === "send")!;
+    const replyTo = leaf.options.find((o) => o.long === "--reply-to")!;
+    expect(replyTo.description).toBe("Email-only. Reply-To address.");
   });
 });

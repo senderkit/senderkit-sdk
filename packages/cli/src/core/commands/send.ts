@@ -11,6 +11,10 @@ export const sendCommand = defineCommand<typeof schema.shape, SendResponse>({
   path: ["send"],
   schema,
   positional: ["template", "to"],
+  flagHelp: {
+    cc: "Email-only. Cc recipients, comma-separated or a JSON array (max 50).",
+    bcc: "Email-only. Bcc recipients, comma-separated or a JSON array (max 50).",
+  },
   run: (input, { client }) =>
     client.send({
       template: input.template,

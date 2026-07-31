@@ -83,6 +83,10 @@ export const sendRawCommand = defineCommand<typeof schema.shape, SendResponse>({
   path: ["send-raw"],
   schema,
   positional: ["to"],
+  flagHelp: {
+    cc: "Email-only. Cc recipients, comma-separated or a JSON array (max 50).",
+    bcc: "Email-only. Bcc recipients, comma-separated or a JSON array (max 50).",
+  },
   run: async (input, { client }) => client.sendRaw(buildRequest(input)),
   format: (res) =>
     `${success(`Queued message ${res.id}`)}\n${keyValues({

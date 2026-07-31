@@ -24,11 +24,14 @@ export * from "./mcp-schemas";
 
 /**
  * MCP behaviour hints surfaced to clients (and the Connectors Directory review).
- * A tool is read-only OR destructive — never both, never neither.
+ * A tool declares exactly one hint: it is read-only, or it is a write — either
+ * destructive (`destructiveHint: true`) or explicitly non-destructive
+ * (`destructiveHint: false`, additive/reversible operations a client need not
+ * treat as irreversible).
  */
 export type ToolAnnotations =
   | { readOnlyHint: true; destructiveHint?: never }
-  | { destructiveHint: true; readOnlyHint?: never };
+  | { destructiveHint: boolean; readOnlyHint?: never };
 
 /**
  * The declarative surface of one MCP tool, shared by the CLI-bundled server and
