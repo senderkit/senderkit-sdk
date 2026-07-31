@@ -126,13 +126,13 @@ const fromName = z
 
 const emailEnvelope = {
   cc: z
-    .preprocess(csvOrJsonArray, z.array(z.string()))
+    .preprocess(csvOrJsonArray, z.array(z.string()).max(50))
     .optional()
-    .describe("Email-only. Cc recipients (CLI: comma-separated or JSON array)."),
+    .describe("Email-only. Cc recipients as a JSON array of addresses (max 50)."),
   bcc: z
-    .preprocess(csvOrJsonArray, z.array(z.string()))
+    .preprocess(csvOrJsonArray, z.array(z.string()).max(50))
     .optional()
-    .describe("Email-only. Bcc recipients (CLI: comma-separated or JSON array)."),
+    .describe("Email-only. Bcc recipients as a JSON array of addresses (max 50)."),
   replyTo: z.string().optional().describe("Email-only. Reply-To address."),
   attachments: z
     .preprocess(jsonOrPassthrough, z.array(attachment))
@@ -233,7 +233,13 @@ export const templatesGetInput = {
 
 /** Shape for `senderkit_messages_list`. */
 export const messagesListInput = {
-  limit: positiveInt.describe("Max messages to return."),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(200)
+    .optional()
+    .describe("Max messages to return, 1-200 (default 50)."),
   cursor: z.string().optional().describe("Pagination cursor."),
   status: z
     .enum(MESSAGE_STATUSES)
@@ -344,7 +350,13 @@ export const inboundDomainsDeleteInput = {
 
 /** Shape for `senderkit_inbound_messages_list`. */
 export const inboundMessagesListInput = {
-  limit: positiveInt.describe("Max messages to return (1-100)."),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe("Max messages to return, 1-100 (default 50)."),
   before: z
     .string()
     .datetime({ offset: true })

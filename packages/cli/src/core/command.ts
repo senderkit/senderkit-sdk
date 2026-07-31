@@ -49,12 +49,19 @@ export interface Command<
   title: string;
   /** One-line description used for CLI help and the MCP tool description. */
   summary: string;
-  /** MCP behaviour hints (read-only vs destructive). */
+  /** MCP behaviour hints (read-only, or a write — destructive or not). */
   annotations: ToolAnnotations;
   /** Shared input schema. Validation for the CLI; input schema for MCP. */
   schema: z.ZodObject<Shape>;
   /** Schema fields rendered as positional CLI args (in order). */
   positional?: (keyof Shape)[];
+  /**
+   * CLI-only help overrides, keyed by schema field. Use when the shared schema
+   * description documents the MCP wire contract (e.g. cc/bcc are plain JSON
+   * arrays there) but the flag should document CLI input conventions instead
+   * (comma-separated values, JSON strings, …).
+   */
+  flagHelp?: Partial<Record<keyof Shape & string, string>>;
   run(input: z.infer<z.ZodObject<Shape>>, ctx: CommandCtx): Promise<Output>;
   /** Human-readable rendering for the CLI (non-`--json` output). */
   format(output: Output): string;

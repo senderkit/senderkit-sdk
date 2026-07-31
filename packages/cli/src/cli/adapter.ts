@@ -50,7 +50,7 @@ export function registerCommands(program: Commander, registry: Command<any, any>
     for (const name of command.positional ?? []) {
       const info = describeField(shape[name as string]!);
       const token = info.optional ? `[${String(name)}]` : `<${String(name)}>`;
-      leaf.argument(token, info.description);
+      leaf.argument(token, command.flagHelp?.[String(name)] ?? info.description);
     }
 
     // Remaining fields become options.
@@ -58,7 +58,7 @@ export function registerCommands(program: Commander, registry: Command<any, any>
       if (positional.has(name)) continue;
       const info = describeField(field);
       const flag = kebab(name);
-      let desc = info.description ?? "";
+      let desc = command.flagHelp?.[name] ?? info.description ?? "";
       if (info.enumValues) desc += ` (choices: ${info.enumValues.join(", ")})`;
 
       if (info.kind === "boolean") {

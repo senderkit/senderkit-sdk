@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import * as schemas from "../src/mcp-schemas";
-import { MCP_TOOLS, MCP_TOOLS_BY_NAME } from "../src/mcp";
+import { MCP_TOOLS, MCP_TOOLS_BY_NAME, type ToolAnnotations } from "../src/mcp";
 
 const EXPECTED: Record<string, keyof typeof schemas> = {
   senderkit_context: "contextInput",
@@ -34,16 +35,23 @@ describe("MCP_TOOLS", () => {
     }
   });
 
-  it("each tool is read-only XOR destructive, with a non-empty title + description", () => {
+  it("each tool sets exactly one behaviour hint, with a non-empty title + description", () => {
     for (const t of MCP_TOOLS) {
       const a = t.annotations as {
         readOnlyHint?: boolean;
         destructiveHint?: boolean;
       };
-      expect(Boolean(a.readOnlyHint) !== Boolean(a.destructiveHint)).toBe(true);
+      expect("readOnlyHint" in a !== "destructiveHint" in a, t.name).toBe(true);
       expect(t.title.length).toBeGreaterThan(0);
       expect(t.description.length).toBeGreaterThan(0);
     }
+  });
+
+  it("admits a non-destructive write annotation (destructiveHint: false)", () => {
+    // Type-level: app-only tools (e.g. templates_create) declare additive
+    // writes; the shared union must not force true.
+    const nonDestructiveWrite: ToolAnnotations = { destructiveHint: false };
+    expect(nonDestructiveWrite.destructiveHint).toBe(false);
   });
 
   it("descriptions carry no transport-specific send-mode note", () => {
@@ -56,5 +64,43 @@ describe("MCP_TOOLS", () => {
     expect(Object.keys(MCP_TOOLS_BY_NAME).sort()).toEqual(
       MCP_TOOLS.map((t) => t.name).sort(),
     );
+  });
+
+  it("field descriptions carry no CLI input conventions", () => {
+    // The manifest is the MCP wire contract; CLI flag phrasing lives in each
+    // command's `flagHelp` (packages/cli), not here.
+    for (const t of MCP_TOOLS) {
+      for (const [name, field] of Object.entries(t.inputSchema)) {
+        const description = (field as { description?: string }).description;
+        if (description) {
+          expect(description, `${t.name}.${name}`).not.toMatch(/\bCLI\b/);
+        }
+      }
+    }
+  });
+});
+
+describe("schema bounds", () => {
+  it("messages_list limit enforces the service clamp (1-200), coercing CLI strings", () => {
+    const schema = z.object(schemas.messagesListInput);
+    expect(schema.parse({ limit: 200 }).limit).toBe(200);
+    expect(schema.parse({ limit: "50" }).limit).toBe(50);
+    expect(() => schema.parse({ limit: 0 })).toThrow();
+    expect(() => schema.parse({ limit: 201 })).toThrow();
+  });
+
+  it("inbound_messages_list limit enforces the service clamp (1-100)", () => {
+    const schema = z.object(schemas.inboundMessagesListInput);
+    expect(schema.parse({ limit: 100 }).limit).toBe(100);
+    expect(() => schema.parse({ limit: 101 })).toThrow();
+  });
+
+  it("cc/bcc cap at 50 recipients, matching the API validator", () => {
+    const schema = z.object(schemas.sendInput);
+    const fifty = Array.from({ length: 50 }, (_, i) => `u${i}@x.com`);
+    const base = { template: "welcome", to: "u@x.com" };
+    expect(schema.parse({ ...base, cc: fifty }).cc).toHaveLength(50);
+    expect(() => schema.parse({ ...base, cc: [...fifty, "z@x.com"] })).toThrow();
+    expect(() => schema.parse({ ...base, bcc: [...fifty, "z@x.com"] })).toThrow();
   });
 });
