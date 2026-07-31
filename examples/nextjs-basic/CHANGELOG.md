@@ -1,5 +1,12 @@
 # @senderkit-examples/nextjs-basic
 
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [ca9d5ec]
+  - @senderkit/sdk@0.14.0
+
 ## 0.0.14
 
 ### Patch Changes
