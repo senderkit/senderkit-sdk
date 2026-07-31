@@ -26,10 +26,13 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
-      # Pinned to a major: npm@latest moved to 12.x, which dropped Node 20 and
-      # broke this step. Trusted Publishing needs npm >= 11.5.1.
+      # Pinned to npm 11: Trusted Publishing needs npm >= 11.5.1, but npm 12
+      # hard-errors (EUNKNOWNCONFIG) on the pnpm-only --no-git-checks flag that
+      # changesets passes to `pnpm publish` and pnpm 10 forwards verbatim to
+      # `npm publish`; npm 11 only warns. Revisit once we're on pnpm >= 11,
+      # which publishes via libnpmpublish and spawns no npm at all.
       - name: Upgrade npm for Trusted Publishing
-        run: npm install -g npm@12
+        run: npm install -g npm@11
 
       - run: pnpm install --frozen-lockfile
 
