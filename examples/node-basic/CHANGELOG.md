@@ -1,5 +1,12 @@
 # @senderkit-examples/node-basic
 
+## 0.0.16
+
+### Patch Changes
+
+- Updated dependencies [dc8ad1e]
+  - @senderkit/sdk@0.14.1
+
 ## 0.0.15
 
 ### Patch Changes

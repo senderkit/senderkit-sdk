@@ -1,5 +1,12 @@
 # @senderkit/cli
 
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [dc8ad1e]
+  - @senderkit/sdk@0.14.1
+
 ## 0.9.0
 
 ### Minor Changes
