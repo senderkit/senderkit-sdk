@@ -104,3 +104,67 @@ describe("schema bounds", () => {
     expect(() => schema.parse({ ...base, bcc: [...fifty, "z@x.com"] })).toThrow();
   });
 });
+
+describe("inbound manifest parity with the hosted app's definitions", () => {
+  it("inbound_addresses_create is an additive, non-destructive write", () => {
+    // Creating an address is fully reversed by deleting it again; flagging it
+    // destructive makes well-behaved clients demand confirmation for a
+    // reversible operation.
+    expect(
+      MCP_TOOLS_BY_NAME.senderkit_inbound_addresses_create.annotations,
+    ).toEqual({ destructiveHint: false });
+  });
+
+  it("livemode description does not promise a quota exemption", () => {
+    // Every address, test or live, counts toward the plan's inbound-address
+    // limit — the manifest must not claim otherwise.
+    const shape = schemas.inboundAddressesCreateInput;
+    const desc = (shape.livemode as z.ZodType).description ?? "";
+    expect(desc).not.toMatch(/count against quota/i);
+    expect(desc, "should say the plan limit applies to every address").toMatch(/plan/i);
+  });
+
+  it("inbound message tool titles match the app's served titles", () => {
+    expect(MCP_TOOLS_BY_NAME.senderkit_inbound_messages_list.title).toBe(
+      "List Inbound Messages",
+    );
+    expect(MCP_TOOLS_BY_NAME.senderkit_inbound_messages_get.title).toBe(
+      "Get Inbound Message",
+    );
+  });
+
+  it("inbound_messages_list.before rejects non-ISO input with a helpful message", () => {
+    const schema = z.object(schemas.inboundMessagesListInput);
+    const res = schema.safeParse({ before: "yesterday" });
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues[0]?.message).toMatch(/ISO 8601/);
+    }
+  });
+
+  it("localPart documents the catch-all and charset rules", () => {
+    // The service accepts "*" as a catch-all and enforces 1-64 chars of
+    // a-z 0-9 . _ - — undocumented, the feature is undiscoverable over MCP.
+    const shape = schemas.inboundAddressesCreateInput;
+    const desc = (shape.localPart as z.ZodType).description ?? "";
+    expect(desc).toMatch(/catch-all/i);
+    expect(desc).toMatch(/"\*"/);
+    expect(desc).toMatch(/1-64/);
+  });
+
+  it("webhookEndpointId documents the unbound fan-out", () => {
+    // Bound: that one endpoint gets message.received even if not subscribed.
+    // Unbound: fan-out to every active subscribed endpoint in the mode.
+    const shape = schemas.inboundAddressesCreateInput;
+    const desc = (shape.webhookEndpointId as z.ZodType).description ?? "";
+    expect(desc).toMatch(/fans? out/i);
+    expect(desc).toMatch(/subscribed/i);
+  });
+
+  it("livemode documents test-mode forward behavior", () => {
+    // A test-mode address's forwards are recorded as test sends, not delivered.
+    const shape = schemas.inboundAddressesCreateInput;
+    const desc = (shape.livemode as z.ZodType).description ?? "";
+    expect(desc).toMatch(/forward/i);
+  });
+});

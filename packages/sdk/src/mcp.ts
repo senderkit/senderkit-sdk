@@ -128,8 +128,9 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     name: "senderkit_inbound_addresses_list",
     title: "List Inbound Addresses",
     description:
-      "List the addresses provisioned on the workspace's shared receiving " +
-      "domain — the addresses that can receive mail into this workspace.",
+      "List the workspace's programmatic inbound email addresses — the " +
+      "addresses that receive mail and forward it or fire a webhook into the " +
+      "workspace.",
     annotations: { readOnlyHint: true },
     inputSchema: inboundAddressesListInput,
   },
@@ -137,38 +138,43 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     name: "senderkit_inbound_addresses_create",
     title: "Create Inbound Address",
     description:
-      "Provision a new address so it can receive mail — on the workspace's " +
-      "shared receiving domain, or a verified custom domain via domainId. " +
-      'Pass localPart "*" for a catch-all. Optionally forward received mail to ' +
-      "another address or bind the address to a specific webhook endpoint.",
-    annotations: { destructiveHint: true },
+      "Create a new inbound email address that receives mail for the " +
+      "workspace and, optionally, forwards it and/or fires a webhook on " +
+      "receipt. Enforces the workspace's plan limit and validates " +
+      "forwardTo/webhookEndpointId.",
+    // Additive: mints a new address; deleting it again fully reverses it.
+    annotations: { destructiveHint: false },
     inputSchema: inboundAddressesCreateInput,
   },
   {
     name: "senderkit_inbound_addresses_delete",
     title: "Delete Inbound Address",
     description:
-      "Delete an inbound address by its public id. Mail sent to it afterward is " +
-      "dropped like any other unmatched recipient.",
+      "Delete one of the workspace's inbound email addresses by id. The " +
+      "address immediately stops receiving new mail; already-received " +
+      "messages are unaffected.",
     annotations: { destructiveHint: true },
     inputSchema: inboundAddressesDeleteInput,
   },
   {
     name: "senderkit_inbound_messages_list",
-    title: "List Received Messages",
+    title: "List Inbound Messages",
     description:
-      "List messages received on the workspace's inbound addresses, newest " +
-      "first. Filter by address or page backwards with a `before` timestamp — " +
-      "use this to monitor or triage incoming mail.",
+      "List received inbound email messages for the workspace's programmatic " +
+      "addresses, newest first. Filter by address or a receivedAt cursor — " +
+      "use this to check whether mail has arrived, or to page through recent " +
+      "receipts.",
     annotations: { readOnlyHint: true },
     inputSchema: inboundMessagesListInput,
   },
   {
     name: "senderkit_inbound_messages_get",
-    title: "Get Received Message",
+    title: "Get Inbound Message",
     description:
-      "Fetch a single received message by id, including its parsed text/HTML " +
-      "body, stripped reply, headers, scanning verdicts, and attachment list.",
+      "Fetch a single received inbound email message by id — envelope, " +
+      "headers, subject, body, attachments (as authenticated v1 API links — " +
+      "Bearer key with the inbound scope, not signed/presigned), and " +
+      "spam/auth verdicts.",
     annotations: { readOnlyHint: true },
     inputSchema: inboundMessagesGetInput,
   },
@@ -176,9 +182,9 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     name: "senderkit_inbound_domains_list",
     title: "List Inbound Domains",
     description:
-      "List the workspace's inbound domains — the shared receiving domain and " +
-      "any custom domains — with their verification status and, for pending " +
-      "custom domains, the DNS records still required to verify them.",
+      "List the workspace's custom inbound domains — including the shared " +
+      "{slug}.in.senderkit.email domain, if used — with their verification " +
+      "status and (for pending custom domains) the DNS records still needed.",
     annotations: { readOnlyHint: true },
     inputSchema: inboundDomainsListInput,
   },
@@ -191,9 +197,9 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "exactly what to add. If the domain already has live MX records pointing " +
       "elsewhere, this fails with an existing_mx error naming the current " +
       "host(s); get the user's explicit confirmation before retrying with " +
-      "acknowledgeExistingMx, since claiming redirects all of that domain's " +
-      "mail to SenderKit. Nothing is received until the records are live and " +
-      "verification completes.",
+      "acknowledgeExistingMx: true, since claiming will redirect ALL of that " +
+      "domain's mail to SenderKit. Nothing is received until the records are " +
+      "live and verification completes.",
     annotations: { destructiveHint: true },
     inputSchema: inboundDomainsCreateInput,
   },
@@ -202,7 +208,8 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     title: "Delete Inbound Domain",
     description:
       "Delete a custom inbound domain by id. Its addresses stop receiving mail " +
-      "immediately. The workspace's shared receiving domain cannot be deleted.",
+      "immediately. The workspace's shared {slug}.in.senderkit.email domain " +
+      "cannot be deleted.",
     annotations: { destructiveHint: true },
     inputSchema: inboundDomainsDeleteInput,
   },
