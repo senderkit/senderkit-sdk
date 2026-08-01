@@ -282,8 +282,11 @@ export const inboundAddressesCreateInput = {
     .optional()
     .describe(
       'Local part before the @, e.g. "invoices" for ' +
-        "invoices@{workspace}.in.senderkit.email. Omit to mint an unguessable " +
-        "random one.",
+        "invoices@{slug}.in.senderkit.email — 1-64 chars of a-z, 0-9, dot, " +
+        "underscore, dash, starting and ending alphanumeric (lowercased; " +
+        'some names are reserved). Pass "*" for a catch-all that receives ' +
+        "mail for every local part no exact address claims. Omit to mint an " +
+        "unguessable random one.",
     ),
   description: z
     .string()
@@ -303,11 +306,12 @@ export const inboundAddressesCreateInput = {
     .uuid()
     .optional()
     .describe(
-      "This workspace's webhook endpoint id to fire a message.received event " +
-        "to on receipt. Must be an active endpoint owned by this workspace " +
-        "whose livemode matches this address's livemode (test-mode addresses " +
-        "bind test-mode endpoints; live-mode addresses bind live-mode " +
-        "endpoints).",
+      "This workspace's webhook endpoint id to fire message.received events " +
+        "to on receipt — a bound endpoint receives them even if not " +
+        "subscribed, but must be active and match this address's livemode " +
+        "(test-mode addresses bind test-mode endpoints). When unset, events " +
+        "fan out to every active endpoint subscribed to message.received in " +
+        "the address's mode.",
     ),
   domainId: z
     .string()
@@ -323,8 +327,9 @@ export const inboundAddressesCreateInput = {
     .optional()
     .describe(
       "Live mode (default true). Test-mode addresses receive real mail but " +
-        "fan out only to test-mode webhook endpoints. Every address, test or " +
-        "live, counts toward the plan's inbound-address limit.",
+        "fan out only to test-mode webhook endpoints, and their forwards are " +
+        "recorded as test sends without real delivery. Every address, test " +
+        "or live, counts toward the plan's inbound-address limit.",
     ),
 };
 
