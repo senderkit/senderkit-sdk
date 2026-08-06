@@ -100,7 +100,7 @@ await senderkit.sendRaw({
 });
 ```
 
-SMS, push, and web-push work the same way — switch the `channel` and the `content` shape:
+SMS, push, and web-push work the same way — switch the `channel` and the `content` shape. SMS recipients must be an [E.164](https://en.wikipedia.org/wiki/E.164) phone number (e.g. `+15555550123`); anything else is rejected with `400 invalid_recipient`.
 
 ```ts
 await senderkit.sendRaw({

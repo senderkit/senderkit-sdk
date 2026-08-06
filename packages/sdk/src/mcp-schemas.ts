@@ -193,7 +193,9 @@ export const sendRawInput = {
   to: z
     .string()
     .describe(
-      "Recipient address. For web-push, the JSON-encoded browser PushSubscription (endpoint + keys).",
+      "Recipient address for the chosen channel: an email address (email), an " +
+        "E.164 phone number such as +15551234567 (sms), a device token (push), or " +
+        "the JSON-encoded browser PushSubscription — endpoint + keys — (web-push).",
     ),
   // email
   subject: z.string().optional().describe("Email subject (email)."),
