@@ -86,7 +86,11 @@ const nonNegativeInt = z.coerce.number().int().nonnegative().optional();
 const scheduledAt = z
   .string()
   .datetime({ offset: true })
-  .describe("ISO 8601 timestamp for scheduled delivery (e.g. 2026-06-01T09:00:00Z).")
+  .describe(
+    "ISO 8601 timestamp for scheduled delivery (e.g. 2026-06-01T09:00:00Z). " +
+      "Must be in the future and at most 30 days ahead — check the current date " +
+      "before computing it. Omit to send immediately.",
+  )
   .optional();
 
 const idempotencyKey = z
@@ -198,9 +202,18 @@ export const sendRawInput = {
         "the JSON-encoded browser PushSubscription — endpoint + keys — (web-push).",
     ),
   // email
-  subject: z.string().optional().describe("Email subject (email)."),
+  subject: z
+    .string()
+    .optional()
+    .describe('Email subject. Required when channel is "email".'),
   preheader: z.string().optional().describe("Email preheader (email)."),
-  html: z.string().optional().describe("Email HTML body (email)."),
+  html: z
+    .string()
+    .optional()
+    .describe(
+      'Email HTML body. Required when channel is "email" — a text-only email ' +
+        "send is rejected; wrap plain text in minimal HTML instead.",
+    ),
   text: z.string().optional().describe("Email plain-text body (email)."),
   from: fromOverride,
   fromName,

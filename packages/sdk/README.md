@@ -69,7 +69,7 @@ The response shape:
 { id: "msg_…", status: "queued" | "scheduled", livemode: boolean }
 ```
 
-`status` is `"scheduled"` when `scheduledAt` is in the future, otherwise `"queued"`.
+`scheduledAt` must be in the future and at most 30 days ahead; the API rejects a past or too-distant timestamp with `400`. `status` is `"scheduled"` when `scheduledAt` is in the future, otherwise `"queued"`.
 
 Override the From identity per send (email only) with `from` (bare address) and/or `fromName` (display name). Either can be set on its own; both fall back to the provider connection's configured values. The same two fields work on `sendRaw`.
 
