@@ -447,7 +447,7 @@ export interface InboundMessage {
   truncated: boolean;
   headers: Record<string, string>;
   attachments: InboundAttachment[];
-  /** SES scanning verdicts (e.g. spam/virus/SPF/DKIM), as reported. */
+  /** Scanning verdicts (e.g. spam/virus/SPF/DKIM), as reported. */
   verdicts: Record<string, string>;
   sizeBytes: number;
   /** Authenticated API URL for the raw RFC 822 source. */
