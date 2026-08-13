@@ -35,22 +35,40 @@ describe("MCP_TOOLS", () => {
     }
   });
 
-  it("each tool sets exactly one behaviour hint, with a non-empty title + description", () => {
+  it("sets all three safety hints explicitly, with a non-empty title + description", () => {
+    // OpenAI's ChatGPT/Codex plugin review requires explicit readOnlyHint,
+    // openWorldHint, and destructiveHint values on every scanned tool.
     for (const t of MCP_TOOLS) {
-      const a = t.annotations as {
-        readOnlyHint?: boolean;
-        destructiveHint?: boolean;
-      };
-      expect("readOnlyHint" in a !== "destructiveHint" in a, t.name).toBe(true);
+      expect(typeof t.annotations.readOnlyHint, t.name).toBe("boolean");
+      expect(typeof t.annotations.openWorldHint, t.name).toBe("boolean");
+      expect(typeof t.annotations.destructiveHint, t.name).toBe("boolean");
+      // A read-only tool cannot also mutate or reach outside SenderKit.
+      if (t.annotations.readOnlyHint) {
+        expect(t.annotations.destructiveHint, t.name).toBe(false);
+        expect(t.annotations.openWorldHint, t.name).toBe(false);
+      }
       expect(t.title.length).toBeGreaterThan(0);
       expect(t.description.length).toBeGreaterThan(0);
     }
   });
 
+  it("marks exactly the send tools open-world", () => {
+    // Only senderkit_send / senderkit_send_raw deliver messages to recipients
+    // outside SenderKit; everything else operates on workspace state.
+    const openWorld = MCP_TOOLS.filter((t) => t.annotations.openWorldHint).map(
+      (t) => t.name,
+    );
+    expect(openWorld.sort()).toEqual(["senderkit_send", "senderkit_send_raw"]);
+  });
+
   it("admits a non-destructive write annotation (destructiveHint: false)", () => {
     // Type-level: app-only tools (e.g. templates_create) declare additive
-    // writes; the shared union must not force true.
-    const nonDestructiveWrite: ToolAnnotations = { destructiveHint: false };
+    // writes; the shared shape must not force true.
+    const nonDestructiveWrite: ToolAnnotations = {
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: false,
+    };
     expect(nonDestructiveWrite.destructiveHint).toBe(false);
   });
 
@@ -112,7 +130,11 @@ describe("inbound manifest parity with the hosted app's definitions", () => {
     // reversible operation.
     expect(
       MCP_TOOLS_BY_NAME.senderkit_inbound_addresses_create.annotations,
-    ).toEqual({ destructiveHint: false });
+    ).toEqual({
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: false,
+    });
   });
 
   it("livemode description does not promise a quota exemption", () => {

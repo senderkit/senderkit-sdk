@@ -23,15 +23,27 @@ import {
 export * from "./mcp-schemas";
 
 /**
- * MCP behaviour hints surfaced to clients (and the Connectors Directory review).
- * A tool declares exactly one hint: it is read-only, or it is a write — either
- * destructive (`destructiveHint: true`) or explicitly non-destructive
- * (`destructiveHint: false`, additive/reversible operations a client need not
- * treat as irreversible).
+ * MCP behaviour hints surfaced to clients (and the connector directory
+ * reviews). Every tool states the full trio explicitly: OpenAI's ChatGPT/Codex
+ * plugin review rejects manifests whose tools omit `readOnlyHint`,
+ * `openWorldHint`, or `destructiveHint`, so the manifest ships completed
+ * values instead of leaving clients to infer the spec's defaults.
  */
-export type ToolAnnotations =
-  | { readOnlyHint: true; destructiveHint?: never }
-  | { destructiveHint: boolean; readOnlyHint?: never };
+export interface ToolAnnotations {
+  /** True when the tool only reads workspace state. */
+  readOnlyHint: boolean;
+  /**
+   * True when the tool reaches beyond SenderKit — only the send tools, which
+   * deliver email/SMS/push/web-push to external recipients.
+   */
+  openWorldHint: boolean;
+  /**
+   * True when the tool's effect is not recoverable (a cancelled send, a
+   * deleted address or domain, redirected domain mail). `false` on reads and
+   * on additive writes a client need not treat as irreversible.
+   */
+  destructiveHint: boolean;
+}
 
 /**
  * The declarative surface of one MCP tool, shared by the CLI-bundled server and
@@ -57,7 +69,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "Call this before sending so you can tell the user which workspace they're " +
       "in and whether messages will be really delivered (live) or only recorded " +
       "without delivery (test).",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: contextInput,
   },
   {
@@ -66,7 +82,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     description:
       "Send a transactional email, SMS, push, or web-push notification to a " +
       "recipient using a saved template.",
-    annotations: { destructiveHint: true },
+    annotations: {
+      readOnlyHint: false,
+      openWorldHint: true,
+      destructiveHint: true,
+    },
     inputSchema: sendInput,
   },
   {
@@ -75,7 +95,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     description:
       "Send a transactional email, SMS, push, or web-push notification with " +
       "inline content, without a registered template.",
-    annotations: { destructiveHint: true },
+    annotations: {
+      readOnlyHint: false,
+      openWorldHint: true,
+      destructiveHint: true,
+    },
     inputSchema: sendRawInput,
   },
   {
@@ -84,7 +108,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     description:
       "List all message templates in the workspace across email, SMS, push, " +
       "and web-push, with slugs and channels.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: templatesListInput,
   },
   {
@@ -93,7 +121,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     description:
       "Fetch a template's content, variables, and current version by slug — " +
       "inspect what will actually be delivered before sending or editing.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: templatesGetInput,
   },
   {
@@ -104,7 +136,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "web-push. Filter by channel, template, delivery status, or metadata — " +
       "use this to monitor deliverability, debug failed sends, or audit " +
       "transactional message history.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: messagesListInput,
   },
   {
@@ -113,7 +149,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     description:
       "Fetch full details and delivery status for a single message by ID — " +
       "check whether a specific email or SMS was delivered, bounced, or failed.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: messagesGetInput,
   },
   {
@@ -121,7 +161,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     title: "Cancel Scheduled Message",
     description:
       "Cancel a still-pending message (scheduled or queued) by its public id.",
-    annotations: { destructiveHint: true },
+    annotations: {
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: true,
+    },
     inputSchema: cancelMessageInput,
   },
   {
@@ -131,7 +175,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "List the workspace's programmatic inbound email addresses — the " +
       "addresses that receive mail and forward it or fire a webhook into the " +
       "workspace.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: inboundAddressesListInput,
   },
   {
@@ -143,7 +191,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "receipt. Enforces the workspace's plan limit and validates " +
       "forwardTo/webhookEndpointId.",
     // Additive: mints a new address; deleting it again fully reverses it.
-    annotations: { destructiveHint: false },
+    annotations: {
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: inboundAddressesCreateInput,
   },
   {
@@ -153,7 +205,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "Delete one of the workspace's inbound email addresses by id. The " +
       "address immediately stops receiving new mail; already-received " +
       "messages are unaffected.",
-    annotations: { destructiveHint: true },
+    annotations: {
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: true,
+    },
     inputSchema: inboundAddressesDeleteInput,
   },
   {
@@ -164,7 +220,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "addresses, newest first. Filter by address or a receivedAt cursor — " +
       "use this to check whether mail has arrived, or to page through recent " +
       "receipts.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: inboundMessagesListInput,
   },
   {
@@ -175,7 +235,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "headers, subject, body, attachments (as authenticated v1 API links — " +
       "Bearer key with the inbound scope, not signed/presigned), and " +
       "spam/auth verdicts.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: inboundMessagesGetInput,
   },
   {
@@ -185,7 +249,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "List the workspace's custom inbound domains — including the shared " +
       "{slug}.in.senderkit.email domain, if used — with their verification " +
       "status and (for pending custom domains) the DNS records still needed.",
-    annotations: { readOnlyHint: true },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+      destructiveHint: false,
+    },
     inputSchema: inboundDomainsListInput,
   },
   {
@@ -200,7 +268,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "acknowledgeExistingMx: true, since claiming will redirect ALL of that " +
       "domain's mail to SenderKit. Nothing is received until the records are " +
       "live and verification completes.",
-    annotations: { destructiveHint: true },
+    annotations: {
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: true,
+    },
     inputSchema: inboundDomainsCreateInput,
   },
   {
@@ -210,7 +282,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "Delete a custom inbound domain by id. Its addresses stop receiving mail " +
       "immediately. The workspace's shared {slug}.in.senderkit.email domain " +
       "cannot be deleted.",
-    annotations: { destructiveHint: true },
+    annotations: {
+      readOnlyHint: false,
+      openWorldHint: false,
+      destructiveHint: true,
+    },
     inputSchema: inboundDomainsDeleteInput,
   },
 ];
