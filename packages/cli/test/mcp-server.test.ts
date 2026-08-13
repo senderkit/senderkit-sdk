@@ -68,70 +68,97 @@ describe("registry", () => {
 });
 
 describe("tool annotations", () => {
-  // Required by the Anthropic Claude Connectors Directory review: every tool
-  // carries a human-readable title and exactly one behaviour hint.
+  // The Anthropic Claude Connectors Directory review requires a human-readable
+  // title; OpenAI's ChatGPT/Codex plugin review additionally requires explicit
+  // readOnlyHint, openWorldHint, and destructiveHint values on every tool.
+  const READ_ONLY = {
+    readOnlyHint: true,
+    openWorldHint: false,
+    destructiveHint: false,
+  } as const;
+  const DESTRUCTIVE_WRITE = {
+    readOnlyHint: false,
+    openWorldHint: false,
+    destructiveHint: true,
+  } as const;
+  // The send tools are the only open-world ones: they deliver messages to
+  // recipients outside SenderKit.
+  const OPEN_WORLD_SEND = {
+    readOnlyHint: false,
+    openWorldHint: true,
+    destructiveHint: true,
+  } as const;
+
   const EXPECTED = {
-    senderkit_context: { title: "Get Workspace Context", hint: "readOnlyHint" },
-    senderkit_send: { title: "Send Templated Message", hint: "destructiveHint" },
-    senderkit_send_raw: { title: "Send Raw Message", hint: "destructiveHint" },
+    senderkit_context: {
+      title: "Get Workspace Context",
+      annotations: READ_ONLY,
+    },
+    senderkit_send: {
+      title: "Send Templated Message",
+      annotations: OPEN_WORLD_SEND,
+    },
+    senderkit_send_raw: {
+      title: "Send Raw Message",
+      annotations: OPEN_WORLD_SEND,
+    },
     senderkit_cancel_message: {
       title: "Cancel Scheduled Message",
-      hint: "destructiveHint",
+      annotations: DESTRUCTIVE_WRITE,
     },
-    senderkit_messages_list: { title: "List Messages", hint: "readOnlyHint" },
-    senderkit_messages_get: { title: "Get Message", hint: "readOnlyHint" },
-    senderkit_templates_list: { title: "List Templates", hint: "readOnlyHint" },
-    senderkit_templates_get: { title: "Get Template", hint: "readOnlyHint" },
+    senderkit_messages_list: { title: "List Messages", annotations: READ_ONLY },
+    senderkit_messages_get: { title: "Get Message", annotations: READ_ONLY },
+    senderkit_templates_list: {
+      title: "List Templates",
+      annotations: READ_ONLY,
+    },
+    senderkit_templates_get: { title: "Get Template", annotations: READ_ONLY },
     senderkit_inbound_addresses_list: {
       title: "List Inbound Addresses",
-      hint: "readOnlyHint",
+      annotations: READ_ONLY,
     },
     senderkit_inbound_addresses_create: {
       title: "Create Inbound Address",
       // Additive write: creating an address is fully reversed by deleting it,
       // so the manifest advertises an explicit non-destructive write.
-      hint: "destructiveHint",
-      value: false,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+      },
     },
     senderkit_inbound_addresses_delete: {
       title: "Delete Inbound Address",
-      hint: "destructiveHint",
+      annotations: DESTRUCTIVE_WRITE,
     },
     senderkit_inbound_messages_list: {
       title: "List Inbound Messages",
-      hint: "readOnlyHint",
+      annotations: READ_ONLY,
     },
     senderkit_inbound_messages_get: {
       title: "Get Inbound Message",
-      hint: "readOnlyHint",
+      annotations: READ_ONLY,
     },
     senderkit_inbound_domains_list: {
       title: "List Inbound Domains",
-      hint: "readOnlyHint",
+      annotations: READ_ONLY,
     },
     senderkit_inbound_domains_create: {
       title: "Claim Inbound Domain",
-      hint: "destructiveHint",
+      annotations: DESTRUCTIVE_WRITE,
     },
     senderkit_inbound_domains_delete: {
       title: "Delete Inbound Domain",
-      hint: "destructiveHint",
+      annotations: DESTRUCTIVE_WRITE,
     },
   } as const;
 
-  it("assigns the directory-required title and a single hint to every tool", () => {
+  it("assigns the directory-required title and the full hint trio to every tool", () => {
     for (const command of registry) {
       const expected = EXPECTED[command.mcpName as keyof typeof EXPECTED];
       expect(expected, `no expectation for ${command.mcpName}`).toBeDefined();
       expect(command.title).toBe(expected.title);
-
-      // Exactly one of readOnlyHint / destructiveHint — true unless the entry
-      // pins an explicit value (destructiveHint: false = non-destructive write).
-      const hints = command.annotations as Record<string, unknown>;
-      expect(hints[expected.hint]).toBe("value" in expected ? expected.value : true);
-      const other =
-        expected.hint === "readOnlyHint" ? "destructiveHint" : "readOnlyHint";
-      expect(hints[other]).toBeUndefined();
+      expect(command.annotations, command.mcpName).toEqual(expected.annotations);
     }
   });
 
@@ -154,9 +181,7 @@ describe("tool annotations", () => {
       for (const tool of tools) {
         const expected = EXPECTED[tool.name as keyof typeof EXPECTED];
         expect(tool.title).toBe(expected.title);
-        expect(tool.annotations?.[expected.hint]).toBe(
-          "value" in expected ? expected.value : true,
-        );
+        expect(tool.annotations, tool.name).toMatchObject(expected.annotations);
       }
     } finally {
       await client.close();
