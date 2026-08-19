@@ -426,3 +426,361 @@ export const inboundMessagesGetInput = {
 export const SEND_TOOL_LIVE_MODE_NOTE =
   " Dispatches a real message; live vs test mode is determined by the API key prefix" +
   " (sk_live_ / sk_test_). Call senderkit_context first if you need to confirm the active mode.";
+
+// --------------------------------------------------------------------------- //
+// Output shapes — the structured result each tool returns.
+//
+// Per the MCP spec (2025-06-18) a tool that declares `outputSchema` MUST return
+// `structuredContent` conforming to it, so these describe exactly what the
+// hosted server (mcp.senderkit.com) puts in `structuredContent` — the same
+// object it serializes into the text `content` for older clients. They mirror
+// the v1 REST responses the tools wrap, minus internal identifiers (database
+// row ids, workspace ids, provider-connection ids) that a caller never needs.
+// Like the input shapes, each is a ZodRawShape so it can be passed straight to
+// the MCP SDK's `registerTool` or wrapped with `z.object(shape)` to validate.
+// --------------------------------------------------------------------------- //
+
+/**
+ * ISO 8601 timestamp (`2026-06-01T09:00:00.000Z`). Plain string at runtime so a
+ * timestamp can never fail validation on the server; `format: date-time` in
+ * the emitted JSON Schema tells clients what it is.
+ */
+const isoTimestamp = z.string().meta({ format: "date-time" });
+
+const sendMode = z
+  .enum(["live", "test"])
+  .describe(
+    "The connection's send mode: live messages are really delivered; test " +
+      "messages are recorded but not delivered.",
+  );
+
+/** Template lifecycle states (mirrors the app's `templateStatusEnum`). */
+export const TEMPLATE_STATUSES = ["active", "draft", "archived"] as const;
+
+/** Received-message states (mirrors the app's `inboundMessageStatusEnum`). */
+export const INBOUND_MESSAGE_STATUSES = ["received", "dropped", "quota_exceeded"] as const;
+
+/** Inbound domain kinds / verification states (mirror the app's enums). */
+export const INBOUND_DOMAIN_KINDS = ["shared", "custom"] as const;
+export const INBOUND_DOMAIN_STATUSES = ["pending", "verified", "failed"] as const;
+
+/** Shape of the `senderkit_context` result. */
+export const contextOutput = {
+  workspace: z.object({
+    id: z.string().describe("Workspace id."),
+    slug: z.string().describe("Workspace slug (also the shared inbound domain prefix)."),
+    name: z.string().describe("Workspace display name."),
+  }),
+  mode: sendMode,
+};
+
+/** Shape of the `senderkit_send` / `senderkit_send_raw` result. */
+export const sendOutput = {
+  id: z
+    .string()
+    .describe(
+      'Public message id (e.g. "msg_…"). Pass it to senderkit_messages_get to ' +
+        "track delivery, or to senderkit_cancel_message while it is still pending.",
+    ),
+  status: z
+    .enum(["queued", "scheduled"])
+    .describe('"scheduled" when scheduledAt was in the future; otherwise "queued".'),
+  livemode: z.boolean().describe("Whether the message was created in live mode."),
+  mode: sendMode,
+};
+
+/** `senderkit_send_raw` returns the same shape as `senderkit_send`. */
+export const sendRawOutput = sendOutput;
+
+const templateSummary = {
+  slug: z.string().describe("Template slug — pass to senderkit_send / senderkit_templates_get."),
+  channel: channel.describe("The template's primary channel."),
+  description: z.string().nullable().describe("Internal note, or null."),
+  status: z
+    .enum(TEMPLATE_STATUSES)
+    .describe(
+      "active = has a published version; draft = never published (sendable in " +
+        "test mode only); archived = retired.",
+    ),
+  updatedAt: isoTimestamp.describe("When the template was last changed."),
+};
+
+/** Shape of the `senderkit_templates_list` result. */
+export const templatesListOutput = {
+  data: z.array(z.object(templateSummary)).describe("Every template in the workspace."),
+};
+
+/** Shape of the `senderkit_templates_get` result. */
+export const templatesGetOutput = {
+  ...templateSummary,
+  currentVersion: z
+    .object({
+      versionNumber: z.number().int().describe("Version number (1-based)."),
+      variables: z
+        .array(z.unknown())
+        .describe(
+          "Declared template variables — objects with name, type (string | " +
+            "array | object | boolean) and optional description, required, " +
+            "example, itemShape. Fill these in `vars` when sending.",
+        ),
+      publishedAt: isoTimestamp
+        .nullable()
+        .describe("When this version was published, or null for an unpublished draft."),
+    })
+    .nullable()
+    .describe(
+      "The current version's metadata (rendered content is omitted to keep " +
+        "results small), or null when the template has no version yet.",
+    ),
+};
+
+const timelineEntry = z
+  .object({
+    t: isoTimestamp.describe("When the event happened."),
+    e: z.string().describe("Event name (e.g. queued, dispatched, sent, delivered, failed)."),
+    meta: z.unknown().optional().describe("Event-specific detail, when any."),
+  })
+  .describe("One lifecycle event.");
+
+/** One message as returned by `senderkit_messages_list` / `senderkit_messages_get`. */
+const messageRecord = {
+  publicId: z
+    .string()
+    .describe(
+      'Public message id (e.g. "msg_…") — the id senderkit_messages_get and ' +
+        "senderkit_cancel_message take.",
+    ),
+  templateSlug: z
+    .string()
+    .nullable()
+    .describe("Template the message was sent from, or null for a raw send."),
+  channel: channel.describe("Delivery channel."),
+  status: z
+    .enum(MESSAGE_STATUSES)
+    .describe(
+      "Lifecycle status. failed = bounce or provider error (see error/timeline); " +
+        "suppressed = never attempted (address invalid or already suppressed); " +
+        "blocked = halted by automated content safety checks.",
+    ),
+  livemode: z.boolean().describe("Whether the message was created in live mode."),
+  recipient: z.string().describe("Recipient address / number / token as supplied."),
+  vars: z
+    .record(z.string(), z.unknown())
+    .describe("Template variables supplied at send time."),
+  metadata: z
+    .record(z.string(), z.unknown())
+    .describe("Caller-supplied metadata (scalar values) attached at send time."),
+  fromOverride: z
+    .string()
+    .nullable()
+    .describe("Per-message From address override (email), or null."),
+  fromNameOverride: z
+    .string()
+    .nullable()
+    .describe("Per-message From display-name override (email), or null."),
+  interpolate: z
+    .boolean()
+    .describe("Raw sends only: whether server-side variable substitution ran."),
+  pinnedVersion: z
+    .number()
+    .int()
+    .nullable()
+    .describe("Template version pinned by the caller, or null."),
+  idempotencyKey: z.string().nullable().describe("Caller-supplied idempotency key, or null."),
+  provider: z
+    .string()
+    .nullable()
+    .describe("Provider that handled (or is handling) delivery, or null before dispatch."),
+  providerMessageId: z
+    .string()
+    .nullable()
+    .describe("The provider's own id for this message, or null."),
+  latencyMs: z
+    .number()
+    .int()
+    .nullable()
+    .describe("Provider round-trip time in milliseconds, or null."),
+  openedAt: isoTimestamp
+    .nullable()
+    .describe("First reported email open (open tracking), or null."),
+  clickedAt: isoTimestamp
+    .nullable()
+    .describe("First reported link click (click tracking), or null."),
+  error: z.string().nullable().describe("Provider/bounce error message, or null."),
+  timeline: z.array(timelineEntry).describe("Lifecycle events, oldest first."),
+  scheduledAt: isoTimestamp
+    .nullable()
+    .describe("Deliver-at time for a scheduled send, or null for an immediate one."),
+  createdAt: isoTimestamp.describe("When the message was created."),
+};
+
+/** Shape of the `senderkit_messages_list` result. */
+export const messagesListOutput = {
+  data: z.array(z.object(messageRecord)).describe("Messages, newest first."),
+  nextCursor: z
+    .string()
+    .nullable()
+    .describe("Pass as `cursor` to fetch the next page; null when there are no more."),
+};
+
+/** Shape of the `senderkit_messages_get` result. */
+export const messagesGetOutput = messageRecord;
+
+/** Shape of the `senderkit_cancel_message` result. */
+export const cancelMessageOutput = {
+  id: z.string().describe('The canceled message\'s public id (e.g. "msg_…").'),
+  status: z.literal("canceled"),
+};
+
+const inboundAddress = {
+  id: z.string().describe('Inbound address id (e.g. "inb_…").'),
+  address: z
+    .string()
+    .describe("The full receiving address, e.g. support@acme.in.senderkit.email."),
+  description: z.string().nullable().describe("Internal note, or null."),
+  forwardTo: z
+    .string()
+    .nullable()
+    .describe("Address received mail is also forwarded to, or null."),
+  active: z.boolean().describe("Whether the address currently receives mail."),
+  livemode: z.boolean().describe("Live-mode address (true) or test-mode (false)."),
+  createdAt: isoTimestamp.describe("When the address was created."),
+};
+
+/** Shape of the `senderkit_inbound_addresses_list` result. */
+export const inboundAddressesListOutput = {
+  data: z.array(z.object(inboundAddress)).describe("The workspace's inbound addresses."),
+};
+
+/** Shape of the `senderkit_inbound_addresses_create` result. */
+export const inboundAddressesCreateOutput = inboundAddress;
+
+/** Shape of the `senderkit_inbound_addresses_delete` result. */
+export const inboundAddressesDeleteOutput = {
+  deleted: z.literal(true),
+};
+
+const inboundMessageStatus = z
+  .enum(INBOUND_MESSAGE_STATUSES)
+  .describe(
+    "received = stored and the webhook/forward pipeline ran; dropped = arrived " +
+      "on a verified domain but matched no address; quota_exceeded = stored but " +
+      "the pipeline was skipped.",
+  );
+
+/** Shape of the `senderkit_inbound_messages_list` result. */
+export const inboundMessagesListOutput = {
+  data: z
+    .array(
+      z.object({
+        id: z.string().describe('Inbound message id (e.g. "rcv_…").'),
+        status: inboundMessageStatus,
+        from: z.string().nullable().describe("Header From address, or null."),
+        subject: z.string().nullable(),
+        plusTag: z
+          .string()
+          .nullable()
+          .describe("The +tag segment of the addressed local part, if any."),
+        sizeBytes: z.number().int().describe("Size of the raw message in bytes."),
+        receivedAt: isoTimestamp.describe("When the message was received."),
+      }),
+    )
+    .describe("Received messages, newest first."),
+};
+
+const inboundAddressPair = z.object({
+  email: z.string(),
+  name: z.string().nullable(),
+});
+
+/** Shape of the `senderkit_inbound_messages_get` result. */
+export const inboundMessagesGetOutput = {
+  id: z.string().describe('Inbound message id (e.g. "rcv_…").'),
+  status: inboundMessageStatus,
+  channel: channel,
+  address: z
+    .string()
+    .nullable()
+    .describe("Canonical receiving address, or null for catch-all/unmatched mail."),
+  plusTag: z.string().nullable().describe("The +tag segment of the addressed local part, if any."),
+  from: z.object({ email: z.string().nullable(), name: z.string().nullable() }),
+  to: z.array(inboundAddressPair),
+  cc: z.array(inboundAddressPair),
+  envelope: z.object({
+    from: z.string().nullable().describe("SMTP envelope sender (MAIL FROM)."),
+    to: z.array(z.string()).describe("SMTP envelope recipients (RCPT TO)."),
+  }),
+  subject: z.string().nullable(),
+  messageId: z.string().nullable().describe("The mail's Message-ID header."),
+  inReplyTo: z.string().nullable().describe("The In-Reply-To header, if any."),
+  text: z.string().nullable().describe("Plain-text body, or null."),
+  html: z.string().nullable().describe("HTML body, or null."),
+  strippedReply: z
+    .string()
+    .nullable()
+    .describe("The plain-text reply with quoted history and signature stripped."),
+  truncated: z.boolean().describe("Whether the stored body was truncated."),
+  headers: z.record(z.string(), z.string()).describe("Mail headers."),
+  attachments: z.array(
+    z.object({
+      index: z.number().int().describe("Zero-based index used in the attachment URL."),
+      filename: z.string().nullable(),
+      contentType: z.string(),
+      size: z.number().int().describe("Size in bytes."),
+      url: z
+        .string()
+        .describe(
+          "Authenticated v1 API URL for the bytes — fetch with a Bearer API key " +
+            "holding the inbound scope (not a public/signed link).",
+        ),
+    }),
+  ),
+  verdicts: z
+    .record(z.string(), z.string())
+    .describe("Scanning verdicts (spam, virus, SPF, DKIM, DMARC) as reported."),
+  sizeBytes: z.number().int().describe("Size of the raw message in bytes."),
+  rawUrl: z
+    .string()
+    .describe("Authenticated v1 API URL for the raw RFC 822 source (Bearer key, inbound scope)."),
+  receivedAt: isoTimestamp.describe("When the message was received."),
+};
+
+const inboundDnsRecord = z.object({
+  type: z.enum(["TXT", "MX"]),
+  name: z.string().describe("Host/name to create the record at."),
+  value: z.string().describe("Record value."),
+  priority: z.number().int().optional().describe("MX priority (MX records only)."),
+  purpose: z.string().describe("Why the record is needed."),
+});
+
+const inboundDomain = {
+  id: z.string().describe("Inbound domain id (UUID) — the id senderkit_inbound_domains_delete takes."),
+  domain: z.string().describe("The domain, e.g. inbound.acme.com."),
+  kind: z
+    .enum(INBOUND_DOMAIN_KINDS)
+    .describe("shared = the managed {slug}.in.senderkit.email domain; custom = a claimed domain."),
+  status: z
+    .enum(INBOUND_DOMAIN_STATUSES)
+    .describe("Verification state; only verified domains receive mail."),
+  records: z
+    .array(inboundDnsRecord)
+    .describe(
+      "DNS records the user must publish (custom domains only; empty for the " +
+        "shared domain). Surface them verbatim.",
+    ),
+  verifiedAt: isoTimestamp.nullable().describe("When verification completed, or null."),
+  createdAt: isoTimestamp.describe("When the domain was claimed."),
+};
+
+/** Shape of the `senderkit_inbound_domains_list` result. */
+export const inboundDomainsListOutput = {
+  domains: z.array(z.object(inboundDomain)).describe("The workspace's inbound domains."),
+};
+
+/** Shape of the `senderkit_inbound_domains_create` result. */
+export const inboundDomainsCreateOutput = inboundDomain;
+
+/** Shape of the `senderkit_inbound_domains_delete` result. */
+export const inboundDomainsDeleteOutput = {
+  deleted: z.literal(true),
+};
