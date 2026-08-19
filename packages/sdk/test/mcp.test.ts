@@ -27,12 +27,64 @@ describe("MCP_TOOLS", () => {
     expect(MCP_TOOLS.map((t) => t.name)).toEqual(Object.keys(EXPECTED));
   });
 
-  it("each spec reuses the shared mcp-schemas shape", () => {
+  it("each spec reuses the shared mcp-schemas input shape", () => {
     for (const t of MCP_TOOLS) {
       const key = EXPECTED[t.name];
       expect(key, `unexpected tool ${t.name}`).toBeDefined();
       expect(t.inputSchema).toBe(schemas[key!]);
     }
+  });
+
+  it("each spec reuses the matching mcp-schemas output shape", () => {
+    // Pairing by naming convention (fooInput ↔ fooOutput) keeps a copy-paste
+    // error — the wrong tool's shape on a spec — from shipping.
+    for (const t of MCP_TOOLS) {
+      const key = EXPECTED[t.name]!.replace(/Input$/, "Output") as keyof typeof schemas;
+      expect(schemas[key], `${t.name}: no ${key} export`).toBeDefined();
+      expect(t.outputSchema, t.name).toBe(schemas[key]);
+    }
+  });
+
+  it("every outputSchema is a non-empty object shape that renders to JSON Schema", () => {
+    // MCP requires `structuredContent` to be a JSON object; an empty shape would
+    // advertise an object with no fields, which helps no client. The JSON Schema
+    // conversion is what `tools/list` emits (the MCP SDK uses output io mode).
+    for (const t of MCP_TOOLS) {
+      expect(Object.keys(t.outputSchema).length, t.name).toBeGreaterThan(0);
+      const json = z.toJSONSchema(z.object(t.outputSchema), { io: "output" }) as {
+        type?: string;
+        properties?: Record<string, unknown>;
+      };
+      expect(json.type, t.name).toBe("object");
+      expect(Object.keys(json.properties ?? {}).sort(), t.name).toEqual(
+        Object.keys(t.outputSchema).sort(),
+      );
+    }
+  });
+
+  it("output shapes carry no internal identifiers", () => {
+    // OpenAI's app review asks tool results to omit internal ids / debug
+    // payloads; the hosted server strips them, and the schema must not
+    // re-advertise them. Walk the shape recursively.
+    const FORBIDDEN = new Set(["workspaceId", "providerConnectionId", "addressId", "domainId"]);
+    const walk = (schema: z.ZodType, path: string): void => {
+      const def = (schema as unknown as { def: { type: string } }).def;
+      if (def.type === "object") {
+        const shape = (schema as z.ZodObject).shape;
+        for (const [key, child] of Object.entries(shape)) {
+          expect(FORBIDDEN.has(key), `${path}.${key}`).toBe(false);
+          walk(child as z.ZodType, `${path}.${key}`);
+        }
+      } else if (def.type === "array") {
+        walk((schema as z.ZodArray).element as z.ZodType, `${path}[]`);
+      } else if (def.type === "nullable" || def.type === "optional") {
+        walk((schema as z.ZodNullable).unwrap() as z.ZodType, path);
+      }
+    };
+    for (const t of MCP_TOOLS) walk(z.object(t.outputSchema), t.name);
+    // The message record exposes the public id only, never the row id.
+    expect("id" in schemas.messagesGetOutput).toBe(false);
+    expect("publicId" in schemas.messagesGetOutput).toBe(true);
   });
 
   it("sets all three safety hints explicitly, with a non-empty title + description", () => {

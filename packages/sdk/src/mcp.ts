@@ -16,6 +16,22 @@ import {
   inboundDomainsListInput,
   inboundDomainsCreateInput,
   inboundDomainsDeleteInput,
+  contextOutput,
+  sendOutput,
+  sendRawOutput,
+  templatesListOutput,
+  templatesGetOutput,
+  messagesListOutput,
+  messagesGetOutput,
+  cancelMessageOutput,
+  inboundAddressesListOutput,
+  inboundAddressesCreateOutput,
+  inboundAddressesDeleteOutput,
+  inboundMessagesListOutput,
+  inboundMessagesGetOutput,
+  inboundDomainsListOutput,
+  inboundDomainsCreateOutput,
+  inboundDomainsDeleteOutput,
 } from "./mcp-schemas";
 
 // Single MCP entry point: re-export the input shapes + SEND_TOOL_LIVE_MODE_NOTE
@@ -57,6 +73,15 @@ export interface McpToolSpec {
   description: string;
   annotations: ToolAnnotations;
   inputSchema: z.ZodRawShape;
+  /**
+   * Shape of the tool's structured result (`structuredContent`), exposed to
+   * clients as JSON Schema via `tools/list`. Describes the hosted server's
+   * result — the v1 REST response the tool wraps, minus internal identifiers.
+   * A server that declares it MUST return conforming `structuredContent`
+   * (MCP spec 2025-06-18); the CLI-bundled stdio server returns the SDK
+   * client's unwrapped shapes and therefore does not declare it yet.
+   */
+  outputSchema: z.ZodRawShape;
 }
 
 export const MCP_TOOLS: readonly McpToolSpec[] = [
@@ -75,6 +100,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: contextInput,
+    outputSchema: contextOutput,
   },
   {
     name: "senderkit_send",
@@ -88,6 +114,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: true,
     },
     inputSchema: sendInput,
+    outputSchema: sendOutput,
   },
   {
     name: "senderkit_send_raw",
@@ -101,6 +128,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: true,
     },
     inputSchema: sendRawInput,
+    outputSchema: sendRawOutput,
   },
   {
     name: "senderkit_templates_list",
@@ -114,6 +142,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: templatesListInput,
+    outputSchema: templatesListOutput,
   },
   {
     name: "senderkit_templates_get",
@@ -127,6 +156,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: templatesGetInput,
+    outputSchema: templatesGetOutput,
   },
   {
     name: "senderkit_messages_list",
@@ -142,6 +172,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: messagesListInput,
+    outputSchema: messagesListOutput,
   },
   {
     name: "senderkit_messages_get",
@@ -155,6 +186,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: messagesGetInput,
+    outputSchema: messagesGetOutput,
   },
   {
     name: "senderkit_cancel_message",
@@ -167,6 +199,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: true,
     },
     inputSchema: cancelMessageInput,
+    outputSchema: cancelMessageOutput,
   },
   {
     name: "senderkit_inbound_addresses_list",
@@ -181,6 +214,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: inboundAddressesListInput,
+    outputSchema: inboundAddressesListOutput,
   },
   {
     name: "senderkit_inbound_addresses_create",
@@ -197,6 +231,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: inboundAddressesCreateInput,
+    outputSchema: inboundAddressesCreateOutput,
   },
   {
     name: "senderkit_inbound_addresses_delete",
@@ -211,6 +246,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: true,
     },
     inputSchema: inboundAddressesDeleteInput,
+    outputSchema: inboundAddressesDeleteOutput,
   },
   {
     name: "senderkit_inbound_messages_list",
@@ -226,6 +262,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: inboundMessagesListInput,
+    outputSchema: inboundMessagesListOutput,
   },
   {
     name: "senderkit_inbound_messages_get",
@@ -241,6 +278,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: inboundMessagesGetInput,
+    outputSchema: inboundMessagesGetOutput,
   },
   {
     name: "senderkit_inbound_domains_list",
@@ -255,6 +293,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: false,
     },
     inputSchema: inboundDomainsListInput,
+    outputSchema: inboundDomainsListOutput,
   },
   {
     name: "senderkit_inbound_domains_create",
@@ -274,6 +313,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: true,
     },
     inputSchema: inboundDomainsCreateInput,
+    outputSchema: inboundDomainsCreateOutput,
   },
   {
     name: "senderkit_inbound_domains_delete",
@@ -288,6 +328,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       destructiveHint: true,
     },
     inputSchema: inboundDomainsDeleteInput,
+    outputSchema: inboundDomainsDeleteOutput,
   },
 ];
 
