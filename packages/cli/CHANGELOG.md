@@ -1,5 +1,12 @@
 # @senderkit/cli
 
+## 0.10.1
+
+### Patch Changes
+
+- Updated dependencies [5d1f5d9]
+  - @senderkit/sdk@0.16.0
+
 ## 0.10.0
 
 ### Minor Changes
