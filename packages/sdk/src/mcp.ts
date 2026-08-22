@@ -78,8 +78,11 @@ export interface McpToolSpec {
    * clients as JSON Schema via `tools/list`. Describes the hosted server's
    * result — the v1 REST response the tool wraps, minus internal identifiers.
    * A server that declares it MUST return conforming `structuredContent`
-   * (MCP spec 2025-06-18); the CLI-bundled stdio server returns the SDK
-   * client's unwrapped shapes and therefore does not declare it yet.
+   * (MCP spec 2025-06-18). Both the app-hosted server and the CLI-bundled
+   * stdio/HTTP server declare it and return conforming results; the CLI server
+   * projects the SDK client's shapes through this schema, which drops the
+   * client's internal-only fields so the two servers stay field-for-field
+   * identical.
    */
   outputSchema: z.ZodRawShape;
 }

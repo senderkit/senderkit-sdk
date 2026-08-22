@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { buildMcpServer, withResultMode } from "../src/mcp/server";
+import { buildMcpServer, withResultMode, toStructuredContent } from "../src/mcp/server";
 import { buildClient, MissingApiKeyError } from "../src/core/context";
 import { registry } from "../src/core/registry";
 
@@ -168,7 +168,7 @@ describe("tool annotations", () => {
     );
   });
 
-  it("surfaces title + annotations over the wire via tools/list", async () => {
+  it("surfaces title + annotations + outputSchema over the wire via tools/list", async () => {
     const server = buildMcpServer(buildClient({ apiKey: "sk_test_introspect" }));
     const [clientT, serverT] = InMemoryTransport.createLinkedPair();
     const client = new Client({ name: "introspect", version: "0" });
@@ -182,11 +182,96 @@ describe("tool annotations", () => {
         const expected = EXPECTED[tool.name as keyof typeof EXPECTED];
         expect(tool.title).toBe(expected.title);
         expect(tool.annotations, tool.name).toMatchObject(expected.annotations);
+        // Every tool advertises an object outputSchema so MCP clients can
+        // validate results (the parity the app-hosted server also requires).
+        expect(tool.outputSchema, tool.name).toMatchObject({ type: "object" });
       }
     } finally {
       await client.close();
       await server.close();
     }
+  });
+});
+
+describe("toStructuredContent", () => {
+  it("drops internal identifiers the SDK client carries but the schema omits", () => {
+    // The v1 REST message is the lean schema's fields plus internal ids.
+    const restMessage = {
+      id: "internal-row-uuid",
+      workspaceId: "ws-uuid",
+      providerConnectionId: "pc-uuid",
+      publicId: "msg_123",
+      templateSlug: "welcome",
+      channel: "email",
+      status: "delivered",
+      livemode: true,
+      recipient: "user@example.com",
+      vars: { name: "Ada" },
+      metadata: { source: "signup" },
+      fromOverride: null,
+      fromNameOverride: null,
+      interpolate: false,
+      pinnedVersion: null,
+      idempotencyKey: null,
+      provider: "resend",
+      providerMessageId: "re_abc",
+      latencyMs: 42,
+      openedAt: null,
+      clickedAt: null,
+      error: null,
+      timeline: [{ t: "2026-01-01T00:00:00.000Z", e: "queued" }],
+      scheduledAt: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+
+    const structured = toStructuredContent("senderkit_messages_get", restMessage);
+
+    expect(structured.publicId).toBe("msg_123");
+    expect(structured).not.toHaveProperty("id");
+    expect(structured).not.toHaveProperty("workspaceId");
+    expect(structured).not.toHaveProperty("providerConnectionId");
+  });
+
+  it("re-wraps the SDK client's bare-array list results under the schema key", () => {
+    const templates = [
+      {
+        slug: "welcome",
+        channel: "email",
+        description: null,
+        status: "active",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+    expect(toStructuredContent("senderkit_templates_list", templates)).toEqual({
+      data: templates,
+    });
+
+    const domains = [
+      {
+        id: "dom_1",
+        domain: "inbound.acme.com",
+        kind: "custom",
+        status: "verified",
+        records: [],
+        verifiedAt: "2026-01-01T00:00:00.000Z",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+    // Inbound domains list nests under `domains`, not `data`.
+    expect(toStructuredContent("senderkit_inbound_domains_list", domains)).toEqual({
+      domains,
+    });
+  });
+
+  it("keeps the send-mode stamp and passes object results through", () => {
+    const sendResult = { id: "msg_1", status: "queued", livemode: false, mode: "test" };
+    expect(toStructuredContent("senderkit_send", sendResult)).toEqual(sendResult);
+  });
+
+  it("throws when a result is missing a schema-required field", () => {
+    expect(() =>
+      toStructuredContent("senderkit_context", { workspace: { id: "w" }, mode: "test" }),
+    ).toThrow();
   });
 });
 
