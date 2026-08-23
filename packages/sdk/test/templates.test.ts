@@ -88,6 +88,13 @@ describe("messages", () => {
     expect(url).toContain("metadata%5Bvip%5D=true");
   });
 
+  it("forwards the search term as a query param", async () => {
+    const mock = createMockFetch([{ status: 200, body: { data: [] } }]);
+    const sk = new SenderKit({ apiKey: "sk_test_x", fetch: mock.fetch });
+    await sk.messages.list({ search: "order 42" });
+    expect(mock.calls[0]!.url).toMatch(/search=order(\+|%20)42/);
+  });
+
   it("gets a message by id with URL encoding", async () => {
     const mock = createMockFetch([
       {

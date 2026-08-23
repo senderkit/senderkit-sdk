@@ -22,6 +22,7 @@ export const messagesListCommand = defineCommand<
       channel: input.channel,
       template: input.template,
       metadata: input.metadata,
+      search: input.search,
     }),
   format: (res) => {
     if (res.data.length === 0) return "No messages found.";

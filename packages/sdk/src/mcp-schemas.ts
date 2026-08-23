@@ -266,6 +266,15 @@ export const messagesListInput = {
   channel: channel.optional().describe("Filter by channel."),
   template: z.string().optional().describe("Filter by template slug."),
   metadata: metadata.describe("Filter by metadata (each key/value must match)."),
+  search: z
+    .string()
+    .max(512)
+    .optional()
+    .describe(
+      "Case-insensitive substring search over public id, recipient, template " +
+        "slug, and metadata keys/values. Composes with the other filters; use " +
+        "metadata for an exact match. Max 512 characters.",
+    ),
 };
 
 /** Shape for `senderkit_messages_get`. */

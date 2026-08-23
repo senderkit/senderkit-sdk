@@ -52,7 +52,7 @@ senderkit send-raw '<subscription-json>' --channel web-push --title "Back in sto
 senderkit templates list
 senderkit templates get <slug>
 
-senderkit messages list [--status delivered] [--channel email] [--template welcome] [--limit 50] [--cursor …]
+senderkit messages list [--status delivered] [--channel email] [--template welcome] [--search user@example.com] [--limit 50] [--cursor …]
 senderkit messages get <id>
 senderkit messages cancel <id>
 

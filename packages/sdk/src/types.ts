@@ -251,6 +251,13 @@ export interface ListMessagesParams {
   template?: string;
   /** Filter by metadata attached at send time. Each key/value pair must match. */
   metadata?: Record<string, string | number | boolean>;
+  /**
+   * Case-insensitive substring match over a message's public id, recipient,
+   * template slug, and metadata keys/values. Composes with the other filters
+   * and with cursor pagination; use `metadata` when you need an exact match.
+   * Capped at 512 characters by the API.
+   */
+  search?: string;
 }
 
 export interface ListMessagesResponse {

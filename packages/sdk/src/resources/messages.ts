@@ -21,6 +21,7 @@ export class MessagesResource {
       status: params.status,
       channel: params.channel,
       template: params.template,
+      search: params.search,
     };
     if (params.metadata) {
       for (const [key, value] of Object.entries(params.metadata)) {

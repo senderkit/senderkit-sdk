@@ -159,6 +159,12 @@ describe("schema bounds", () => {
     expect(() => schema.parse({ limit: 201 })).toThrow();
   });
 
+  it("messages_list search caps at 512 characters", () => {
+    const schema = z.object(schemas.messagesListInput);
+    expect(schema.parse({ search: "a".repeat(512) }).search).toHaveLength(512);
+    expect(() => schema.parse({ search: "a".repeat(513) })).toThrow();
+  });
+
   it("inbound_messages_list limit enforces the service clamp (1-100)", () => {
     const schema = z.object(schemas.inboundMessagesListInput);
     expect(schema.parse({ limit: 100 }).limit).toBe(100);
