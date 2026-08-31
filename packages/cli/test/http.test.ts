@@ -30,7 +30,22 @@ beforeEach(async () => {
       res.end(JSON.stringify({ message: "bad key" }));
       return;
     }
-    res.end(JSON.stringify({ data: [{ slug: "welcome", name: "Welcome", channels: ["email"] }] }));
+    // A conformant v1 templates list response, plus extra fields the lean
+    // outputSchema omits (proving the server strips them from structuredContent).
+    res.end(
+      JSON.stringify({
+        data: [
+          {
+            slug: "welcome",
+            channel: "email",
+            description: null,
+            status: "active",
+            updatedAt: "2026-01-01T00:00:00.000Z",
+            currentVersionId: "ver_internal",
+          },
+        ],
+      }),
+    );
   });
   const apiPort = await listen(mockApi);
   originalBaseUrl = process.env["SENDERKIT_BASE_URL"];
@@ -59,10 +74,26 @@ describe("MCP HTTP server", () => {
     await client.connect(clientTransport({ Authorization: "Bearer sk_test_abc" }));
 
     const tools = await client.listTools();
-    expect(tools.tools.map((t) => t.name)).toContain("senderkit_templates_list");
+    const listTool = tools.tools.find((t) => t.name === "senderkit_templates_list");
+    expect(listTool).toBeDefined();
+    // Every tool advertises an outputSchema so models understand its results.
+    expect(listTool!.outputSchema).toMatchObject({ type: "object" });
 
     const res = await client.callTool({ name: "senderkit_templates_list", arguments: {} });
     expect((res.content as { text: string }[])[0]!.text).toContain("welcome");
+    // The MCP SDK validated structuredContent against the advertised schema; the
+    // bare-array client result is re-wrapped under `data` and internal-only
+    // fields (currentVersionId) are dropped.
+    const structured = res.structuredContent as { data: Record<string, unknown>[] };
+    expect(structured.data).toEqual([
+      {
+        slug: "welcome",
+        channel: "email",
+        description: null,
+        status: "active",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ]);
 
     await client.close();
   });
