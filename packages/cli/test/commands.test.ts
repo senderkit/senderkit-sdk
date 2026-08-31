@@ -179,6 +179,12 @@ describe("read commands", () => {
     expect(calls.listParams).toMatchObject({ metadata: { orderId: "123", tier: 1 } });
   });
 
+  it("messages list forwards the search term", async () => {
+    const { client, calls } = stubClient();
+    await messagesListCommand.run({ search: "order 42" }, { client });
+    expect(calls.listParams).toMatchObject({ search: "order 42" });
+  });
+
   it("messages list parses metadata JSON from CLI string input", () => {
     const parsed = messagesListCommand.schema.parse({
       metadata: '{"orderId":"123","tier":1}',

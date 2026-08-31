@@ -264,6 +264,7 @@ const { data, nextCursor } = await senderkit.messages.list({
   limit: 50,
   status: "delivered",
   template: "welcome",
+  search: "user@example.com", // substring match over id, recipient, template slug, and metadata
 });
 
 const message = await senderkit.messages.get("msg_…");
