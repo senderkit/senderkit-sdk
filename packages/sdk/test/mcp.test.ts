@@ -104,13 +104,31 @@ describe("MCP_TOOLS", () => {
     }
   });
 
-  it("marks exactly the send tools open-world", () => {
-    // Only senderkit_send / senderkit_send_raw deliver messages to recipients
-    // outside SenderKit; everything else operates on workspace state.
+  it("marks exactly the tools that reach outside SenderKit open-world", () => {
+    // Sends deliver to external recipients; an inbound address can forward
+    // received mail to any external address; claiming an inbound domain
+    // redirects that domain's mail and depends on the user's DNS. OpenAI's
+    // tool scan flags openWorldHint: false on the latter two. Everything else
+    // operates on workspace state.
     const openWorld = MCP_TOOLS.filter((t) => t.annotations.openWorldHint).map(
       (t) => t.name,
     );
-    expect(openWorld.sort()).toEqual(["senderkit_send", "senderkit_send_raw"]);
+    expect(openWorld.sort()).toEqual([
+      "senderkit_inbound_addresses_create",
+      "senderkit_inbound_domains_create",
+      "senderkit_send",
+      "senderkit_send_raw",
+    ]);
+  });
+
+  it("templates_get describes only what it returns (no rendered content)", () => {
+    // The result carries channel, status, and the current version's number,
+    // publish time, and variables — rendered content is omitted. OpenAI's
+    // tool scan flags descriptions that claim more than the tool returns.
+    const desc = MCP_TOOLS_BY_NAME.senderkit_templates_get.description;
+    expect(desc).not.toMatch(/fetch a template's content|actually be delivered/i);
+    expect(desc).toMatch(/content is not included/i);
+    expect(desc).toMatch(/variables/i);
   });
 
   it("admits a non-destructive write annotation (destructiveHint: false)", () => {
@@ -182,15 +200,16 @@ describe("schema bounds", () => {
 });
 
 describe("inbound manifest parity with the hosted app's definitions", () => {
-  it("inbound_addresses_create is an additive, non-destructive write", () => {
+  it("inbound_addresses_create is an additive, non-destructive, open-world write", () => {
     // Creating an address is fully reversed by deleting it again; flagging it
     // destructive makes well-behaved clients demand confirmation for a
-    // reversible operation.
+    // reversible operation. It is open-world: it can forward received mail
+    // to any external address.
     expect(
       MCP_TOOLS_BY_NAME.senderkit_inbound_addresses_create.annotations,
     ).toEqual({
       readOnlyHint: false,
-      openWorldHint: false,
+      openWorldHint: true,
       destructiveHint: false,
     });
   });

@@ -151,8 +151,9 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     name: "senderkit_templates_get",
     title: "Get Template",
     description:
-      "Fetch a template's content, variables, and current version by slug — " +
-      "inspect what will actually be delivered before sending or editing.",
+      "Look up a template by slug: its channel, status, and current " +
+      "version's number, publish time, and declared variables (fill these " +
+      "in `vars` when sending). Rendered content is not included.",
     annotations: {
       readOnlyHint: true,
       openWorldHint: false,
@@ -228,9 +229,10 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "receipt. Enforces the workspace's plan limit and validates " +
       "forwardTo/webhookEndpointId.",
     // Additive: mints a new address; deleting it again fully reverses it.
+    // Open-world: it can forward received mail to any external address.
     annotations: {
       readOnlyHint: false,
-      openWorldHint: false,
+      openWorldHint: true,
       destructiveHint: false,
     },
     inputSchema: inboundAddressesCreateInput,
@@ -310,9 +312,10 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "acknowledgeExistingMx: true, since claiming will redirect ALL of that " +
       "domain's mail to SenderKit. Nothing is received until the records are " +
       "live and verification completes.",
+    // Open-world: redirects the domain's mail and depends on the user's DNS.
     annotations: {
       readOnlyHint: false,
-      openWorldHint: false,
+      openWorldHint: true,
       destructiveHint: true,
     },
     inputSchema: inboundDomainsCreateInput,
