@@ -19,11 +19,18 @@ updates:
     ignore:
       - dependency-name: "react"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
       - dependency-name: "@react-email/render"
         update-types: ["version-update:semver-major"]
       # TS 7 (Go-based compiler) breaks dts generation in tsup/rollup-plugin-dts
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
     groups:
+      # react-dom throws at runtime unless it matches react's exact version,
+      # so the pair (and their types) must land in one PR. Listed before
+      # devDependencies because a dependency joins the first group it matches.
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
       devDependencies:
         dependency-type: "development"
