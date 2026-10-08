@@ -378,11 +378,10 @@ export const inboundDomainsCreateInput = {
     .boolean()
     .optional()
     .describe(
-      "Only pass true after the user has explicitly confirmed they want to " +
-        "redirect this domain's mail to SenderKit. Omit on the first attempt — " +
-        "if the domain already has live MX records, the call fails with an " +
-        "existing_mx error naming the current host(s) so you can get that " +
-        "confirmation first.",
+      "Claim the domain even though it already has live MX records pointing " +
+        "elsewhere; this redirects all of the domain's mail to SenderKit. " +
+        "Without it, such a domain fails with an existing_mx error naming the " +
+        "current host(s).",
     ),
 };
 
@@ -434,7 +433,7 @@ export const inboundMessagesGetInput = {
  */
 export const SEND_TOOL_LIVE_MODE_NOTE =
   " Dispatches a real message; live vs test mode is determined by the API key prefix" +
-  " (sk_live_ / sk_test_). Call senderkit_context first if you need to confirm the active mode.";
+  " (sk_live_ / sk_test_). senderkit_context reports the active mode.";
 
 // --------------------------------------------------------------------------- //
 // Output shapes — the structured result each tool returns.
