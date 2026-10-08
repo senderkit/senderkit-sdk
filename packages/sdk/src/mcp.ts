@@ -93,10 +93,9 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     title: "Get Workspace Context",
     description:
       "Returns the connected workspace (id, name, slug) and the send mode (live " +
-      "or test) for this connection. The mode is fixed for the whole connection. " +
-      "Call this before sending so you can tell the user which workspace they're " +
-      "in and whether messages will be really delivered (live) or only recorded " +
-      "without delivery (test).",
+      "or test) for this connection. The mode is fixed for the whole connection: " +
+      "in live mode messages are really delivered; in test mode they are only " +
+      "recorded, without delivery.",
     annotations: {
       readOnlyHint: true,
       openWorldHint: false,
@@ -305,13 +304,12 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     title: "Claim Inbound Domain",
     description:
       'Claim a custom domain for receiving mail (e.g. "inbound.acme.com"). ' +
-      "Returns the DNS records (MX, DKIM) the user must publish — tell them " +
-      "exactly what to add. If the domain already has live MX records pointing " +
-      "elsewhere, this fails with an existing_mx error naming the current " +
-      "host(s); get the user's explicit confirmation before retrying with " +
-      "acknowledgeExistingMx: true, since claiming will redirect ALL of that " +
-      "domain's mail to SenderKit. Nothing is received until the records are " +
-      "live and verification completes.",
+      "Returns the DNS records (MX, DKIM) to publish at the domain's DNS host. " +
+      "If the domain already has live MX records pointing elsewhere, the call " +
+      "fails with an existing_mx error naming the current host(s); with " +
+      "acknowledgeExistingMx: true it claims the domain anyway, which redirects " +
+      "all of that domain's mail to SenderKit. Nothing is received until the " +
+      "records are live and verification completes.",
     // Open-world: redirects the domain's mail and depends on the user's DNS.
     annotations: {
       readOnlyHint: false,

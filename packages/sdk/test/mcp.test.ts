@@ -267,3 +267,31 @@ describe("inbound manifest parity with the hosted app's definitions", () => {
     expect(desc).toMatch(/forward/i);
   });
 });
+
+describe("model-readable text describes behavior, not instructions", () => {
+  // ChatGPT's tool-call review flagged a send description as a "Suspicious
+  // Instruction" for telling the model what to check and say. Descriptions
+  // must describe what a tool or field does; consent is carried by the
+  // destructive/open-world annotations, not by prose aimed at the model.
+  const INSTRUCTION =
+    /tell (the user|them)|ask (the user|which)|do not ask|get the user|warn the user|before calling|call this before|call senderkit_context first|only pass true after|you need to confirm|so you can/i;
+
+  it("tool descriptions carry no instructions to the model", () => {
+    for (const t of MCP_TOOLS) {
+      expect(t.description, t.name).not.toMatch(INSTRUCTION);
+    }
+  });
+
+  it("input field descriptions carry no instructions to the model", () => {
+    for (const t of MCP_TOOLS) {
+      for (const [field, schema] of Object.entries(t.inputSchema ?? {})) {
+        const desc = (schema as z.ZodType).description ?? "";
+        expect(desc, `${t.name}.${field}`).not.toMatch(INSTRUCTION);
+      }
+    }
+  });
+
+  it("the API-key send-mode note carries no instructions to the model", () => {
+    expect(schemas.SEND_TOOL_LIVE_MODE_NOTE).not.toMatch(INSTRUCTION);
+  });
+});
