@@ -1,5 +1,43 @@
 # @senderkit/sdk
 
+## 0.17.0
+
+### Minor Changes
+
+- 12fc0e5: Add a `search` filter to `messages.list`
+  
+  `messages.list` now accepts a `search` parameter — a case-insensitive
+  substring match over a message's public id, recipient, template slug, and
+  metadata keys/values. It composes with the existing filters and cursor
+  pagination; use the `metadata` filter when you need an exact match. Terms are
+  capped at 512 characters.
+  
+  The same filter is exposed on the `messages list` CLI command (`--search`) and
+  the `senderkit_messages_list` MCP tool.
+
+### Patch Changes
+
+- 5ea59de: The CLI-bundled MCP server (stdio and HTTP) now declares an `outputSchema` on
+  every tool and returns conforming `structuredContent`, bringing it to parity
+  with the hosted server. MCP clients get a JSON Schema for each tool's result via
+  `tools/list` and a validated structured result on every call. Results are
+  projected through the shared manifest schemas, so internal-only fields are
+  dropped and the two servers stay field-for-field identical.
+  
+  The `@senderkit/sdk` change is documentation only: the `McpToolSpec.outputSchema`
+  comment now reflects that the CLI-bundled server declares the schema too.
+- 48edad4: Make MCP tool metadata match tool behavior
+  
+  OpenAI's MCP tool scan flagged three manifest entries:
+  
+  - `senderkit_templates_get` described returning a template's content and
+    "what will actually be delivered", but the result omits rendered content.
+    The description now lists what it returns: channel, status, and the current
+    version's number, publish time, and declared variables.
+  - `senderkit_inbound_addresses_create` (can forward received mail to any
+    external address) and `senderkit_inbound_domains_create` (redirects a
+    domain's mail; depends on the user's DNS) are now `openWorldHint: true`.
+
 ## 0.16.0
 
 ### Minor Changes
