@@ -81,8 +81,9 @@ describe("tool annotations", () => {
     openWorldHint: false,
     destructiveHint: true,
   } as const;
-  // The send tools are the only open-world ones: they deliver messages to
-  // recipients outside SenderKit.
+  // Open-world tools reach outside SenderKit: sends deliver to external
+  // recipients; inbound address/domain creation can forward mail externally or
+  // redirect a domain's mail (OpenAI's tool scan flags them otherwise).
   const OPEN_WORLD_SEND = {
     readOnlyHint: false,
     openWorldHint: true,
@@ -120,10 +121,11 @@ describe("tool annotations", () => {
     senderkit_inbound_addresses_create: {
       title: "Create Inbound Address",
       // Additive write: creating an address is fully reversed by deleting it,
-      // so the manifest advertises an explicit non-destructive write.
+      // so the manifest advertises an explicit non-destructive write. Open-world:
+      // it can forward received mail to any external address.
       annotations: {
         readOnlyHint: false,
-        openWorldHint: false,
+        openWorldHint: true,
         destructiveHint: false,
       },
     },
@@ -145,7 +147,12 @@ describe("tool annotations", () => {
     },
     senderkit_inbound_domains_create: {
       title: "Claim Inbound Domain",
-      annotations: DESTRUCTIVE_WRITE,
+      // Open-world: claiming redirects the domain's mail and depends on DNS.
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: true,
+      },
     },
     senderkit_inbound_domains_delete: {
       title: "Delete Inbound Domain",
