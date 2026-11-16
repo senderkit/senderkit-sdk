@@ -322,3 +322,56 @@ describe("send tools are described by how they are used", () => {
     }
   });
 });
+
+describe("senderkit_context reports what a first send needs", () => {
+  const base = { workspace: { id: "w", slug: "acme", name: "Acme" }, mode: "live" };
+  const schema = z.object(schemas.contextOutput);
+
+  it("describes the wider result", () => {
+    expect(MCP_TOOLS_BY_NAME.senderkit_context.description).toBe(
+      "Returns the connected workspace, the send mode (live or test), the identity emails are sent with, which channels are ready, and the remaining allowance of the built-in sender.",
+    );
+  });
+
+  it("still accepts a result with only the workspace and mode", () => {
+    expect(schema.parse(base)).toEqual(base);
+  });
+
+  it("keeps the user, email status and channels without stripping anything", () => {
+    const full = {
+      ...base,
+      user: { name: "Dana Lee", email: "dana@example.com" },
+      email: {
+        ready: true,
+        sender: "shared",
+        from: "dana-1a2b@tx.senderkit.email",
+        fromName: "Dana Lee",
+        replyTo: "dana@example.com",
+        allowance: { daily: { used: 3, limit: 50 }, monthly: { used: 40, limit: 500 } },
+      },
+      channels: {
+        sms: { ready: false, setupUrl: "https://www.senderkit.com/app/channels/new/sms" },
+        push: { ready: true },
+        webPush: { ready: false },
+      },
+    };
+    expect(schema.parse(full)).toEqual(full);
+  });
+
+  it("accepts a user without a name", () => {
+    expect(schema.safeParse({ ...base, user: { name: null, email: "a@b.com" } }).success).toBe(true);
+  });
+
+  it("rejects an unknown sender kind", () => {
+    expect(
+      schema.safeParse({ ...base, email: { ready: true, sender: "carrier-pigeon" } }).success,
+    ).toBe(false);
+  });
+
+  it("describes every new field", () => {
+    const json = z.toJSONSchema(schema) as { properties: Record<string, { description?: string }> };
+    for (const key of ["user", "email", "channels"]) {
+      expect(json.properties[key]?.description, key).toBeTruthy();
+    }
+  });
+});

@@ -92,10 +92,9 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
     name: "senderkit_context",
     title: "Get Workspace Context",
     description:
-      "Returns the connected workspace (id, name, slug) and the send mode (live " +
-      "or test) for this connection. The mode is fixed for the whole connection: " +
-      "in live mode messages are really delivered; in test mode they are only " +
-      "recorded, without delivery.",
+      "Returns the connected workspace, the send mode (live or test), the " +
+      "identity emails are sent with, which channels are ready, and the " +
+      "remaining allowance of the built-in sender.",
     annotations: {
       readOnlyHint: true,
       openWorldHint: false,

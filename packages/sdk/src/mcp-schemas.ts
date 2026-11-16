@@ -473,7 +473,26 @@ export const INBOUND_MESSAGE_STATUSES = ["received", "dropped", "quota_exceeded"
 export const INBOUND_DOMAIN_KINDS = ["shared", "custom"] as const;
 export const INBOUND_DOMAIN_STATUSES = ["pending", "verified", "failed"] as const;
 
-/** Shape of the `senderkit_context` result. */
+/** Sends counted against a cap in one window of the built-in sender's allowance. */
+const usageWindow = z.object({
+  used: z.number().int().describe("Emails already sent in this window."),
+  limit: z.number().int().describe("The plan's cap for this window."),
+});
+
+/** Whether one non-email channel can send right now. */
+const channelStatus = z.object({
+  ready: z.boolean().describe("True when a provider is connected for this channel."),
+  setupUrl: z
+    .string()
+    .optional()
+    .describe("Dashboard page for connecting a provider. Present when the channel is not ready."),
+});
+
+/**
+ * Shape of the `senderkit_context` result. `workspace` and `mode` are always
+ * present. The rest is optional: the hosted server fills it in, while a server
+ * backed by the REST API returns only the first two.
+ */
 export const contextOutput = {
   workspace: z.object({
     id: z.string().describe("Workspace id."),
@@ -481,6 +500,47 @@ export const contextOutput = {
     name: z.string().describe("Workspace display name."),
   }),
   mode: sendMode,
+  user: z
+    .object({
+      name: z.string().nullable().describe("The person's name, or null when unknown."),
+      email: z.string().describe("The person's account email."),
+    })
+    .optional()
+    .describe(
+      "The person this connection acts for. Present for assistant (OAuth) connections only.",
+    ),
+  email: z
+    .object({
+      ready: z.boolean().describe("True when an email can be sent right now."),
+      sender: z
+        .enum(["shared", "custom-domain", "own-provider"])
+        .optional()
+        .describe(
+          "Where email goes out from: the built-in shared sender, the built-in sender on the workspace's verified domain, or a provider the workspace connected.",
+        ),
+      from: z
+        .string()
+        .optional()
+        .describe("The From address an inline email sent now would carry."),
+      fromName: z
+        .string()
+        .optional()
+        .describe("The From name an inline email sent now would carry."),
+      replyTo: z
+        .string()
+        .optional()
+        .describe("The Reply-To an inline email sent now would carry when the call sets none."),
+      allowance: z
+        .object({ daily: usageWindow, monthly: usageWindow })
+        .optional()
+        .describe("Use of the built-in sender's daily and monthly caps. Absent for a connected provider."),
+    })
+    .optional()
+    .describe("Email readiness and the identity an inline email would be sent with."),
+  channels: z
+    .object({ sms: channelStatus, push: channelStatus, webPush: channelStatus })
+    .optional()
+    .describe("Readiness of the SMS, push and web-push channels."),
 };
 
 /** Shape of the `senderkit_send` / `senderkit_send_raw` result. */

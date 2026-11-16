@@ -275,6 +275,11 @@ describe("toStructuredContent", () => {
     expect(toStructuredContent("senderkit_send", sendResult)).toEqual(sendResult);
   });
 
+  it("still accepts today's /v1/context response", () => {
+    const result = { workspace: { id: "w", slug: "acme", name: "Acme" }, mode: "test" };
+    expect(toStructuredContent("senderkit_context", result)).toEqual(result);
+  });
+
   it("throws when a result is missing a schema-required field", () => {
     expect(() =>
       toStructuredContent("senderkit_context", { workspace: { id: "w" }, mode: "test" }),
