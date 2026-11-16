@@ -96,11 +96,11 @@ describe("tool annotations", () => {
       annotations: READ_ONLY,
     },
     senderkit_send: {
-      title: "Send Templated Message",
+      title: "Send From Template",
       annotations: OPEN_WORLD_SEND,
     },
     senderkit_send_raw: {
-      title: "Send Raw Message",
+      title: "Send Message",
       annotations: OPEN_WORLD_SEND,
     },
     senderkit_cancel_message: {

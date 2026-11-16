@@ -295,3 +295,30 @@ describe("model-readable text describes behavior, not instructions", () => {
     expect(schemas.SEND_TOOL_LIVE_MODE_NOTE).not.toMatch(INSTRUCTION);
   });
 });
+
+describe("send tools are described by how they are used", () => {
+  it("titles and describes the two send tools", () => {
+    const raw = MCP_TOOLS_BY_NAME.senderkit_send_raw;
+    const tpl = MCP_TOOLS_BY_NAME.senderkit_send;
+    expect(raw.title).toBe("Send Message");
+    expect(raw.description).toBe(
+      "Send an email, SMS, push or web-push message with content written inline; no template is needed. Email goes out through the workspace's built-in sender unless another provider is connected, and suits one-off emails, summaries, reports, scheduled digests and completion notices. One recipient per call; cc and bcc add people to the same email. Not for bulk or unsolicited mailing. SMS, push and web-push require a connected provider.",
+    );
+    expect(tpl.title).toBe("Send From Template");
+    expect(tpl.description).toBe(
+      "Send an email, SMS, push or web-push message from a saved template, filling in its variables. One recipient per call. Not for bulk or unsolicited mailing.",
+    );
+  });
+
+  it("says a send takes one recipient", () => {
+    for (const shape of [schemas.sendInput, schemas.sendRawInput]) {
+      expect((shape.to as z.ZodType).description).toMatch(/ One recipient per call\.$/);
+    }
+  });
+
+  it("no tool calls itself transactional", () => {
+    for (const tool of MCP_TOOLS) {
+      expect(tool.description, tool.name).not.toMatch(/transactional/i);
+    }
+  });
+});

@@ -106,10 +106,11 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
   },
   {
     name: "senderkit_send",
-    title: "Send Templated Message",
+    title: "Send From Template",
     description:
-      "Send a transactional email, SMS, push, or web-push notification to a " +
-      "recipient using a saved template.",
+      "Send an email, SMS, push or web-push message from a saved template, " +
+      "filling in its variables. One recipient per call. Not for bulk or " +
+      "unsolicited mailing.",
     annotations: {
       readOnlyHint: false,
       openWorldHint: true,
@@ -120,10 +121,15 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
   },
   {
     name: "senderkit_send_raw",
-    title: "Send Raw Message",
+    title: "Send Message",
     description:
-      "Send a transactional email, SMS, push, or web-push notification with " +
-      "inline content, without a registered template.",
+      "Send an email, SMS, push or web-push message with content written " +
+      "inline; no template is needed. Email goes out through the workspace's " +
+      "built-in sender unless another provider is connected, and suits one-off " +
+      "emails, summaries, reports, scheduled digests and completion notices. " +
+      "One recipient per call; cc and bcc add people to the same email. Not " +
+      "for bulk or unsolicited mailing. SMS, push and web-push require a " +
+      "connected provider.",
     annotations: {
       readOnlyHint: false,
       openWorldHint: true,
@@ -168,7 +174,7 @@ export const MCP_TOOLS: readonly McpToolSpec[] = [
       "List sent and scheduled messages across email, SMS, push, and " +
       "web-push. Filter by channel, template, delivery status, or metadata — " +
       "use this to monitor deliverability, debug failed sends, or audit " +
-      "transactional message history.",
+      "message history.",
     annotations: {
       readOnlyHint: true,
       openWorldHint: false,

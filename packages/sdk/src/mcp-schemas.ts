@@ -178,7 +178,7 @@ export const sendInput = {
     .describe(
       "Recipient address for the template's channel: an email address, an " +
         "E.164 phone number (sms), a device token (push), or the JSON-encoded " +
-        "browser PushSubscription (web-push).",
+        "browser PushSubscription (web-push). One recipient per call.",
     ),
   vars,
   channel: channel.optional().describe("Force a channel (defaults to the template's primary)."),
@@ -199,7 +199,8 @@ export const sendRawInput = {
     .describe(
       "Recipient address for the chosen channel: an email address (email), an " +
         "E.164 phone number such as +15551234567 (sms), a device token (push), or " +
-        "the JSON-encoded browser PushSubscription — endpoint + keys — (web-push).",
+        "the JSON-encoded browser PushSubscription — endpoint + keys — (web-push). " +
+        "One recipient per call.",
     ),
   // email
   subject: z
